@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { AppSidebar } from "./components/app-sidebar";
+import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import "./globals.css";
 import { ConvexClientProvider } from "./provider/ConvexClientProvider";
 
@@ -25,12 +28,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-        <ConvexClientProvider>{children}</ConvexClientProvider>
-      </body>
+      <SidebarProvider>
+        <AppSidebar />
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <SidebarTrigger />
+          {children}
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </body>
+      </SidebarProvider>
     </html>
   );
 }
