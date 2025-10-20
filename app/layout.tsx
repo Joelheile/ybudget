@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
+import { SidebarProvider } from "./components/ui/sidebar";
 import "./globals.css";
 import { ConvexClientProvider } from "./provider/ConvexClientProvider";
 
@@ -23,21 +23,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <SidebarProvider>
-        <AppSidebar />
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <SidebarTrigger />
-          {children}
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </body>
-      </SidebarProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ConvexClientProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            {children}
+          </SidebarProvider>
+        </ConvexClientProvider>
+      </body>
     </html>
   );
 }

@@ -23,7 +23,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { MainNav } from "./MainSidebar";
+
+import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
 
 const data = {
