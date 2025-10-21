@@ -6,6 +6,7 @@ import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarToggle";
 import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
+import { mockProjects } from "@/components/data/mockProjects";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { useState } from "react";
@@ -64,41 +65,14 @@ export default function Dashboard() {
           <CategoryChart />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4 lg:gap-6 mt-4 lg:mt-6">
-          <ProjectCard
-            title={"YFN 9.0"}
-            description={
-              "Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende."
-            }
-            progress={30}
-          />
-          <ProjectCard
-            title={"YFN 9.0"}
-            description={
-              "Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende."
-            }
-            progress={30}
-          />
-          <ProjectCard
-            title={"YFN 9.0"}
-            description={
-              "Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende."
-            }
-            progress={30}
-          />
-          <ProjectCard
-            title={"YFN 9.0"}
-            description={
-              "Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende."
-            }
-            progress={30}
-          />
-          <ProjectCard
-            title={"YFN 9.0"}
-            description={
-              "Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende."
-            }
-            progress={30}
-          />
+          {mockProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              title={project.name}
+              description={project.description}
+              progress={project.progress}
+            />
+          ))}
         </div>
       </div>
     </SidebarInset>
