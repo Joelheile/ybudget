@@ -26,6 +26,7 @@ import {
 
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
+import { SearchForm } from "./SearchForm";
 
 const data = {
   user: {
@@ -124,7 +125,7 @@ const data = {
   mainNav: [
     {
       name: "Dashboard",
-      url: "",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
@@ -164,6 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <SearchForm />
       </SidebarHeader>
       <SidebarContent>
         <MainNav mainNav={data.mainNav} />
