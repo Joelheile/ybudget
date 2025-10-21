@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import RangeCalendar from "@/components/RangeCalendar";
+import RangeCalendar from "@/components/RangeCalendar/RangeCalendar";
 import { Button } from "@/components/ui/button";
 import { useDateRange } from "@/contexts/DateRangeContext";
 

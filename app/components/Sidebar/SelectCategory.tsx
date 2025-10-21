@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { MOCK_CATEGORY_GROUPS } from "./data/mockCategories";
+import { MOCK_CATEGORY_GROUPS } from "../data/mockCategories";
 
 const categoryGroups = MOCK_CATEGORY_GROUPS;
 

@@ -20,9 +20,9 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ArrowLeft, CalendarIcon, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AmountInput } from "../AmountInput";
-import { SelectCategory } from "../SelectCategory";
-import { SelectProject } from "../SelectProject";
+import { SelectCategory } from "../Sidebar/SelectCategory";
+import { SelectProject } from "../Sidebar/SelectProject";
+import { AmountInput } from "./AmountInput";
 
 const formatAmount = (amount: string) => (amount ? `${amount} €` : "");
 

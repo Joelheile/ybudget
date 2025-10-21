@@ -2,10 +2,10 @@
 import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { BudgetChart } from "@/components/Dashboard/BudgetChart";
 import { CategoryChart } from "@/components/Dashboard/CategoryChart";
+import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
-import { DashboardDropdown } from "@/components/DashboardDropdown";
-import { RangeCalendarToggle } from "@/components/RangeCalendarToggle";
-import { TransactionSheet } from "@/components/sheets/TransactionSheet";
+import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarToggle";
+import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { useState } from "react";

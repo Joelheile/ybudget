@@ -5,7 +5,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
-} from "./ui/input-group";
+} from "../ui/input-group";
 
 const sanitizeAmount = (value: string) => value.replace(/[^\d,]/g, "");
 

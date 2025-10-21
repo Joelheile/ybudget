@@ -1,11 +1,11 @@
 "use client";
 
-import { DashboardDropdown } from "@/components/DashboardDropdown";
-import { RangeCalendarToggle } from "@/components/RangeCalendarToggle";
-import { DataTable } from "@/components/TransactionsTable/DataTable";
-import { columns } from "@/components/TransactionsTable/columns";
+import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
+import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarToggle";
+import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
+import { DataTable } from "@/components/Tables/DataTable";
+import { columns } from "@/components/Tables/columns";
 import { mockTransactions } from "@/components/data/mockTransactions";
-import { TransactionSheet } from "@/components/sheets/TransactionSheet";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
