@@ -1,18 +1,14 @@
 "use client";
 
-import { startOfMonth } from "date-fns";
 import { useEffect, useRef, useState } from "react";
-import type { DateRange } from "react-day-picker";
 
 import RangeCalendar from "@/components/RangeCalendar";
 import { Button } from "@/components/ui/button";
+import { useDateRange } from "@/contexts/DateRangeContext";
 
 export function RangeCalendarToggle() {
   const [open, setOpen] = useState(false);
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
-    from: startOfMonth(new Date()),
-    to: new Date(),
-  });
+  const { selectedDateRange, setSelectedDateRange } = useDateRange();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
