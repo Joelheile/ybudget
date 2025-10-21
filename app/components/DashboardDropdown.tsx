@@ -5,7 +5,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 export function DashboardDropdown({
@@ -22,24 +21,25 @@ export function DashboardDropdown({
       <DropdownMenuTrigger asChild>
         <Button variant="default">Hinzufügen</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 mr-6" align="start">
+      <DropdownMenuContent className="w-auto mr-4" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={onOpenExpense}>
-            Ausgabe planen
-            <DropdownMenuShortcut>⇧⌘A</DropdownMenuShortcut>
+            <span className="font-semibold"> Ausgabe planen</span>
+            {/* <DropdownMenuShortcut>⇧⌘A</DropdownMenuShortcut> */}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenIncome}>
-            Einnahme planen
-            <DropdownMenuShortcut>⇧⌘E</DropdownMenuShortcut>
+            <span className="font-semibold"> Einnahme planen</span>
+            {/* <DropdownMenuShortcut>⇧⌘E</DropdownMenuShortcut> */}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenImport}>
-            Banking CSV imporieren
-            <DropdownMenuShortcut>⇧⌘B</DropdownMenuShortcut>
+            CSV importieren
+            {/* <DropdownMenuShortcut>⇧⌘B</DropdownMenuShortcut> */}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            Keyboard shortcuts
-            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+            <span className="text-muted-foreground"> Shortcuts</span>
+
+            {/* <DropdownMenuShortcut>⌘K</DropdownMenuShortcut> */}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
