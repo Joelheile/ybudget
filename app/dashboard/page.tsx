@@ -5,6 +5,7 @@ import { CategoryChart } from "@/components/Dashboard/CategoryChart";
 import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarToggle";
+import { ImportCSVSheet } from "@/components/Sheets/ImportCSVSheet";
 import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
 import { mockProjects } from "@/components/data/mockProjects";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +15,7 @@ import { useState } from "react";
 export default function Dashboard() {
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
   const [isIncomeOpen, setIsIncomeOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   return (
     <SidebarInset>
@@ -30,7 +32,7 @@ export default function Dashboard() {
               <DashboardDropdown
                 onOpenExpense={() => setIsExpenseOpen(true)}
                 onOpenIncome={() => setIsIncomeOpen(true)}
-                onOpenImport={() => {}}
+                onOpenImport={() => setIsImportOpen(true)}
               />
             </div>
           </div>
@@ -46,6 +48,7 @@ export default function Dashboard() {
           open={isIncomeOpen}
           onOpenChange={setIsIncomeOpen}
         />
+        <ImportCSVSheet open={isImportOpen} onOpenChange={setIsImportOpen} />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
             title={"Offenes Budget"}
