@@ -18,21 +18,28 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { mockProjects } from "../data/mockProjects";
 
-export function ProjectNav({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    // icon: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+export function ProjectNav() {
+  const parentProjects = mockProjects.filter((p) => !p.parentId);
+
+  const items = parentProjects.map((project) => {
+    const childProjects = mockProjects.filter((p) => p.parentId === project.id);
+
+    return {
+      title: project.name,
+      url: `/projects/${project.id}`,
+      isActive: project.isActive,
+      items:
+        childProjects.length > 0
+          ? childProjects.map((child) => ({
+              title: child.name,
+              url: `/projects/${child.id}`,
+            }))
+          : undefined,
+    };
+  });
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Projekte</SidebarGroupLabel>
@@ -44,7 +51,6 @@ export function ProjectNav({
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <a href={item.url}>
-                      {/* <item.icon /> */}
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -52,7 +58,6 @@ export function ProjectNav({
               ) : (
                 <SidebarMenuButton asChild tooltip={item.title}>
                   <a href={item.url}>
-                    {/* <item.icon /> */}
                     <span>{item.title}</span>
                   </a>
                 </SidebarMenuButton>
