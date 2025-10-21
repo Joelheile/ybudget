@@ -18,16 +18,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, CalendarIcon, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AmountInput } from "../AmountInput";
 import { SelectCategory } from "../SelectCategory";
 import { SelectProject } from "../SelectProject";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "../ui/input-group";
+
+const formatAmount = (amount: string) => (amount ? `${amount} €` : "");
 
 export function ExpenseInputSheet({
   open,
@@ -36,90 +33,167 @@ export function ExpenseInputSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [project, setProject] = useState("");
+  const [step, setStep] = useState(1);
+  const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [recipient, setRecipient] = useState("");
+  const [description, setDescription] = useState("");
+  const [project, setProject] = useState("");
+
+  const resetForm = () => {
+    setStep(1);
+    setAmount("");
+    setCategory("");
+    setDate(undefined);
+    setRecipient("");
+    setDescription("");
+    setProject("");
+  };
+
+  useEffect(() => {
+    if (open) resetForm();
+  }, [open]);
+
+  const handleSubmit = () => {
+    console.log({ amount, category, date, recipient, description, project });
+    onOpenChange(false);
+  };
+
+  const canContinue = amount && category;
+
+  const renderStepOne = () => (
+    <div className="flex-1 flex flex-col gap-8 px-6 py-4">
+      <p className="text-sm text-muted-foreground">
+        Du möchtest eine Ausgabe planen? Dann gib bitte alle nötigen Infos ein,
+        um das Budget bestmöglich zu planen :)
+      </p>
+
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="flex flex-col gap-3">
+          <Label htmlFor="amount" className="text-base">
+            Wie viel?
+          </Label>
+          <AmountInput value={amount} onChange={setAmount} autoFocus />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Label className="text-base">Wann?</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                <span className=" font-medium ">
+                  {date ? (
+                    format(date, "dd.MM.yyyy")
+                  ) : (
+                    <div className="text-muted-foreground"> Datum wählen </div>
+                  )}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(newDate) => newDate && setDate(newDate)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <Label className="text-base">Kategorie</Label>
+        <SelectCategory value={category} onValueChange={setCategory} />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <Label className="text-base">Projekt</Label>
+        <SelectProject value={project} onValueChange={setProject} />
+      </div>
+    </div>
+  );
+
+  const renderStepTwo = () => (
+    <div className="flex-1 flex flex-col gap-6 px-6 py-4">
+      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg text-sm">
+        <CheckCircle2 className="h-4 w-4 text-green-600" />
+        <span className="font-medium">
+          {formatAmount(amount)} •{" "}
+          {date ? format(date, "dd.MM.yyyy") : "Kein Datum"}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="recipient">Empfänger</Label>
+        <Input
+          id="recipient"
+          placeholder="z.B. Lieferant, Firma..."
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          autoFocus
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="description">Notiz (optional)</Label>
+        <Textarea
+          id="description"
+          placeholder="Details zur Ausgabe..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="min-h-[80px] resize-none"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Projekt</Label>
+        <SelectProject value={project} onValueChange={setProject} />
+      </div>
+    </div>
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col">
-        <SheetHeader className="pb-6">
-          <SheetTitle className="text-2xl">Ausgabe planen</SheetTitle>
-          <SheetDescription>
-            Erfasse eine geplante Ausgabe für dein Budget.
-          </SheetDescription>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col p-0">
+        <SheetHeader className="px-6 pt-6 pb-2">
+          <div className="flex items-center gap-3">
+            {step === 2 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setStep(1)}
+                className="h-8 w-8"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <div>
+              <SheetTitle className="text-2xl">Ausgabe planen</SheetTitle>
+              <SheetDescription className="text-xs mt-0.5">
+                Schritt {step} von 2
+              </SheetDescription>
+            </div>
+          </div>
         </SheetHeader>
 
-        <div className="flex-1 flex flex-col gap-6 px-6 py-6">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="recipient">An wen geht das Geld?</Label>
-            <Input id="recipient" placeholder="z.B. Lieferant, Firma..." />
-          </div>
+        {step === 1 ? renderStepOne() : renderStepTwo()}
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="purpose">Wofür ist diese Ausgabe?</Label>
-            <Textarea
-              id="purpose"
-              placeholder="Beschreibe kurz den Zweck..."
-              className="min-h-[80px] resize-none"
-            />
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="amount">Wie viel?</Label>
-              <InputGroup>
-                <InputGroupAddon>
-                  <InputGroupText>€</InputGroupText>
-                </InputGroupAddon>
-                <InputGroupInput id="amount" placeholder="0.00" />
-                <InputGroupAddon align="inline-end">
-                  <InputGroupText>EUR</InputGroupText>
-                </InputGroupAddon>
-              </InputGroup>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label>Wann muss es gezahlt sein?</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "dd.MM.yyyy") : "Datum wählen"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Projekt wählen</Label>
-            <SelectProject value={project} onValueChange={setProject} />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Kategorie wählen</Label>
-            <SelectCategory value={category} onValueChange={setCategory} />
-          </div>
-        </div>
-
-        <SheetFooter className="pt-6">
-          <Button type="submit" className="w-full">
-            Ausgabe planen
+        <SheetFooter className="px-6 pb-6 pt-4">
+          <Button
+            onClick={step === 1 ? () => setStep(2) : handleSubmit}
+            disabled={step === 1 && !canContinue}
+            className="w-full h-12 text-base"
+          >
+            {step === 1 ? "Weiter" : "Ausgabe planen"}
           </Button>
         </SheetFooter>
       </SheetContent>

@@ -36,19 +36,24 @@ export function SelectProject({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-full justify-between"
         >
-          {value
-            ? projects.find((project) => project.value === value)?.label
-            : "Projekt wählen..."}
+          {value ? (
+            projects.find((project) => project.value === value)?.label
+          ) : (
+            <p className="text-muted-foreground">Projekt suchen...</p>
+          )}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder="Projekt wählen..." className="h-9" />
+          <CommandInput
+            placeholder="Projekt suchen..."
+            className="h-9 text-muted-foreground"
+          />
           <CommandList>
-            <CommandEmpty>Kein Projekt gefunden :(</CommandEmpty>
+            <CommandEmpty>Keine Projekte :(</CommandEmpty>
             <CommandGroup>
               {projects.map((project) => (
                 <CommandItem
