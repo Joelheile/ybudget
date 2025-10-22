@@ -1,0 +1,48 @@
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+export function DashboardDropdown({
+  onOpenExpense,
+  onOpenIncome,
+  onOpenImport,
+}: {
+  onOpenExpense: () => void;
+  onOpenIncome: () => void;
+  onOpenImport: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="default">Hinzufügen</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-auto mr-4" align="start">
+        <DropdownMenuGroup>
+          <DropdownMenuItem onSelect={onOpenExpense}>
+            <span className="font-semibold"> Ausgabe planen</span>
+            {/* <DropdownMenuShortcut>⇧⌘A</DropdownMenuShortcut> */}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={onOpenIncome}>
+            <span className="font-semibold"> Einnahme planen</span>
+            {/* <DropdownMenuShortcut>⇧⌘E</DropdownMenuShortcut> */}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={onOpenImport}>
+            CSV importieren
+            {/* <DropdownMenuShortcut>⇧⌘B</DropdownMenuShortcut> */}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <span className="text-muted-foreground"> Shortcuts</span>
+
+            {/* <DropdownMenuShortcut>⌘K</DropdownMenuShortcut> */}
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
