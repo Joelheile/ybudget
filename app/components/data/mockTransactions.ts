@@ -8,6 +8,7 @@ export type Transaction = {
   amount: number;
   type: "expense" | "income";
   status: "geplant" | "bezahlt";
+  donor?: string;
 };
 
 export const mockTransactions: Transaction[] = [
@@ -32,6 +33,7 @@ export const mockTransactions: Transaction[] = [
     amount: 15000.00,
     type: "income",
     status: "bezahlt",
+    donor: "BMW Stiftung",
   },
   {
     id: "3",
@@ -109,6 +111,7 @@ export const mockTransactions: Transaction[] = [
     amount: 25000.00,
     type: "income",
     status: "bezahlt",
+    donor: "Stadt München",
   },
   {
     id: "10",
@@ -120,6 +123,54 @@ export const mockTransactions: Transaction[] = [
     amount: -156.78,
     type: "expense",
     status: "geplant",
+  },
+  {
+    id: "11",
+    date: new Date(2025, 8, 15),
+    name: "Privatspende Schmidt",
+    description: "Spende für Jugendarbeit",
+    project: "YFN 9.0",
+    category: "Donations",
+    amount: 2000.00,
+    type: "income",
+    status: "bezahlt",
+    donor: "Privatspende Schmidt",
+  },
+  {
+    id: "12",
+    date: new Date(2025, 9, 22),
+    name: "CVJM Bayern",
+    description: "Förderung Q3",
+    project: "YFN Schools",
+    category: "Grants",
+    amount: 4000.00,
+    type: "income",
+    status: "bezahlt",
+    donor: "CVJM Bayern",
+  },
+  {
+    id: "13",
+    date: new Date(2025, 10, 1),
+    name: "Aktion Mensch",
+    description: "Projektförderung Teil 1",
+    project: "YFN 9.0",
+    category: "Grants",
+    amount: 12500.00,
+    type: "income",
+    status: "bezahlt",
+    donor: "Aktion Mensch",
+  },
+  {
+    id: "14",
+    date: new Date(2025, 10, 15),
+    name: "Google.org",
+    description: "Tech for Good Grant",
+    project: "YFN 8.0",
+    category: "Sponsoring",
+    amount: 15000.00,
+    type: "income",
+    status: "bezahlt",
+    donor: "Google.org",
   },
 ];
 
