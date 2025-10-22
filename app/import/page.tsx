@@ -32,7 +32,7 @@ export default function ImportTransactionsPage() {
   return (
     <SidebarInset>
       <PageHeader title="Transaktionen zuordnen" />
-      <div className="flex pt-10 flex-1 flex-col gap-4 p-5 ">
+      <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 md:p-5 pt-0">
         <ImportCSVCard
           amount={32.2}
           title={"AWS Invoice"}
