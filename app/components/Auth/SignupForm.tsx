@@ -1,4 +1,4 @@
-import { Wallet } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,7 +14,13 @@ export function SignupForm({
         <form>
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10">
-              <Wallet className="size-8 text-primary" />
+              <Image
+                src="/AppIcon.png"
+                alt="YBudget"
+                width={32}
+                height={32}
+                className="size-12"
+              />
             </div>
 
             <div className="space-y-2">
