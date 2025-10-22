@@ -59,7 +59,7 @@ export function DataTable({ columns, data }: DataTableProps) {
   const rows = table.getRowModel().rows.slice(0, visibleRows);
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="rounded-md border overflow-x-auto w-full">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
