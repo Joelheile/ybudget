@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { mockProjects } from "../data/mockProjects";
 
 export function SelectProject({
   value,
@@ -27,7 +28,10 @@ export function SelectProject({
   onValueChange: (value: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const projects: { value: string; label: string }[] = []; // implement convex query
+  const projects = mockProjects.map((project) => ({
+    value: project.id,
+    label: project.name,
+  }));
   const valueColor = value ? "text-foreground" : "text-muted-foreground";
 
   return (

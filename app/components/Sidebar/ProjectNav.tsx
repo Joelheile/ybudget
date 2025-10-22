@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
+import { useState } from "react";
 
 import {
   Collapsible,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
@@ -18,9 +20,11 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { CreateProjectSheet } from "../Sheets/CreateProjectSheet";
 import { mockProjects } from "../data/mockProjects";
 
 export function ProjectNav() {
+  const [sheetOpen, setSheetOpen] = useState(false);
   const parentProjects = mockProjects.filter((p) => !p.parentId);
 
   const items = parentProjects.map((project) => {
@@ -43,6 +47,10 @@ export function ProjectNav() {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Projekte</SidebarGroupLabel>
+      <SidebarGroupAction onClick={() => setSheetOpen(true)}>
+        <Plus />
+        <span className="sr-only">Projekt hinzufügen</span>
+      </SidebarGroupAction>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
@@ -89,6 +97,7 @@ export function ProjectNav() {
           </Collapsible>
         ))}
       </SidebarMenu>
+      <CreateProjectSheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </SidebarGroup>
   );
 }
