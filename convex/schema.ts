@@ -1,21 +1,19 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+    ...authTables,
     organizations: defineTable({
         id: v.string(),
         name: v.string(),
     }),
     users: defineTable({
-        id: v.string(),
+        userId: v.id("users"),
         firstName: v.string(),
         lastName: v.string(),
-        email: v.string(),
         organizationId: v.string(),
-        oauthId: v.string(),
-        oauthProvider: v.string(),
-        //role: 
-    }),
+    }).index("by_user", ["userId"]),
     projects: defineTable({
         id: v.string(),
         name: v.string(),
@@ -57,6 +55,7 @@ export default defineSchema({
         //     v.literal("matched"),
         // )
     }),
+
     categories: defineTable({
        id: v.string(),
        name: v.string(),
