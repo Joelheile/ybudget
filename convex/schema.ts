@@ -3,6 +3,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+    ...authTables,
     organizations: defineTable({
         id: v.string(),
         name: v.string(),
@@ -22,12 +23,6 @@ export default defineSchema({
         .index("email", ["email"])
         .index("phone", ["phone"])
         .index("by_organization", ["organizationId"]),
-    authSessions: authTables.authSessions,
-    authAccounts: authTables.authAccounts,
-    authRefreshTokens: authTables.authRefreshTokens,
-    authVerificationCodes: authTables.authVerificationCodes,
-    authVerifiers: authTables.authVerifiers,
-    authRateLimits: authTables.authRateLimits,
     projects: defineTable({
         id: v.string(),
         name: v.string(),

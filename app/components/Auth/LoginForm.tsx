@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export function SignupForm({
+export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -33,11 +33,10 @@ export function SignupForm({
 
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
-              Willkommen zu YBudget
+              Willkommen zurück zu YBudget
             </h1>
             <p className="text-muted-foreground">
-              Erstelle dir jetzt einen Account und fange an Budgeting neu zu
-              denken!
+              Melde dich an, um dein Budget zu verwalten!
             </p>
           </div>
 
@@ -57,7 +56,7 @@ export function SignupForm({
                 fill="currentColor"
               />
             </svg>
-            Mit Google
+            Mit Google anmelden
           </Button>
         </div>
       </Card>
