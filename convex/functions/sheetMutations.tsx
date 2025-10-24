@@ -1,19 +1,23 @@
 import { v } from "convex/values";
-import { mutation } from "../../_generated/server";
+import { mutation } from "../_generated/server";
 
 export const addExpectedTransaction = mutation({
   args: {
     id: v.string(), // generated on client
     projectId: v.string(),
-    expectedDate: v.number(), //epoch timestamp
+    expectedDate: v.number(),
     amount: v.number(),
     reference: v.string(),
     categoryId: v.string(),
-    donorId: v.string(),
+
     isExpense: v.boolean(),
-    createdBy: v.string(),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
     await ctx.db.insert("expectedTransactions", {
       id: args.id,
       projectId: args.projectId,
@@ -21,9 +25,8 @@ export const addExpectedTransaction = mutation({
       amount: args.amount,
       reference: args.reference,
       categoryId: args.categoryId,
-      donorId: args.donorId,
       isExpense: args.isExpense,
-      createdBy: args.createdBy,
+      createdBy: identity.subject,
     });
   },
 });

@@ -54,7 +54,7 @@ export default defineSchema({
         amount: v.number(),
         reference: v.string(),
         categoryId: v.string(),
-        donorId: v.string(),
+        donorId: v.optional(v.string()),
         isExpense: v.boolean(),
         createdBy: v.string(),
         matchedTransactionId: v.optional(v.string()),

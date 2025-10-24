@@ -17,9 +17,12 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useMutation } from "convex/react";
 import { format } from "date-fns";
 import { ArrowLeft, CalendarIcon, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { v4 } from "uuid";
+import { api } from "../../../convex/_generated/api";
 import { AmountInput } from "./AmountInput";
 import { SelectCategory } from "./SelectCategory";
 import { SelectProject } from "./SelectProject";
@@ -44,6 +47,11 @@ export function TransactionSheet({
   const [counterparty, setCounterparty] = useState("");
   const [description, setDescription] = useState("");
   const [project, setProject] = useState("");
+  const isExpense = type === "expense";
+
+  const addTransaction = useMutation(
+    api.functions.sheetMutations.addExpectedTransaction
+  );
 
   const dateColor = date ? "text-foreground" : "text-muted-foreground";
 
@@ -62,21 +70,21 @@ export function TransactionSheet({
   }, [open]);
 
   const handleSubmit = () => {
-    console.log({
-      type,
-      amount,
-      category,
-      date,
-      counterparty,
-      description,
-      project,
+    addTransaction({
+      id: v4(),
+      projectId: project,
+      expectedDate: date?.getTime() ?? Date.now(),
+      amount: parseFloat(amount),
+      reference: counterparty,
+      categoryId: category,
+      isExpense: isExpense,
     });
+
     onOpenChange(false);
   };
 
   const canContinue = amount;
 
-  const isExpense = type === "expense";
   const title = isExpense ? "Ausgabe planen" : "Einnahme erfassen";
   const counterpartyLabel = isExpense ? "Empfänger" : "Von";
   const submitButtonText = isExpense ? "Ausgabe planen" : "Einnahme erfassen";
