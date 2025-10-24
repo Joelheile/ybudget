@@ -21,6 +21,7 @@ import { useMutation } from "convex/react";
 import { format } from "date-fns";
 import { ArrowLeft, CalendarIcon, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { v4 } from "uuid";
 import { api } from "../../../convex/_generated/api";
 import { AmountInput } from "./AmountInput";
@@ -69,18 +70,24 @@ export function TransactionSheet({
     if (open) resetForm();
   }, [open]);
 
-  const handleSubmit = () => {
-    addTransaction({
-      id: v4(),
-      projectId: project,
-      expectedDate: date?.getTime() ?? Date.now(),
-      amount: parseFloat(amount),
-      reference: counterparty,
-      categoryId: category,
-      isExpense: isExpense,
-    });
-
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    try {
+      await addTransaction({
+        id: v4(),
+        projectId: project,
+        expectedDate: date?.getTime() ?? Date.now(),
+        amount: parseFloat(amount),
+        reference: counterparty,
+        categoryId: category,
+        isExpense: isExpense,
+      });
+      toast.success(
+        isExpense ? "Ausgabe gespeichert!" : "Einnahme gespeichert!"
+      );
+      onOpenChange(false);
+    } catch (error) {
+      toast.error("Fehler beim Speichern :(");
+    }
   };
 
   const canContinue = amount;
