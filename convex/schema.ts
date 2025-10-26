@@ -32,7 +32,8 @@ export default defineSchema({
         parentId: v.optional(v.id("projects")),
         organizationId: v.id("organizations"),
         description: v.string(),
-        isActive: v.boolean()
+        isActive: v.boolean(),
+        createdBy: v.string(),
     }),
     transactions: defineTable({
         projectId: v.string(),

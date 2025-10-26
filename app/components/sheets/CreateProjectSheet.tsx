@@ -12,7 +12,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { api } from "../../../convex/_generated/api";
 import { SelectProject } from "./SelectProject";
 
 interface CreateProjectSheetProps {
@@ -28,13 +31,30 @@ export function CreateProjectSheet({
   const [description, setDescription] = useState("");
   const [parentId, setParentId] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const user = useQuery(api.queries.userQueries.getCurrentUser);
+  const addProject = useMutation(api.functions.projectMutations.addProject);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ name, description, parentId });
-    setName("");
-    setDescription("");
-    setParentId("");
-    onOpenChange(false);
+
+    if (!user?.organizationId) {
+      toast.error("Keine Organisation gefunden");
+      return;
+    }
+
+    try {
+      await addProject({
+        name: name,
+        description: description,
+        parentId: parentId ? (parentId as any)   : undefined,
+        organizationId: user.organizationId,
+        // fix issue that user doesn't have an org
+      });
+      toast.success("Projekt erstellt!");
+      onOpenChange(false);
+    } catch (error) {
+      toast.error("Fehler beim Erstellen");
+    }
   };
 
   return (

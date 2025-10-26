@@ -1,22 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "../_generated/server";
-
-
-export const checkOrganizationExists = query({
-  args: {
-    email: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const domain = args.email.split("@")[1];
-
-    const organization = await ctx.db
-      .query("organizations")
-      .withIndex("by_domain", (q) => q.eq("domain", domain))
-      .first();
-
-    return !!organization;
-  },
-});
+import { mutation } from "../_generated/server";
 
 export const addOrganization = mutation({
   args: {
@@ -28,35 +11,23 @@ export const addOrganization = mutation({
     if (!identity) {
       throw new Error("Unauthenticated");
     }
-    await ctx.db.insert("organizations", {
+    
+    const organizationId = await ctx.db.insert("organizations", {
       name: args.name,
       domain: args.domain,
       createdBy: identity.subject,
     });
-  },
-});
 
-export const assignUserToOrganizationByDomain = mutation({
-  args: {
-    userId: v.id("users"),
-    email: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const domain = args.email.split("@")[1];
-
-    const organization = await ctx.db
-      .query("organizations")
-      .withIndex("by_domain", (q) => q.eq("domain", domain))
+    // Update user with organizationId
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), identity.email))
       .first();
-
-    if (organization) {
-      const user = await ctx.db.get(args.userId);
-
-      if (user && !user.organizationId) {
-        await ctx.db.patch(user._id, {
-          organizationId: organization._id,
-        });
-      }
+    
+    if (user) {
+      await ctx.db.patch(user._id, { organizationId });
     }
   },
 });
+
+// TODO: add organizationid to user when oragnization gets created, also when another user logs in it needs to show that person is part of org
