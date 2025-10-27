@@ -21,6 +21,7 @@ import {
 
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Skeleton } from "../ui/skeleton";
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
 import { SearchForm } from "./SearchForm";
@@ -65,8 +66,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <PiggyBank className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {organizationName}
+                  <span className="truncate font-semibold">YBudget</span>
+                  <span className="truncate font-medium text-xs">
+                    {organizationName ?? <Skeleton className="w-10 h-4" />}
                   </span>
                 </div>
               </a>
