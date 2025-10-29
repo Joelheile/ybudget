@@ -16,7 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Upload } from "lucide-react";
 import Papa from "papaparse";
 import { useState } from "react";
@@ -37,6 +37,9 @@ export function ImportCSVSheet({
   const [importSource, setImportSource] = useState<ImportSource | "">("");
   const [isDragging, setIsDragging] = useState(false);
 
+  const existingIds = useQuery(
+    api.queries.transactionQueries.getImportedTransactionIds
+  );
   const addTransaction = useMutation(
     api.functions.transactionMutations.addImportedTransaction
   );
@@ -64,10 +67,24 @@ export function ImportCSVSheet({
   };
 
   const handleImport = async () => {
-    if (!importSource) return;
+    if (!importSource || existingIds === undefined) return;
+
+    const existingIdsSet = new Set(existingIds);
+    const newTransactions = csvData.filter((row) => {
+      const mapped = mapCSVRow(row, importSource);
+      return !existingIdsSet.has(mapped.importedTransactionId);
+    });
+
+    const skipped = csvData.length - newTransactions.length;
+    const toastId = toast.loading(
+      `Importiere 0/${newTransactions.length} Transaktionen...`
+    );
 
     try {
-      for (const row of csvData) {
+      let processed = 0;
+      let inserted = 0;
+
+      for (const row of newTransactions) {
         const mapped = mapCSVRow(row, importSource);
         await addTransaction({
           date: mapped.date,
@@ -78,14 +95,26 @@ export function ImportCSVSheet({
           importSource: importSource,
           accountName: mapped.accountName,
         });
+
+        processed++;
+        inserted++;
+        toast.loading(
+          `Importiere ${processed}/${newTransactions.length} Transaktionen...`,
+          {
+            id: toastId,
+          }
+        );
       }
 
-      toast.success(`${csvData.length} Transaktionen importiert!`);
+      toast.success(
+        `${inserted} neue Transaktionen importiert, ${skipped} Duplikate übersprungen`,
+        { id: toastId }
+      );
       setCsvData([]);
       setImportSource("");
       onOpenChange(false);
     } catch (error) {
-      toast.error("Fehler beim Importieren");
+      toast.error("Fehler beim Importieren", { id: toastId });
     }
   };
 
@@ -169,7 +198,7 @@ export function ImportCSVSheet({
 
             <Button
               onClick={handleImport}
-              disabled={!importSource}
+              disabled={!importSource || existingIds === undefined}
               className="w-full"
             >
               Transaktionen importieren

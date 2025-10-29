@@ -82,6 +82,22 @@ export const getUnassignedProcessedTransactions = query({
   },
 });
 
+export const getImportedTransactionIds = query({
+  
+  handler: async (ctx) => {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) return [];
+
+    const transactions = await ctx.db
+      .query("transactions")
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .filter(q => q.neq(q.field("importedTransactionId"), ""))
+      .collect();
+
+    return transactions.map(t => t.importedTransactionId);
+  },
+});
+
 export const getExpectedTransactions = query({
   handler: async (ctx) => {
     const user = await getAuthenticatedUser(ctx);
