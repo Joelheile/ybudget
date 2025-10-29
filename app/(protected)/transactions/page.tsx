@@ -14,6 +14,12 @@ export default function Transactions() {
   const startDate = selectedDateRange.from?.getTime() ?? 0;
   const endDate = selectedDateRange.to?.getTime() ?? Date.now();
 
+  console.log("Date range filter:", {
+    startDate: new Date(startDate),
+    endDate: new Date(endDate),
+    selectedDateRange
+  });
+
   const transactions = useQuery(
     api.queries.transactionQueries.getTransactions,
     {
@@ -21,6 +27,11 @@ export default function Transactions() {
       endDate,
     }
   );
+
+  const allTransactions = useQuery(api.queries.transactionQueries.getAllTransactions);
+
+  console.log("Transactions from query:", transactions);
+  console.log("All transactions (no date filter):", allTransactions);
 
   if (transactions === undefined) {
     return (

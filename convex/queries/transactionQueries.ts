@@ -51,3 +51,49 @@ export const getAllTransactions = query({
       .collect();
   },
 });
+
+export const getUnassignedProcessedTransactions = query({
+  handler: async (ctx) => {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) return [];
+
+    const transactions = await ctx.db
+      .query("transactions")
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .filter(q => q.and(
+        q.eq(q.field("status"), "processed"),
+        q.eq(q.field("projectId"), "")
+      ))
+      .collect();
+
+    const categoryMap = createCategoryMap();
+
+    return transactions.map(t => ({
+      ...t,
+      categoryName: categoryMap.get(t.categoryId) || t.categoryId,
+    }));
+  },
+});
+
+export const getExpectedTransactions = query({
+  handler: async (ctx) => {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) return [];
+
+    const transactions = await ctx.db
+      .query("transactions")
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .filter(q => q.eq(q.field("status"), "expected"))
+      .collect();
+
+    const projects = await ctx.db.query("projects").collect();
+    const categoryMap = createCategoryMap();
+    const projectMap = new Map(projects.map(p => [p._id.toString(), p.name]));
+
+    return transactions.map(t => ({
+      ...t,
+      projectName: projectMap.get(t.projectId) || t.projectId,
+      categoryName: categoryMap.get(t.categoryId) || t.categoryId,
+    }));
+  },
+});

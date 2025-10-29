@@ -1,8 +1,5 @@
 "use client";
 
-import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -18,6 +15,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { useState } from "react";
 
 export function SelectPlannedTransaction({
   value,
@@ -26,9 +25,10 @@ export function SelectPlannedTransaction({
   value: string;
   onValueChange: (value: string) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const projects: { value: string; label: string }[] = []; // implement convex query
-  const valueColor = value ? "text-foreground" : "text-muted-foreground";
+  const [open, setOpen] = useState(false);
+  const transactions: { value: string; label: string }[] = [];
+
+  const selectedLabel = transactions.find((t) => t.value === value)?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,10 +39,13 @@ export function SelectPlannedTransaction({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          <span className={cn("font-medium", valueColor)}>
-            {value
-              ? projects.find((project) => project.value === value)?.label
-              : "Transaktion suchen..."}
+          <span
+            className={cn(
+              "font-medium",
+              value ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            {selectedLabel || "Transaktion suchen..."}
           </span>
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -50,26 +53,28 @@ export function SelectPlannedTransaction({
       <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput
-            placeholder="Projekt suchen..."
+            placeholder="Transaktion suchen..."
             className="h-9 text-muted-foreground"
           />
           <CommandList>
-            <CommandEmpty>Keine Projekte :(</CommandEmpty>
+            <CommandEmpty>Keine Transaktionen gefunden</CommandEmpty>
             <CommandGroup>
-              {projects.map((project) => (
+              {transactions.map((transaction) => (
                 <CommandItem
-                  key={project.value}
-                  value={project.value}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue);
+                  key={transaction.value}
+                  value={transaction.value}
+                  onSelect={() => {
+                    onValueChange(
+                      transaction.value === value ? "" : transaction.value
+                    );
                     setOpen(false);
                   }}
                 >
-                  {project.label}
+                  {transaction.label}
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === project.value ? "opacity-100" : "opacity-0"
+                      value === transaction.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

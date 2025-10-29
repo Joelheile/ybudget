@@ -34,7 +34,7 @@ export function mapMossCSV(row: Record<string, string>): TransactionData {
   return {
     date: parsedDate,
     amount: parseFloat(row["Amount"] || row.amount || "0"),
-    description: row["Merchant and Card Description"] || row["Note"] || row["Description"] || row.description || "",
+    description: row["Note"] || row["Merchant and Card Description"] || row["Description"] || row.description || "",
     counterparty: row["Merchant Name"] || row["Merchant name"] || row.merchant || "",
     importedTransactionId: row["Transaction ID"] || row["transaction id"] || row.id || `moss-${Date.now()}-${Math.random()}`,
     accountName: row["Cardholder"] || row.cardholder || row.account || "",
