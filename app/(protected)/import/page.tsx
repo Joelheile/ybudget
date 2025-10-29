@@ -16,18 +16,7 @@ export default function ImportTransactionsPage() {
   const expectedTransactions = useQuery(
     api.queries.transactionQueries.getExpectedTransactions
   );
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedPlannedTransaction, setSelectedPlannedTransaction] = useState<
-    string | null
-  >(null);
-
-  console.log("Unassigned processed transactions:", unassignedTransactions);
-  console.log("Expected transactions:", expectedTransactions);
-
-  const handlePlannedTransactionSelect = (transactionId: string) => {
-    setSelectedPlannedTransaction(transactionId);
-    console.log("Selected planned transaction:", transactionId);
-  };
+  const [currentIndex] = useState(0);
 
   if (
     unassignedTransactions === undefined ||
@@ -36,11 +25,9 @@ export default function ImportTransactionsPage() {
     return (
       <SidebarInset>
         <PageHeader title="Transaktionen zuordnen" />
-        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 md:p-5 pt-0">
-          <div className="flex items-center justify-center p-8">
-            <div className="text-sm text-muted-foreground">
-              Transaktionen werden geladen...
-            </div>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-sm text-muted-foreground">
+            Transaktionen werden geladen...
           </div>
         </div>
       </SidebarInset>
@@ -51,17 +38,14 @@ export default function ImportTransactionsPage() {
     return (
       <SidebarInset>
         <PageHeader title="Transaktionen zuordnen" />
-        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 md:p-5 pt-0">
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">
-                Keine unzugeordneten Transaktionen
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Alle importierten Transaktionen sind bereits Projekten
-                zugeordnet.
-              </p>
-            </div>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">
+              Keine unzugeordneten Transaktionen
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Alle importierten Transaktionen sind bereits Projekten zugeordnet.
+            </p>
           </div>
         </div>
       </SidebarInset>
@@ -69,16 +53,12 @@ export default function ImportTransactionsPage() {
   }
 
   const currentTransaction = unassignedTransactions[currentIndex];
-  const totalTransactions = unassignedTransactions.length;
 
   return (
     <SidebarInset>
       <div className="flex flex-col h-full">
-        <div className="px-4 lg:px-6">
-          <PageHeader title="Transaktionen zuordnen" />
-        </div>
-
-        <div className="flex  justify-center  pt-30 px-4 lg:px-6 pb-16">
+        <PageHeader title="Transaktionen zuordnen" />
+        <div className="flex-1 flex justify-center items-center px-4 lg:px-6 pb-20">
           <ImportCSVCard
             title={
               currentTransaction.counterparty || currentTransaction.description
@@ -87,23 +67,19 @@ export default function ImportTransactionsPage() {
             amount={currentTransaction.amount}
             date={new Date(currentTransaction.date)}
             currentIndex={currentIndex + 1}
-            totalCount={totalTransactions}
+            totalCount={unassignedTransactions.length}
           />
-
-          <div className="pl-8  -mt-16">
+          <div className="pl-8 -mt-16">
             <PlannedTransactionMatches
-              currentAmount={currentTransaction.amount}
-              currentDate={new Date(currentTransaction.date)}
-              currentDescription={currentTransaction.description}
               expectedTransactions={expectedTransactions}
-              onSelect={handlePlannedTransactionSelect}
+              onSelect={() => {}}
             />
           </div>
         </div>
-        <div className=" absolute bottom-0 w-full px-4 lg:px-6 pb-6">
+        <div className="absolute bottom-0 w-full px-4 lg:px-6 pb-6">
           <Progress
             className="w-3/4 mx-auto"
-            value={(currentIndex / totalTransactions) * 100}
+            value={(currentIndex / unassignedTransactions.length) * 100}
           />
         </div>
       </div>
