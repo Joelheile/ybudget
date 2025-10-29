@@ -38,6 +38,7 @@ export default defineSchema({
         .index("by_organization", ["organizationId"]),
     transactions: defineTable({
         projectId: v.string(),
+        organizationId: v.id("organizations"),
         date: v.number(), //epoch timestamp
         amount: v.number(), // negative for expenses, positive for income
         description: v.string(),
@@ -56,7 +57,7 @@ export default defineSchema({
             v.literal("processed")
         ),
         matchedTransactionId: v.optional(v.string()),
-        organizationId: v.id("organizations"),
+        accountName: v.optional(v.string()),
     })
         .index("by_project_date", ["projectId", "date"])
         .index("by_organization_date", ["organizationId", "date"])

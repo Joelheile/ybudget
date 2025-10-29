@@ -2,15 +2,15 @@ import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getAuthenticatedUser } from "../utils/auth";
 
-export const addTransaction = mutation({
+export const addExpectedTransaction = mutation({
   args: {
     projectId: v.string(),
     date: v.number(),
     amount: v.number(),
-    reference: v.string(),
+    description: v.string(),
+    counterparty: v.string(),
     categoryId: v.string(),
-    isExpense: v.boolean(),
-    status: v.union(v.literal("expected"), v.literal("actual")),
+    status: v.literal("expected"),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -22,10 +22,10 @@ export const addTransaction = mutation({
       projectId: args.projectId,
       date: args.date,
       amount: args.amount,
-      reference: args.reference,
+      description: args.description,
+      counterparty: args.counterparty,
       categoryId: args.categoryId,
       donorId: "",
-      isExpense: args.isExpense,
       importedBy: user._id,
       status: args.status,
       organizationId: user.organizationId,
@@ -33,17 +33,56 @@ export const addTransaction = mutation({
   },
 });
 
-export const addProject = mutation({
+export const addImportedTransaction = mutation({
   args: {
-    name: v.string(),
+    date: v.number(),
+    importedTransactionId: v.string(),
+    importSource: v.union(
+      v.literal("sparkasse"),
+      v.literal("volksbank"),
+      v.literal("moss")
+    ),
+    amount: v.number(),
     description: v.string(),
-    parentId: v.string(),
-    organizationId: v.string(),
+    counterparty: v.string(),
+    accountName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("Unauthenticated");
     }
+
+    const existing = await ctx.db
+      .query("transactions")
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId)
+      )
+      .filter((q) =>
+        q.eq(q.field("importedTransactionId"), args.importedTransactionId)
+      )
+      .first();
+
+    if (existing) {
+      return { skipped: true };
+    }
+
+    await ctx.db.insert("transactions", {
+      projectId: "",
+      date: args.date,
+      amount: args.amount,
+      description: args.description,
+      counterparty: args.counterparty,
+      categoryId: "",
+      donorId: "",
+      importedBy: user._id,
+      importedTransactionId: args.importedTransactionId,
+      importSource: args.importSource,
+      status: "processed",
+      organizationId: user.organizationId,
+      accountName: args.accountName,
+    });
+
+    return { inserted: true };
   },
 });
