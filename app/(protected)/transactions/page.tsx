@@ -11,13 +11,13 @@ import { api } from "../../../convex/_generated/api";
 export default function Transactions() {
   const { selectedDateRange } = useDateRange();
 
-  const startDate = selectedDateRange.from?.getTime() ?? 0;
-  const endDate = selectedDateRange.to?.getTime() ?? Date.now();
+  const startDate = selectedDateRange.from.getTime();
+  const endDate = selectedDateRange.to.getTime();
 
   console.log("Date range filter:", {
     startDate: new Date(startDate),
     endDate: new Date(endDate),
-    selectedDateRange
+    selectedDateRange,
   });
 
   const transactions = useQuery(
@@ -28,7 +28,9 @@ export default function Transactions() {
     }
   );
 
-  const allTransactions = useQuery(api.queries.transactionQueries.getAllTransactions);
+  const allTransactions = useQuery(
+    api.queries.transactionQueries.getAllTransactions
+  );
 
   console.log("Transactions from query:", transactions);
   console.log("All transactions (no date filter):", allTransactions);

@@ -13,6 +13,10 @@ import type * as functions_organizationMutations from "../functions/organization
 import type * as functions_projectMutations from "../functions/projectMutations.js";
 import type * as functions_transactionMutations from "../functions/transactionMutations.js";
 import type * as http from "../http.js";
+import type * as queries_getAllocatedBudget from "../queries/getAllocatedBudget.js";
+import type * as queries_getAvailableBudget from "../queries/getAvailableBudget.js";
+import type * as queries_getReceivedBudget from "../queries/getReceivedBudget.js";
+import type * as queries_getSpentBudget from "../queries/getSpentBudget.js";
 import type * as queries_organizationQueries from "../queries/organizationQueries.js";
 import type * as queries_projectQueries from "../queries/projectQueries.js";
 import type * as queries_transactionQueries from "../queries/transactionQueries.js";
@@ -40,6 +44,10 @@ declare const fullApi: ApiFromModules<{
   "functions/projectMutations": typeof functions_projectMutations;
   "functions/transactionMutations": typeof functions_transactionMutations;
   http: typeof http;
+  "queries/getAllocatedBudget": typeof queries_getAllocatedBudget;
+  "queries/getAvailableBudget": typeof queries_getAvailableBudget;
+  "queries/getReceivedBudget": typeof queries_getReceivedBudget;
+  "queries/getSpentBudget": typeof queries_getSpentBudget;
   "queries/organizationQueries": typeof queries_organizationQueries;
   "queries/projectQueries": typeof queries_projectQueries;
   "queries/transactionQueries": typeof queries_transactionQueries;

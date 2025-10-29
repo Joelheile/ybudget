@@ -8,7 +8,11 @@ import {
     startOfMonth,
 } from "date-fns";
 import { de } from "date-fns/locale";
-import { DateRange } from "react-day-picker";
+
+export interface DateRange {
+  from: Date;
+  to: Date;
+}
 
 export interface Transaction {
   id: string;
@@ -24,7 +28,6 @@ export interface ChartDataPoint {
 }
 
 function spansMultipleMonths(dateRange: DateRange): boolean {
-  if (!dateRange.from || !dateRange.to) return false;
   return !isSameMonth(dateRange.from, dateRange.to);
 }
 
@@ -32,8 +35,6 @@ function aggregateTransactionsByMonth(
   transactions: Transaction[],
   dateRange: DateRange
 ): ChartDataPoint[] {
-  if (!dateRange.from || !dateRange.to) return [];
-
   const months = eachMonthOfInterval({
     start: dateRange.from,
     end: dateRange.to,
@@ -68,8 +69,6 @@ function aggregateTransactionsByDay(
   transactions: Transaction[],
   dateRange: DateRange
 ): ChartDataPoint[] {
-  if (!dateRange.from || !dateRange.to) return [];
-
   const days = eachDayOfInterval({
     start: dateRange.from,
     end: dateRange.to,
@@ -104,8 +103,6 @@ export function generateChartData(
   transactions: Transaction[],
   dateRange: DateRange
 ): ChartDataPoint[] {
-  if (!dateRange.from || !dateRange.to) return [];
-
   const isMultipleMonths = spansMultipleMonths(dateRange);
 
   if (isMultipleMonths) {

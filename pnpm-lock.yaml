@@ -11,6 +11,9 @@ importers:
       '@auth/core':
         specifier: ^0.37.4
         version: 0.37.4
+      '@convex-dev/aggregate':
+        specifier: ^0.1.25
+        version: 0.1.25(convex@1.28.0(react@19.1.0))
       '@convex-dev/auth':
         specifier: ^0.0.90
         version: 0.0.90(@auth/core@0.37.4)(convex@1.28.0(react@19.1.0))(react@19.1.0)
@@ -153,6 +156,11 @@ packages:
   '@babel/runtime@7.28.4':
     resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
     engines: {node: '>=6.9.0'}
+
+  '@convex-dev/aggregate@0.1.25':
+    resolution: {integrity: sha512-HNO4Ft/mNvVnnXT4W+CLCcD5LH0r8x8bY77w0CmdVx9GRmU3SaLICP87GQzonnHHalgTelq8HQB04RzdmygzqQ==}
+    peerDependencies:
+      convex: ~1.16.5 || >=1.17.0 <1.35.0
 
   '@convex-dev/auth@0.0.90':
     resolution: {integrity: sha512-aqw88EB042HvnaF4wcf/f/wTocmT2Bus2VDQRuV79cM0+8kORM0ICK/ByZ6XsHgQ9qr6TmidNbXm6QAgndrdpQ==}
@@ -1644,6 +1652,10 @@ snapshots:
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
   '@babel/runtime@7.28.4': {}
+
+  '@convex-dev/aggregate@0.1.25(convex@1.28.0(react@19.1.0))':
+    dependencies:
+      convex: 1.28.0(react@19.1.0)
 
   '@convex-dev/auth@0.0.90(@auth/core@0.37.4)(convex@1.28.0(react@19.1.0))(react@19.1.0)':
     dependencies:

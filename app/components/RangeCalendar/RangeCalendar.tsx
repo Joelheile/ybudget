@@ -12,11 +12,16 @@ import {
   subYears,
 } from "date-fns";
 import { useState } from "react";
-import type { DateRange } from "react-day-picker";
+import type { DateRange as ReactDayPickerDateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+
+interface DateRange {
+  from: Date;
+  to: Date;
+}
 
 interface RangeCalendarProps {
   selectedDateRange: DateRange;
@@ -30,7 +35,7 @@ const RangeCalendar = ({
   const today = new Date();
   const [month, setMonth] = useState(today);
 
-  const presetRanges = {
+  const presetRanges: Record<string, DateRange> = {
     month: { from: startOfMonth(today), to: endOfMonth(today) },
     lastMonth: {
       from: startOfMonth(subMonths(today, 1)),
@@ -50,7 +55,7 @@ const RangeCalendar = ({
 
   const handlePresetClick = (range: DateRange) => {
     onDateRangeChange(range);
-    if (range.to) setMonth(range.to);
+    setMonth(range.to);
   };
 
   return (
@@ -58,8 +63,12 @@ const RangeCalendar = ({
       <CardContent className="px-4">
         <Calendar
           mode="range"
-          selected={selectedDateRange}
-          onSelect={(newDate) => newDate && onDateRangeChange(newDate)}
+          selected={selectedDateRange as ReactDayPickerDateRange}
+          onSelect={(newDate: ReactDayPickerDateRange | undefined) => {
+            if (newDate?.from && newDate?.to) {
+              onDateRangeChange({ from: newDate.from, to: newDate.to });
+            }
+          }}
           month={month}
           onMonthChange={setMonth}
           className="w-full bg-transparent p-0"

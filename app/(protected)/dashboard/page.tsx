@@ -5,14 +5,35 @@ import { CategoryChart } from "@/components/Dashboard/CategoryChart";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { SidebarInset } from "@/components/ui/sidebar";
+import { useDateRange } from "@/contexts/DateRangeContext";
 import { useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
+  const { selectedDateRange } = useDateRange();
+
+  const startDate = selectedDateRange.from.getTime();
+  const endDate = selectedDateRange.to.getTime();
 
   const projects = useQuery(api.queries.projectQueries.getProjects);
+  const availableBudget = useQuery(
+    api.queries.getAvailableBudget.getAvailableBudget,
+    { startDate, endDate }
+  );
+  const allocatedBudget = useQuery(
+    api.queries.getAllocatedBudget.getAllocatedBudget,
+    { startDate, endDate }
+  );
+  const spentBudget = useQuery(api.queries.getSpentBudget.getSpentBudget, {
+    startDate,
+    endDate,
+  });
+  const receivedBudget = useQuery(
+    api.queries.getReceivedBudget.getReceivedBudget,
+    { startDate, endDate }
+  );
 
   return (
     <SidebarInset>
@@ -21,15 +42,23 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
             title={"Offenes Budget"}
-            amount={4019}
-            changePercent={2.4}
+            amount={availableBudget ?? 0}
+            description="Geplante Einnahmen + erhaltene Einnahmen - ausgegebene Beträge"
           />
-          <BudgetCard title={"Verplant"} amount={14920} changePercent={9.2} />
-          <BudgetCard title={"Ausgegeben"} amount={3900} changePercent={-8.9} />
+          <BudgetCard
+            title={"Verplant"}
+            amount={allocatedBudget ?? 0}
+            description="Summe aller erwarteten Transaktionen"
+          />
+          <BudgetCard
+            title={"Ausgegeben"}
+            amount={spentBudget ?? 0}
+            description="Summe aller Ausgaben des Bankkontos"
+          />
           <BudgetCard
             title={"Eingenommen"}
-            amount={250}
-            changePercent={-15.2}
+            amount={receivedBudget ?? 0}
+            description="Summe aller Einnahmen des Bankkontos"
           />
         </div>
         <div className="flex flex-col lg:flex-row h-auto lg:h-[400px] w-full gap-4 lg:gap-6 mt-4 lg:mt-6">

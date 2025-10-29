@@ -2,7 +2,11 @@
 
 import { startOfMonth } from "date-fns";
 import { createContext, ReactNode, useContext, useState } from "react";
-import { DateRange } from "react-day-picker";
+
+interface DateRange {
+  from: Date;
+  to: Date;
+}
 
 interface DateRangeContextType {
   selectedDateRange: DateRange;
