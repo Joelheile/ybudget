@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { Id } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
 import { getAuthenticatedUser } from "../utils/auth";
 
@@ -84,5 +85,33 @@ export const addImportedTransaction = mutation({
     });
 
     return { inserted: true };
+  },
+});
+
+export const updateProcessedTransaction = mutation({
+  args: {
+    transactionId: v.string(),
+    projectId: v.optional(v.string()),
+    categoryId: v.optional(v.string()),
+    matchedTransactionId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) {
+      throw new Error("Unauthenticated");
+    }
+
+    const updateData: {
+      projectId?: string;
+      categoryId?: string;
+      matchedTransactionId?: string;
+    } = {};
+
+    if (args.projectId !== undefined) updateData.projectId = args.projectId;
+    if (args.categoryId !== undefined) updateData.categoryId = args.categoryId;
+    if (args.matchedTransactionId !== undefined)
+      updateData.matchedTransactionId = args.matchedTransactionId;
+
+    await ctx.db.patch(args.transactionId as Id<"transactions">, updateData);
   },
 });

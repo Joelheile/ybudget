@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { SelectCategory } from "../Sheets/SelectCategory";
 import { SelectProject } from "../Sheets/SelectProject";
 import { Card, CardContent, CardFooter } from "../ui/card";
@@ -11,6 +10,10 @@ interface ImportCSVCardProps {
   date: Date;
   currentIndex: number;
   totalCount: number;
+  projectId: string;
+  categoryId: string;
+  onProjectChange: (projectId: string) => void;
+  onCategoryChange: (categoryId: string) => void;
 }
 
 export const ImportCSVCard = ({
@@ -20,54 +23,67 @@ export const ImportCSVCard = ({
   date,
   currentIndex,
   totalCount,
+  projectId,
+  categoryId,
+  onProjectChange,
+  onCategoryChange,
 }: ImportCSVCardProps) => {
-  const [project, setProject] = useState("");
-  const [category, setCategory] = useState("");
-
-  const formatAmount = (value: number) => {
-    return new Intl.NumberFormat("de-DE", {
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat("de-DE", {
       style: "currency",
       currency: "EUR",
     }).format(value);
-  };
 
   return (
-    <Card className="max-w-6xl  mx-auto p-8">
-      <div className="flex justify-end text-sm text-muted-foreground mb-8">
-        {currentIndex} von {totalCount}
-      </div>
-
+    <Card className="w-2/5 h-2/3 mx-auto p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-2">{title}</h2>
-        {description && (
-          <p className="text-lg text-muted-foreground mb-4">{description}</p>
-        )}
-        <div className="flex items-center gap-8">
-          <span className="text-3xl font-bold">{formatAmount(amount)}</span>
-          <span className="text-xl text-muted-foreground">
-            {date.toLocaleDateString("de-DE")}
-          </span>
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold mb-2">{title}</h2>
+            {description && (
+              <p className="text-base text-muted-foreground">{description}</p>
+            )}
+          </div>
+          <div className="ml-6 px-3 py-1.5 rounded-md bg-muted text-sm text-muted-foreground">
+            {currentIndex} / {totalCount}
+          </div>
+        </div>
+
+        <div className="flex items-baseline gap-16 pt-4">
+          <div>
+            <div className="text-xs text-muted-foreground uppercase mb-1">
+              Betrag
+            </div>
+            <div className="text-base font-semibold tabular-nums">
+              {formatAmount(amount)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground uppercase mb-1">
+              Datum
+            </div>
+            <div className="text-base">{date.toLocaleDateString("de-DE")}</div>
+          </div>
         </div>
       </div>
 
       <CardContent className="space-y-6 p-0">
-        <div className="space-y-2">
-          <Label>Projekt</Label>
-          <SelectProject value={project} onValueChange={setProject} />
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-semibold">Projekt</Label>
+          <SelectProject value={projectId} onValueChange={onProjectChange} />
         </div>
-
-        <div className="space-y-2">
-          <Label>Kategorie</Label>
-          <SelectCategory value={category} onValueChange={setCategory} />
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-semibold">Kategorie</Label>
+          <SelectCategory value={categoryId} onValueChange={onCategoryChange} />
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-center gap-4 mt-8 p-0 text-sm text-muted-foreground">
-        <span>→ Weiter</span>
-        <span>•</span>
-        <span>⌘← Überspringen</span>
-        <span>•</span>
-        <span>⌘Z Zurück</span>
+      <CardFooter className="flex justify-center gap-3 mt-auto pt-6 text-xs text-muted-foreground">
+        <span className="font-medium">⌘↩ Speichern</span>
+        <span className="text-muted-foreground/50">•</span>
+        <span>→ Überspringen</span>
+        <span className="text-muted-foreground/50">•</span>
+        <span>← Zurück</span>
       </CardFooter>
     </Card>
   );

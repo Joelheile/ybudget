@@ -10,7 +10,7 @@ interface ExpectedTransaction {
 
 interface PlannedTransactionMatchesProps {
   expectedTransactions: ExpectedTransaction[];
-  onSelect: (transactionId: string) => void;
+  onSelect?: (transactionId: string) => void;
 }
 
 export const PlannedTransactionMatches = ({
@@ -39,7 +39,7 @@ export const PlannedTransactionMatches = ({
             }`}
             onClick={() => {
               setSelectedMatch(match._id);
-              onSelect(match._id);
+              onSelect?.(match._id);
             }}
           >
             <div className="mb-2">
