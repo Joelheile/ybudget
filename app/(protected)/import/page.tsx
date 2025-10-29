@@ -2,6 +2,7 @@
 
 import { ExpectedTransactionMatches } from "@/components/ImportTransaction/ExpectedTransactionMatches";
 import { ImportCSVCard } from "@/components/ImportTransaction/ImportCSVCard";
+import { ImportTransactionsSkeleton } from "@/components/ImportTransaction/ImportTransactionsSkeleton";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { Progress } from "@/components/ui/progress";
 import { SidebarInset } from "@/components/ui/sidebar";
@@ -131,39 +132,12 @@ export default function ImportTransactionsPage() {
     updateTransaction,
   ]);
 
-  if (!transactions) {
-    return (
-      <SidebarInset>
-        <div className="px-4 lg:px-6 pb-6 flex flex-col h-full"></div>
-        <PageHeader title="Transaktionen zuordnen" />
-        <div className="flex items-center justify-center p-8">
-          <div className="text-sm text-muted-foreground">Laden...</div>
-        </div>
-      </SidebarInset>
-    );
-  }
+  const current = transactions?.[index];
+  const isLoading = transactions === undefined;
 
-  if (transactions.length === 0) {
-    return (
-      <SidebarInset>
-        <div className="px-4 lg:px-6 pb-6 flex flex-col h-full">
-          <PageHeader title="Transaktionen zuordnen" />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">
-                Keine unzugeordneten Transaktionen
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Alle Transaktionen sind bereits zugeordnet.
-              </p>
-            </div>
-          </div>
-        </div>
-      </SidebarInset>
-    );
+  if (isLoading) {
+    return <ImportTransactionsSkeleton />;
   }
-
-  const current = transactions[index];
 
   return (
     <SidebarInset>
@@ -176,12 +150,12 @@ export default function ImportTransactionsPage() {
           />
           <div className="mt-16 flex-shrink-0">
             <ImportCSVCard
-              title={current.counterparty || ""}
-              description={current.description}
-              amount={current.amount}
-              date={new Date(current.date)}
+              title={current?.counterparty || ""}
+              description={current?.description || ""}
+              amount={current?.amount || 0}
+              date={new Date(current?.date || 0)}
               currentIndex={index + 1}
-              totalCount={transactions.length}
+              totalCount={transactions?.length || 0}
               projectId={projectId}
               categoryId={categoryId}
               onProjectChange={setProjectId}
@@ -192,7 +166,7 @@ export default function ImportTransactionsPage() {
         <div className="mt-auto pt-6">
           <Progress
             className="w-3/4 mx-auto"
-            value={(index / transactions.length) * 100}
+            value={(index / (transactions?.length || 0)) * 100}
           />
         </div>
       </div>
