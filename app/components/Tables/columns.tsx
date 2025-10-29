@@ -15,7 +15,7 @@ export const columns = [
   {
     id: "indicator",
     cell: ({ row }: any) => {
-      const isExpense = row.original.type === "expense";
+      const isExpense = row.original.isExpense;
       const dotColor = isExpense ? "bg-red-500" : "bg-green-500";
 
       return (
@@ -41,24 +41,31 @@ export const columns = [
     },
     cell: ({ row }: any) => {
       const date = row.getValue("date");
-      const dateValue = typeof date === 'number' ? new Date(date) : date;
+      const dateValue = typeof date === "number" ? new Date(date) : date;
       return <div className="pl-2">{format(dateValue, "dd.MM.yyyy")}</div>;
     },
   },
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "description",
-    header: "Beschreibung",
-  },
-  {
-    accessorKey: "project",
+    accessorKey: "projectName",
     header: "Projekt",
   },
   {
-    accessorKey: "category",
+    accessorKey: "reference",
+    header: "Referenz",
+    cell: ({ row }: any) => {
+      const reference = row.getValue("reference");
+      return (
+        <div className="max-w-64 min-w-32">
+          <div className="whitespace-pre-wrap break-words text-sm">
+            {reference}
+          </div>
+        </div>
+      );
+    },
+  },
+
+  {
+    accessorKey: "categoryName",
     header: "Kategorie",
   },
   {
@@ -77,7 +84,8 @@ export const columns = [
     },
     cell: ({ row }: any) => {
       const amount = row.getValue("amount");
-      const isNegative = amount < 0;
+      const isExpense = row.original.isExpense;
+
       const absoluteAmount = Math.abs(amount);
 
       const formattedAmount = new Intl.NumberFormat("de-DE", {
@@ -85,7 +93,7 @@ export const columns = [
         currency: "EUR",
       }).format(absoluteAmount);
 
-      const displayAmount = isNegative
+      const displayAmount = isExpense
         ? `- ${formattedAmount}`
         : `+ ${formattedAmount}`;
 
@@ -98,26 +106,20 @@ export const columns = [
     cell: ({ row }: any) => {
       const status = row.getValue("status");
       const transactionType = row.original.type || row.original.transactionType;
-      
-      let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
+
+      let variant: "default" | "secondary" | "destructive" | "outline" =
+        "secondary";
       let displayText = "Geplant";
-      
-      if (status === "bezahlt") {
+
+      if (status === "actual") {
         variant = "default";
         displayText = "Bezahlt";
-      } else if (status === "matched") {
-        variant = "outline";
-        displayText = "Zugeordnet";
-      } else if (status === "geplant") {
+      } else if (status === "expected") {
         variant = "secondary";
         displayText = "Geplant";
       }
 
-      return (
-        <Badge variant={variant}>
-          {displayText}
-        </Badge>
-      );
+      return <Badge variant={variant}>{displayText}</Badge>;
     },
   },
   {

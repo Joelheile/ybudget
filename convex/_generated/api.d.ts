@@ -18,6 +18,7 @@ import type * as queries_projectQueries from "../queries/projectQueries.js";
 import type * as queries_transactionQueries from "../queries/transactionQueries.js";
 import type * as queries_userQueries from "../queries/userQueries.js";
 import type * as utils_auth from "../utils/auth.js";
+import type * as utils_categoryMapping from "../utils/categoryMapping.js";
 
 import type {
   ApiFromModules,
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   "queries/transactionQueries": typeof queries_transactionQueries;
   "queries/userQueries": typeof queries_userQueries;
   "utils/auth": typeof utils_auth;
+  "utils/categoryMapping": typeof utils_categoryMapping;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

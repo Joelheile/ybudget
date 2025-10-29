@@ -15,7 +15,7 @@ export default function Transactions() {
   const endDate = selectedDateRange.to?.getTime() ?? Date.now();
 
   const transactions = useQuery(
-    api.queries.transactionQueries.getFilteredTransactions,
+    api.queries.transactionQueries.getTransactions,
     {
       startDate,
       endDate,

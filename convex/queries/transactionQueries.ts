@@ -1,8 +1,9 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { getAuthenticatedUser } from "../utils/auth";
+import { createCategoryMap } from "../utils/categoryMapping";
 
-export const getFilteredTransactions = query({
+export const getTransactions = query({
   args: {
     startDate: v.number(),
     endDate: v.number(),
@@ -21,11 +22,21 @@ export const getFilteredTransactions = query({
       ))
       .collect();
 
+    const projects = await ctx.db.query("projects").collect();
+    
+    const projectMap = new Map(projects.map(p => [p._id.toString(), p.name]));
+    const categoryMap = createCategoryMap();
+
+    let filtered = transactions;
     if (args.projectId) {
-      return transactions.filter(t => t.projectId === args.projectId);
+      filtered = transactions.filter(t => t.projectId === args.projectId);
     }
 
-    return transactions;
+    return filtered.map(t => ({
+      ...t,
+      projectName: projectMap.get(t.projectId) || t.projectId,
+      categoryName: categoryMap.get(t.categoryId) || t.categoryId,
+    }));
   },
 });
 
