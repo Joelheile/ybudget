@@ -2,17 +2,18 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { getAuthenticatedUser } from "../utils/auth";
 
-export const getAllocatedBudget = query({
+export const getReceivedBudget = query({
   args: {
     startDate: v.number(),
     endDate: v.number(),
+    projectId: v.optional(v.string()),
   },
   returns: v.number(),
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
     if (!user) return 0;
 
-    const transactions = await ctx.db
+    let query = ctx.db
       .query("transactions")
       .withIndex("by_organization_date", (q) =>
         q
@@ -22,13 +23,22 @@ export const getAllocatedBudget = query({
       )
       .filter((q) =>
         q.and(
-          q.eq(q.field("status"), "expected"),
-          q.neq(q.field("projectId"), "")
+          q.eq(q.field("status"), "processed"),
+          q.neq(q.field("projectId"), ""),
+          q.gt(q.field("amount"), 0)
         )
-      )
-      .collect();
+      );
 
-    const total = transactions.reduce((sum, t) => sum + t.amount, 0);
-    return Math.abs(total);
+    if (args.projectId) {
+      query = query.filter((q) => q.eq(q.field("projectId"), args.projectId));
+    }
+
+    const transactions = await query.collect();
+
+    const total = transactions.reduce(
+      (sum, transaction) => sum + transaction.amount,
+      0
+    );
+    return total;
   },
 });

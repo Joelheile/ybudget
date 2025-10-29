@@ -37,9 +37,9 @@ export default function Dashboard() {
 
   return (
     <SidebarInset>
-      <div className="px-4 lg:px-6 pb-6 overflow-x-hidden w-full">
+      <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
         <PageHeader title="Dashboard" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2   lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
             title={"Offenes Budget"}
             amount={availableBudget ?? 0}
@@ -65,7 +65,9 @@ export default function Dashboard() {
           <BudgetChart />
           <CategoryChart />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4 lg:gap-6 mt-4 lg:mt-6">
+
+        <h2 className="text-xl font-semibold mb-4 mt-4 lg:mt-6">Projekte</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4 lg:gap-6 ">
           {projects?.map((project) => (
             <ProjectCard
               key={project._id}

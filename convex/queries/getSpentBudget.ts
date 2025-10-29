@@ -6,13 +6,14 @@ export const getSpentBudget = query({
   args: {
     startDate: v.number(),
     endDate: v.number(),
+    projectId: v.optional(v.string()),
   },
   returns: v.number(),
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
     if (!user) return 0;
 
-    const transactions = await ctx.db
+    let query = ctx.db
       .query("transactions")
       .withIndex("by_organization_date", (q) =>
         q
@@ -25,8 +26,13 @@ export const getSpentBudget = query({
           q.eq(q.field("status"), "processed"),
           q.neq(q.field("projectId"), "")
         )
-      )
-      .collect();
+      );
+
+    if (args.projectId) {
+      query = query.filter((q) => q.eq(q.field("projectId"), args.projectId));
+    }
+
+    const transactions = await query.collect();
 
     const total = transactions.reduce(
       (sum, transaction) => sum + transaction.amount,

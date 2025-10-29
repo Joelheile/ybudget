@@ -31,7 +31,7 @@ export default function DonorDetail() {
 
   return (
     <SidebarInset>
-      <div className="px-4 lg:px-6 pb-6 overflow-x-hidden w-full">
+      <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
         <PageHeader title={donor.name} />
 
         <div className="mb-6">

@@ -141,7 +141,7 @@ export default function ImportTransactionsPage() {
 
   return (
     <SidebarInset>
-      <div className="px-4 lg:px-6 pb-6 flex flex-col h-full">
+      <div className="p-4 lg:px-6 pb-6 flex flex-col h-full">
         <PageHeader title="Transaktionen zuordnen" />
         <div className="flex-1 flex mt-16 gap-16 ">
           <ExpectedTransactionMatches

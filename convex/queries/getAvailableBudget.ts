@@ -6,13 +6,14 @@ export const getAvailableBudget = query({
   args: {
     startDate: v.number(),
     endDate: v.number(),
+    projectId: v.optional(v.string()),
   },
   returns: v.number(),
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
     if (!user) return 0;
 
-    const transactions = await ctx.db
+    let query = ctx.db
       .query("transactions")
       .withIndex("by_organization_date", (q) =>
         q
@@ -20,8 +21,13 @@ export const getAvailableBudget = query({
           .gte("date", args.startDate)
           .lte("date", args.endDate)
       )
-      .filter((q) => q.neq(q.field("projectId"), ""))
-      .collect();
+      .filter((q) => q.neq(q.field("projectId"), ""));
+
+    if (args.projectId) {
+      query = query.filter((q) => q.eq(q.field("projectId"), args.projectId));
+    }
+
+    const transactions = await query.collect();
 
     let plannedIncomeAmount = 0;
     let receivedAmount = 0;
