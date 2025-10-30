@@ -107,13 +107,17 @@ export const updateProcessedTransaction = mutation({
       matchedTransactionId?: string;
     } = {};
 
-    if (args.projectId !== undefined) updateData.projectId = args.projectId;
-    if (args.categoryId !== undefined) updateData.categoryId = args.categoryId;
-    if (args.matchedTransactionId !== undefined)
+    if (args.projectId !== undefined) {
+      updateData.projectId = args.projectId;
+    }
+    if (args.categoryId !== undefined) {
+      updateData.categoryId = args.categoryId;
+    }
+    if (args.matchedTransactionId !== undefined) {
       updateData.matchedTransactionId = args.matchedTransactionId;
+    }
 
     await ctx.db.patch(args.transactionId as Id<"transactions">, updateData);
-
 
     if (args.matchedTransactionId) {
       const expectedTransaction = await ctx.db.get(
@@ -125,5 +129,60 @@ export const updateProcessedTransaction = mutation({
         });
       }
     }
+  },
+});
+
+export const updateTransaction = mutation({
+  args: {
+    transactionId: v.string(),
+    description: v.optional(v.string()),
+    amount: v.optional(v.number()),
+    date: v.optional(v.number()),
+    projectId: v.optional(v.string()),
+    categoryId: v.optional(v.string()),
+    counterparty: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) {
+      throw new Error("Unauthenticated");
+    }
+
+    const transaction = await ctx.db.get(
+      args.transactionId as Id<"transactions">
+    );
+    if (!transaction || transaction.organizationId !== user.organizationId) {
+      throw new Error("Transaction not found or unauthorized");
+    }
+
+    const updateData: {
+      description?: string;
+      amount?: number;
+      date?: number;
+      projectId?: string;
+      categoryId?: string;
+      counterparty?: string;
+    } = {};
+
+    if (args.description !== undefined) {
+      updateData.description = args.description;
+    }
+    if (args.amount !== undefined) {
+      updateData.amount = args.amount;
+    }
+    if (args.date !== undefined) {
+      updateData.date = args.date;
+    }
+    if (args.projectId !== undefined) {
+      updateData.projectId = args.projectId;
+    }
+    if (args.categoryId !== undefined) {
+      updateData.categoryId = args.categoryId;
+    }
+    if (args.counterparty !== undefined) {
+      updateData.counterparty = args.counterparty;
+    }
+
+    await ctx.db.patch(args.transactionId as Id<"transactions">, updateData);
   },
 });

@@ -4,12 +4,13 @@ import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { CategoryChart } from "@/components/Dashboard/CategoryChart";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
-import { DataTable } from "@/components/Tables/DataTable";
-import { columns } from "@/components/Tables/columns";
+import { EditableDataTable } from "@/components/Tables/EditableDataTable";
+import { editableColumns } from "@/components/Tables/editableColumns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 import { api } from "../../../../convex/_generated/api";
 
 export default function ProjectDetail() {
@@ -54,6 +55,27 @@ export default function ProjectDetail() {
     api.queries.getReceivedBudget.getReceivedBudget,
     { startDate, endDate, projectId }
   );
+
+  const updateTransaction = useMutation(
+    api.functions.transactionMutations.updateTransaction
+  );
+
+  const handleUpdateTransaction = async (
+    transactionId: string,
+    field: string,
+    value: any
+  ) => {
+    try {
+      await updateTransaction({
+        transactionId,
+        [field]: value,
+      });
+      toast.success("Transaktion aktualisiert");
+    } catch (error) {
+      toast.error("Fehler beim Aktualisieren");
+      throw error;
+    }
+  };
 
   if (!project) {
     return (
@@ -115,7 +137,11 @@ export default function ProjectDetail() {
 
         <div className="mt-4 lg:mt-6">
           <h2 className="text-xl font-semibold mb-4">Transaktionen</h2>
-          <DataTable columns={columns} data={transactions || []} />
+          <EditableDataTable
+            columns={editableColumns}
+            data={transactions || []}
+            onUpdate={handleUpdateTransaction}
+          />
         </div>
       </div>
     </SidebarInset>

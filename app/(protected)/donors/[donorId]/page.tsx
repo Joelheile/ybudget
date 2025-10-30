@@ -2,16 +2,21 @@
 
 import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
-import { DataTable } from "@/components/Tables/DataTable";
+import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { columns } from "@/components/Tables/columns";
 import { mockDonors } from "@/components/data/mockDonors";
 import { mockTransactions } from "@/components/data/mockTransactions";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 
 export default function DonorDetail() {
   const params = useParams();
   const donorId = params.donorId as string;
+  const updateTransaction = useMutation(
+    api.functions.transactionMutations.updateTransaction
+  );
 
   const donor = mockDonors.find((d) => d.id === donorId);
 
@@ -28,6 +33,17 @@ export default function DonorDetail() {
   const donorTransactions = mockTransactions.filter(
     (t) => t.donor === donor.name
   );
+
+  const handleUpdateTransaction = async (
+    rowId: string,
+    field: string,
+    value: any
+  ) => {
+    await updateTransaction({
+      transactionId: rowId,
+      [field]: value,
+    });
+  };
 
   return (
     <SidebarInset>
@@ -48,7 +64,11 @@ export default function DonorDetail() {
 
         <div className="mt-4 lg:mt-6">
           <h2 className="text-xl font-semibold mb-4">Transaktionen</h2>
-          <DataTable columns={columns} data={donorTransactions} />
+          <EditableDataTable
+            columns={columns}
+            data={donorTransactions}
+            onUpdate={handleUpdateTransaction}
+          />
         </div>
       </div>
     </SidebarInset>

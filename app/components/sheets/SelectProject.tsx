@@ -1,8 +1,5 @@
 "use client";
 
-import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -19,68 +16,96 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { CreateProjectSheet } from "./CreateProjectSheet";
 
-export function SelectProject({
-  value,
-  onValueChange,
-}: {
+interface SelectProjectProps {
   value: string;
   onValueChange: (value: string) => void;
-}) {
-  const [open, setOpen] = React.useState(false);
+}
+
+export function SelectProject({ value, onValueChange }: SelectProjectProps) {
+  const [open, setOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const projects = useQuery(api.queries.projectQueries.getProjects);
 
-  const valueColor = value ? "text-foreground" : "text-muted-foreground";
+  const selectedProject = projects?.find((p) => p._id === value);
+  const displayText = selectedProject?.name || "Projekt suchen...";
+
+  const handleSelect = (selectedValue: string) => {
+    const newValue = selectedValue === value ? "" : selectedValue;
+    onValueChange(newValue);
+    setOpen(false);
+  };
+
+  const handleCreateNew = () => {
+    setSheetOpen(true);
+    setOpen(false);
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          <span className={cn("font-medium", valueColor)}>
-            {value
-              ? projects?.find((project) => project._id === value)?.name
-              : "Projekt suchen..."}
-          </span>
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput
-            placeholder="Projekt suchen..."
-            className="h-9 text-muted-foreground"
-          />
-          <CommandList>
-            <CommandEmpty>Keine Projekte :(</CommandEmpty>
-            <CommandGroup>
-              {projects?.map((project) => (
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+          >
+            <span
+              className={cn(
+                "font-medium",
+                value ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              {displayText}
+            </span>
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput
+              placeholder="Projekt suchen..."
+              className="h-9 text-muted-foreground"
+            />
+            <CommandList>
+              <CommandEmpty>Keine Projekte :(</CommandEmpty>
+              <CommandGroup>
+                {projects?.map((project) => (
+                  <CommandItem
+                    key={project._id}
+                    value={project._id}
+                    onSelect={handleSelect}
+                  >
+                    {project.name}
+                    <Check
+                      className={cn(
+                        "ml-auto",
+                        value === project._id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandGroup>
                 <CommandItem
-                  key={project._id}
-                  value={project._id}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
+                  onSelect={handleCreateNew}
+                  className="text-primary"
                 >
-                  {project.name}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === project._id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
+                  <Plus className="mr-2 h-4 w-4" />
+                  Neues Projekt erstellen
                 </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      <CreateProjectSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+    </>
   );
 }

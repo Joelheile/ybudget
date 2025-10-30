@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { MOCK_CATEGORY_GROUPS } from "../data/mockCategories";
 
 export function SelectCategory({
@@ -19,18 +19,18 @@ export function SelectCategory({
   value: string;
   onValueChange: (value: string) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [activeIdx, setActiveIdx] = React.useState(0);
-  const [activeItemIdx, setActiveItemIdx] = React.useState(0);
-  const [search, setSearch] = React.useState("");
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const itemRefs = React.useRef<Map<number, HTMLButtonElement>>(new Map());
+  const [open, setOpen] = useState(false);
+  const [activeGroupIdx, setActiveGroupIdx] = useState(0);
+  const [activeItemIdx, setActiveItemIdx] = useState(0);
+  const [search, setSearch] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
   const selectedItem = MOCK_CATEGORY_GROUPS.flatMap((g) => g.items).find(
     (item) => item.value === value
   );
 
-  const filteredGroups = React.useMemo(() => {
+  const filteredGroups = useMemo(() => {
     if (!search) return MOCK_CATEGORY_GROUPS;
     const searchLower = search.toLowerCase();
     return MOCK_CATEGORY_GROUPS.map((group) => ({
@@ -44,17 +44,17 @@ export function SelectCategory({
     })).filter((group) => group.items.length > 0);
   }, [search]);
 
-  const activeItems = filteredGroups[activeIdx]?.items || [];
+  const activeItems = filteredGroups[activeGroupIdx]?.items || [];
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       setSearch("");
-      const idx = MOCK_CATEGORY_GROUPS.findIndex((g) =>
+      const groupIdx = MOCK_CATEGORY_GROUPS.findIndex((g) =>
         g.items.some((i) => i.value === value)
       );
-      setActiveIdx(idx >= 0 ? idx : 0);
-      if (idx >= 0) {
-        const itemIdx = MOCK_CATEGORY_GROUPS[idx].items.findIndex(
+      setActiveGroupIdx(groupIdx >= 0 ? groupIdx : 0);
+      if (groupIdx >= 0) {
+        const itemIdx = MOCK_CATEGORY_GROUPS[groupIdx].items.findIndex(
           (i) => i.value === value
         );
         setActiveItemIdx(itemIdx >= 0 ? itemIdx : 0);
@@ -66,7 +66,7 @@ export function SelectCategory({
     }
   }, [open, value]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const element = itemRefs.current.get(activeItemIdx);
     element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [activeItemIdx]);
@@ -89,14 +89,14 @@ export function SelectCategory({
         break;
       case "ArrowRight":
         e.preventDefault();
-        setActiveIdx((prev) =>
+        setActiveGroupIdx((prev) =>
           prev < filteredGroups.length - 1 ? prev + 1 : 0
         );
         setActiveItemIdx(0);
         break;
       case "ArrowLeft":
         e.preventDefault();
-        setActiveIdx((prev) =>
+        setActiveGroupIdx((prev) =>
           prev > 0 ? prev - 1 : filteredGroups.length - 1
         );
         setActiveItemIdx(0);
@@ -154,12 +154,10 @@ export function SelectCategory({
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 shadow-lg border-2"
+        className="p-0 shadow-lg border-2 w-[600px] z-[100]"
         align="start"
         side="bottom"
         sideOffset={4}
-        avoidCollisions={false}
-        style={{ width: "var(--radix-popover-trigger-width)" }}
         onKeyDown={handleKeyDown}
       >
         <div className="flex max-h-[480px]">
@@ -175,10 +173,10 @@ export function SelectCategory({
                     key={group.group}
                     className={cn(
                       "w-full text-left px-4 py-2 text-sm font-semibold hover:bg-accent",
-                      idx === activeIdx && "bg-muted"
+                      idx === activeGroupIdx && "bg-muted"
                     )}
                     onMouseEnter={() => {
-                      setActiveIdx(idx);
+                      setActiveGroupIdx(idx);
                       setActiveItemIdx(0);
                     }}
                     type="button"

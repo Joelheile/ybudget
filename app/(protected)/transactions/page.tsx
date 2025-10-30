@@ -1,24 +1,21 @@
 "use client";
 
 import { PageHeader } from "@/components/Layout/PageHeader";
-import { DataTable } from "@/components/Tables/DataTable";
+import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { columns } from "@/components/Tables/columns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 export default function Transactions() {
   const { selectedDateRange } = useDateRange();
+  const updateTransaction = useMutation(
+    api.functions.transactionMutations.updateTransaction
+  );
 
   const startDate = selectedDateRange.from.getTime();
   const endDate = selectedDateRange.to.getTime();
-
-  console.log("Date range filter:", {
-    startDate: new Date(startDate),
-    endDate: new Date(endDate),
-    selectedDateRange,
-  });
 
   const transactions = useQuery(
     api.queries.transactionQueries.getTransactions,
@@ -28,12 +25,16 @@ export default function Transactions() {
     }
   );
 
-  const allTransactions = useQuery(
-    api.queries.transactionQueries.getAllTransactions
-  );
-
-  console.log("Transactions from query:", transactions);
-  console.log("All transactions (no date filter):", allTransactions);
+  const handleUpdateTransaction = async (
+    rowId: string,
+    field: string,
+    value: any
+  ) => {
+    await updateTransaction({
+      transactionId: rowId,
+      [field]: value,
+    });
+  };
 
   if (transactions === undefined) {
     return (
@@ -54,7 +55,11 @@ export default function Transactions() {
     <SidebarInset>
       <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 md:p-5 pt-0 overflow-x-hidden w-full">
         <PageHeader title="Transaktionen" />
-        <DataTable columns={columns} data={transactions} />
+        <EditableDataTable
+          columns={columns}
+          data={transactions}
+          onUpdate={handleUpdateTransaction}
+        />
       </div>
     </SidebarInset>
   );

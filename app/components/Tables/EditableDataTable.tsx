@@ -18,17 +18,77 @@ import {
 } from "@tanstack/react-table";
 import { useEffect, useRef, useState } from "react";
 
-interface DataTableProps {
-  columns: ColumnDef<any>[];
-  data: any[];
+interface EditableDataTableProps<T> {
+  columns: ColumnDef<T>[];
+  data: T[];
+  onUpdate?: (rowId: string, field: string, value: any) => Promise<void>;
 }
 
-export function DataTable({ columns, data }: DataTableProps) {
+export function EditableDataTable<T extends { _id: string }>({
+  columns,
+  data,
+  onUpdate,
+}: EditableDataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "date", desc: true },
   ]);
   const [visibleRows, setVisibleRows] = useState(20);
+  const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
+  const [pendingChanges, setPendingChanges] = useState<
+    Record<string, Record<string, any>>
+  >({});
+  const [isUpdating, setIsUpdating] = useState(false);
   const scrollRef = useRef<HTMLTableRowElement>(null);
+
+  const updatePendingChanges = (rowId: string, field: string, value: any) => {
+    setPendingChanges((prev) => ({
+      ...prev,
+      [rowId]: {
+        ...prev[rowId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const saveRow = async (rowId: string) => {
+    const changes = pendingChanges[rowId];
+    if (!changes || Object.keys(changes).length === 0) return;
+    if (!onUpdate) return;
+
+    setIsUpdating(true);
+    try {
+      for (const [field, value] of Object.entries(changes)) {
+        await onUpdate(rowId, field, value);
+      }
+      setPendingChanges((prev) => {
+        const updated = { ...prev };
+        delete updated[rowId];
+        return updated;
+      });
+      setEditingRows((prev) => {
+        const updated = new Set(prev);
+        updated.delete(rowId);
+        return updated;
+      });
+    } catch (error) {
+      console.error("Update failed:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const cancelRow = (rowId: string) => {
+    setPendingChanges((prev) => {
+      const updated = { ...prev };
+      delete updated[rowId];
+      return updated;
+    });
+    setEditingRows((prev) => {
+      const updated = new Set(prev);
+      updated.delete(rowId);
+      return updated;
+    });
+  };
 
   const table = useReactTable({
     data,
@@ -37,6 +97,16 @@ export function DataTable({ columns, data }: DataTableProps) {
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     state: { sorting },
+    meta: {
+      editingRows,
+      setEditingRows,
+      pendingChanges,
+      setPendingChanges,
+      onUpdate: updatePendingChanges,
+      onSaveRow: saveRow,
+      onCancelRow: cancelRow,
+      isUpdating,
+    },
   });
 
   useEffect(() => {
