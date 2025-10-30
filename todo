@@ -1,7 +1,7 @@
-- tabelle bearbeitbar machen
-- schauen wie ich expected transactions in tabelle anzeige (also ob die schon gematched wurden beispeilsweise)
-- categorien aus datenbank laden (evtl schöner stylen) und nochmal mit chatgpt gegen checken
-
-
-- save name of organization locally in browser
-- save if user needs onboarding in locally in browser, so that it doesnt have to do it every time
+- [ ] check how to show expected transactions in table (also if they are already matched)
+- [ ] load categories from database (maybe style nicer) and double-check with chatgpt again
++ [ ] add income to categories
+- [ ] save name of organization locally in browser
+- [ ] save if user needs onboarding in locally in browser, so that it doesnt have to do it every time
+- [ ] how to do booking between projects
+- [ ] csv export 

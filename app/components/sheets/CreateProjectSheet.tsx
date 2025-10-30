@@ -48,7 +48,6 @@ export function CreateProjectSheet({
         description: description,
         parentId: parentId ? (parentId as any)   : undefined,
         organizationId: user.organizationId,
-        // fix issue that user doesn't have an org
       });
       toast.success("Projekt erstellt!");
       onOpenChange(false);
