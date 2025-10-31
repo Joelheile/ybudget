@@ -9,26 +9,22 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as functions_donation_deleteDonationExpenseLink from "../functions/donation/deleteDonationExpenseLink.js";
-import type * as functions_donors_createDonationExpenseLink from "../functions/donors/createDonationExpenseLink.js";
-import type * as functions_donors_createDonor from "../functions/donors/createDonor.js";
+import type * as donations_functions from "../donations/functions.js";
+import type * as donations_queries from "../donations/queries.js";
+import type * as donors_functions from "../donors/functions.js";
+import type * as donors_queries from "../donors/queries.js";
 import type * as functions_organizations_addUserToOrganization from "../functions/organizations/addUserToOrganization.js";
-import type * as functions_organizations_createOrganization from "../functions/organizations/createOrganization.js";
 import type * as functions_projects_createProject from "../functions/projects/createProject.js";
 import type * as functions_transactions_createExpectedTransaction from "../functions/transactions/createExpectedTransaction.js";
 import type * as functions_transactions_createImportedTransaction from "../functions/transactions/createImportedTransaction.js";
 import type * as functions_transactions_patchProcessedTransaction from "../functions/transactions/patchProcessedTransaction.js";
 import type * as http from "../http.js";
+import type * as organizations_functions from "../organizations/functions.js";
+import type * as organizations_queries from "../organizations/queries.js";
 import type * as queries_budgets_getAllocatedBudget from "../queries/budgets/getAllocatedBudget.js";
 import type * as queries_budgets_getAvailableBudget from "../queries/budgets/getAvailableBudget.js";
 import type * as queries_budgets_getReceivedBudget from "../queries/budgets/getReceivedBudget.js";
 import type * as queries_budgets_getSpentBudget from "../queries/budgets/getSpentBudget.js";
-import type * as queries_donations_getAvailableDonationsForProject from "../queries/donations/getAvailableDonationsForProject.js";
-import type * as queries_donors_getAllDonors from "../queries/donors/getAllDonors.js";
-import type * as queries_donors_getDonorById from "../queries/donors/getDonorById.js";
-import type * as queries_donors_getDonorTransactions from "../queries/donors/getDonorTransactions.js";
-import type * as queries_organizations_getOrganizationByDomain from "../queries/organizations/getOrganizationByDomain.js";
-import type * as queries_organizations_getOrganizationName from "../queries/organizations/getOrganizationName.js";
 import type * as queries_projects_getAllProjects from "../queries/projects/getAllProjects.js";
 import type * as queries_projects_getChildProjects from "../queries/projects/getChildProjects.js";
 import type * as queries_projects_getProjectById from "../queries/projects/getProjectById.js";
@@ -58,26 +54,22 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "functions/donation/deleteDonationExpenseLink": typeof functions_donation_deleteDonationExpenseLink;
-  "functions/donors/createDonationExpenseLink": typeof functions_donors_createDonationExpenseLink;
-  "functions/donors/createDonor": typeof functions_donors_createDonor;
+  "donations/functions": typeof donations_functions;
+  "donations/queries": typeof donations_queries;
+  "donors/functions": typeof donors_functions;
+  "donors/queries": typeof donors_queries;
   "functions/organizations/addUserToOrganization": typeof functions_organizations_addUserToOrganization;
-  "functions/organizations/createOrganization": typeof functions_organizations_createOrganization;
   "functions/projects/createProject": typeof functions_projects_createProject;
   "functions/transactions/createExpectedTransaction": typeof functions_transactions_createExpectedTransaction;
   "functions/transactions/createImportedTransaction": typeof functions_transactions_createImportedTransaction;
   "functions/transactions/patchProcessedTransaction": typeof functions_transactions_patchProcessedTransaction;
   http: typeof http;
+  "organizations/functions": typeof organizations_functions;
+  "organizations/queries": typeof organizations_queries;
   "queries/budgets/getAllocatedBudget": typeof queries_budgets_getAllocatedBudget;
   "queries/budgets/getAvailableBudget": typeof queries_budgets_getAvailableBudget;
   "queries/budgets/getReceivedBudget": typeof queries_budgets_getReceivedBudget;
   "queries/budgets/getSpentBudget": typeof queries_budgets_getSpentBudget;
-  "queries/donations/getAvailableDonationsForProject": typeof queries_donations_getAvailableDonationsForProject;
-  "queries/donors/getAllDonors": typeof queries_donors_getAllDonors;
-  "queries/donors/getDonorById": typeof queries_donors_getDonorById;
-  "queries/donors/getDonorTransactions": typeof queries_donors_getDonorTransactions;
-  "queries/organizations/getOrganizationByDomain": typeof queries_organizations_getOrganizationByDomain;
-  "queries/organizations/getOrganizationName": typeof queries_organizations_getOrganizationName;
   "queries/projects/getAllProjects": typeof queries_projects_getAllProjects;
   "queries/projects/getChildProjects": typeof queries_projects_getChildProjects;
   "queries/projects/getProjectById": typeof queries_projects_getProjectById;

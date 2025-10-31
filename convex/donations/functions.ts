@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { mutation } from "../../_generated/server";
-import { getCurrentUser } from "../../queries/users/getCurrentUser";
+import { mutation } from "../_generated/server";
+import { getCurrentUser } from "../queries/users/getCurrentUser";
 
 export const deleteDonationExpenseLink = mutation({
     args: {

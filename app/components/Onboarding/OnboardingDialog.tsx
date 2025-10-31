@@ -1,6 +1,6 @@
 import { DialogClose } from "@radix-ui/react-dialog";
-import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useMutation } from "convex/react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "../ui/button";
@@ -22,29 +22,15 @@ export const OnboardingDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
-  const user = useQuery(api.queries.users.getCurrentUserQuery);
-  const domain = user?.email ? user.email.split("@")[1] : "";
-
-  const existingOrg = useQuery(
-    api.queries.organizations.getOrganizationByDomain,
-    domain ? { domain } : "skip"
-  );
-
   const [name, setName] = useState("");
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(true);
 
-  const addOrganization = useMutation(
-    api.functions.organizationMutations.addOrganization
+  const createOrganization = useMutation(
+    api.functions.organizations.createOrganization
   );
-  const joinOrganization = useMutation(
-    api.functions.organizationMutations.joinExistingOrganization
+  const addUserToOrganization = useMutation(
+    api.functions.organizations.addUserToOrganization
   );
-
-  useEffect(() => {
-    if (open && existingOrg !== undefined) {
-      setShowCreateForm(!existingOrg);
-    }
-  }, [open, existingOrg]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +42,7 @@ export const OnboardingDialog = ({
       }
 
       try {
-        await addOrganization({
-          name: name,
-          domain: domain,
-        });
+        await createOrganization({ name });
         toast.success("Verein erstellt. Nice 🥳");
         onOpenChange(false);
       } catch (error) {
@@ -67,8 +50,13 @@ export const OnboardingDialog = ({
       }
     } else {
       try {
-        await joinOrganization();
-        toast.success(`Du bist jetzt Teil von ${existingOrg?.name}!`);
+        const orgId = await addUserToOrganization({});
+        if (!orgId) {
+          toast.error("Keine Organisation für deine Domain gefunden");
+          setShowCreateForm(true);
+          return;
+        }
+        toast.success("Beigetreten");
         onOpenChange(false);
       } catch (error) {
         toast.error("Fehler beim Beitreten");
@@ -81,17 +69,12 @@ export const OnboardingDialog = ({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              Willkommen bei YBudget, {user?.firstName} :)
+              Willkommen bei YBudget :)
             </DialogTitle>
             <DialogDescription>
-              {showCreateForm ? (
-                "Lass uns direkt loslegen und deinen Verein erstellen."
-              ) : (
-                <>
-                  Anhand deiner Mail, habe ich eine Organisation gefunden.
-                  Möchtest du <strong>{existingOrg?.name}</strong> beitreten?
-                </>
-              )}
+              {showCreateForm
+                ? "Lass uns direkt loslegen und deinen Verein erstellen."
+                : "Falls es schon eine Organisation mit deiner Domain gibt, kannst du beitreten."}
             </DialogDescription>
           </DialogHeader>
 
@@ -105,7 +88,6 @@ export const OnboardingDialog = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-              <p className="text-sm text-muted-foreground ml-2">{domain}</p>
             </div>
           )}
 
@@ -115,9 +97,18 @@ export const OnboardingDialog = ({
                 Abbrechen
               </Button>
             </DialogClose>
-            <Button type="submit">
-              {showCreateForm ? "Verein erstellen" : "Beitreten"}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowCreateForm((v) => !v)}
+              >
+                {showCreateForm ? "Stattdessen beitreten" : "Stattdessen erstellen"}
+              </Button>
+              <Button type="submit">
+                {showCreateForm ? "Verein erstellen" : "Beitreten"}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

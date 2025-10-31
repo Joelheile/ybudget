@@ -41,7 +41,7 @@ export function ImportCSVSheet({
     api.queries.transactions.getImportedTransactionIds
   );
   const addTransaction = useMutation(
-    api.functions.transactionMutations.addImportedTransaction
+    api.functions.transactions.addImportedTransaction
   );
 
   const handleFile = (file: File) => {

@@ -1,13 +1,22 @@
 "use client";
 
-import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
+import {
+  Authenticated,
+  AuthLoading,
+  Unauthenticated,
+  useQuery,
+} from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
-import { AppSidebar } from "../components/Sidebar/AppSidebar";
 import { OnboardingDialog } from "../components/Onboarding/OnboardingDialog";
+import { AppSidebar } from "../components/Sidebar/AppSidebar";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { DateRangeProvider } from "../contexts/DateRangeContext";
+import {
+  getOnboardingComplete,
+  setOnboardingComplete,
+} from "../lib/onboardingStorage";
 
 export default function DashboardLayout({
   children,
@@ -42,20 +51,36 @@ function UnauthenticatedRedirect() {
 }
 
 function ProtectedContent({ children }: { children: React.ReactNode }) {
-  const needsOnboarding = useQuery(api.queries.userQueries.needsOnboarding);
-  const user = useQuery(api.queries.userQueries.getCurrentUser);
+  const needsOrg = useQuery(
+    api.queries.users.getUserOrganizationId.getUserOrganizationId,
+    {}
+  );
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
+  useEffect(() => {
+    if (needsOrg === undefined) return;
+    if (needsOrg === false) {
+      setOnboardingComplete(true);
+      setShowOnboarding(false);
+    } else {
+      setShowOnboarding(!getOnboardingComplete());
+    }
+  }, [needsOrg]);
+
+  const handleOnboardingChange = (open: boolean) => {
+    if (!open) {
+      setOnboardingComplete(true);
+      setShowOnboarding(false);
+    }
+  };
 
   return (
     <DateRangeProvider>
       <SidebarProvider>
         <AppSidebar />
         {children}
-        {user && needsOnboarding === true && (
-          <OnboardingDialog 
-            open={true} 
-            onOpenChange={() => {}}
-          />
+        {showOnboarding && (
+          <OnboardingDialog open={true} onOpenChange={handleOnboardingChange} />
         )}
       </SidebarProvider>
     </DateRangeProvider>

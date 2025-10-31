@@ -59,7 +59,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const organizationName = useQuery(
-    api.queries.organizations.getOrganizationName
+    api.queries.organizations.getOrganizationName.getOrganizationName
   );
   return (
     <Sidebar variant="sidebar" {...props}>
