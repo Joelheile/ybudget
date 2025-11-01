@@ -6,9 +6,16 @@ import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
+import {
+  calculateAllocatedBudget,
+  calculateAvailableBudget,
+  calculateReceivedBudget,
+  calculateSpentBudget,
+} from "@/lib/budgetCalculations";
 import { useQuery } from "convex/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import type { Doc } from "../../../convex/_generated/dataModel";
 
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
@@ -18,22 +25,23 @@ export default function Dashboard() {
   const endDate = selectedDateRange.to.getTime();
 
   const projects = useQuery(api.queries.projects.getAllProjects);
-  const availableBudget = useQuery(api.queries.budgets.getAvailableBudget, {
-    startDate,
-    endDate,
-  });
-  const allocatedBudget = useQuery(api.queries.budgets.getAllocatedBudget, {
-    startDate,
-    endDate,
-  });
-  const spentBudget = useQuery(api.queries.budgets.getSpentBudget, {
-    startDate,
-    endDate,
-  });
-  const receivedBudget = useQuery(api.queries.budgets.getReceivedBudget, {
-    startDate,
-    endDate,
-  });
+  const transactions = useQuery(
+    api.queries.transactions.getTransactqionsByDateRange,
+    {
+      startDate,
+      endDate,
+    }
+  );
+
+  const budgets = useMemo(
+    () => ({
+      allocated: calculateAllocatedBudget(transactions),
+      available: calculateAvailableBudget(transactions),
+      spent: calculateSpentBudget(transactions),
+      received: calculateReceivedBudget(transactions),
+    }),
+    [transactions]
+  );
 
   return (
     <SidebarInset>
@@ -42,22 +50,22 @@ export default function Dashboard() {
         <div className="grid grid-cols-2   lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
             title={"Offenes Budget"}
-            amount={availableBudget ?? 0}
+            amount={budgets.available ?? 0}
             description="Geplante Einnahmen + erhaltene Einnahmen - Ausgaben"
           />
           <BudgetCard
             title={"Verplant"}
-            amount={allocatedBudget ?? 0}
+            amount={budgets.allocated ?? 0}
             description="Summe aller erwarteten Transaktionen"
           />
           <BudgetCard
             title={"Ausgegeben"}
-            amount={spentBudget ?? 0}
+            amount={budgets.spent ?? 0}
             description="Summe aller Ausgaben des Bankkontos"
           />
           <BudgetCard
             title={"Eingenommen"}
-            amount={receivedBudget ?? 0}
+            amount={budgets.received ?? 0}
             description="Summe aller Einnahmen des Bankkontos"
           />
         </div>
@@ -68,7 +76,7 @@ export default function Dashboard() {
 
         <h2 className="text-xl font-semibold mb-4 mt-4 lg:mt-6">Projekte</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4 lg:gap-6 ">
-          {projects?.map((project) => (
+          {projects?.map((project: Doc<"projects">) => (
             <ProjectCard
               key={project._id}
               title={project.name}

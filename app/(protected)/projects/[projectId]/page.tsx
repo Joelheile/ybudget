@@ -10,8 +10,15 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
 import { useMutation, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../../../convex/_generated/api";
+import {
+  calculateAllocatedBudget,
+  calculateAvailableBudget,
+  calculateReceivedBudget,
+  calculateSpentBudget,
+} from "@/lib/budgetCalculations";
 
 export default function ProjectDetail() {
   const params = useParams();
@@ -30,7 +37,7 @@ export default function ProjectDetail() {
   });
 
   const transactions = useQuery(
-    api.queries.transactions.getTransactionsByDateRange,
+    api.queries.transactions.getTransactqionsByDateRange,
     {
       startDate,
       endDate,
@@ -38,23 +45,12 @@ export default function ProjectDetail() {
     }
   );
 
-  const availableBudget = useQuery(
-    api.queries.budgets.getAvailableBudget,
-    { startDate, endDate, projectId }
-  );
-  const allocatedBudget = useQuery(
-    api.queries.budgets.getAllocatedBudget,
-    { startDate, endDate, projectId }
-  );
-  const spentBudget = useQuery(api.queries.budgets.getSpentBudget, {
-    startDate,
-    endDate,
-    projectId,
-  });
-  const receivedBudget = useQuery(
-    api.queries.budgets.getReceivedBudget,
-    { startDate, endDate, projectId }
-  );
+  const budgets = useMemo(() => ({
+    allocated: calculateAllocatedBudget(transactions),
+    available: calculateAvailableBudget(transactions),
+    spent: calculateSpentBudget(transactions),
+    received: calculateReceivedBudget(transactions),
+  }), [transactions]);
 
   const updateTransaction = useMutation(
     api.functions.transactionMutations.updateTransaction
@@ -95,22 +91,22 @@ export default function ProjectDetail() {
         <div className="grid grid-cols-2 py-5 lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
             title={"Offenes Budget"}
-            amount={availableBudget ?? 0}
+            amount={budgets.available ?? 0}
             description="Geplante Einnahmen + erhaltene Einnahmen - Ausgaben"
           />
           <BudgetCard
             title={"Verplant"}
-            amount={allocatedBudget ?? 0}
+            amount={budgets.allocated ?? 0}
             description="Summe aller erwarteten Transaktionen"
           />
           <BudgetCard
             title={"Ausgegeben"}
-            amount={spentBudget ?? 0}
+            amount={budgets.spent ?? 0}
             description="Summe aller Ausgaben des Bankkontos"
           />
           <BudgetCard
             title={"Eingenommen"}
-            amount={receivedBudget ?? 0}
+            amount={budgets.received ?? 0}
             description="Summe aller Einnahmen des Bankkontos"
           />
         </div>
