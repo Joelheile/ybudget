@@ -6,14 +6,10 @@ import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import {
-  calculateAllocatedBudget,
-  calculateAvailableBudget,
-  calculateReceivedBudget,
-  calculateSpentBudget,
-} from "@/lib/budgetCalculations";
+
+import { calculateBudget } from "@/lib/budgetCalculations";
 import { useQuery } from "convex/react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -23,6 +19,7 @@ export default function Dashboard() {
 
   const startDate = selectedDateRange.from.getTime();
   const endDate = selectedDateRange.to.getTime();
+  console.log(new Date(startDate), new Date(endDate));
 
   const projects = useQuery(api.projects.queries.getAllProjects);
   const transactions = useQuery(
@@ -30,18 +27,10 @@ export default function Dashboard() {
     {
       startDate,
       endDate,
-    },
+    }
   );
 
-  const budgets = useMemo(
-    () => ({
-      allocated: calculateAllocatedBudget(transactions),
-      available: calculateAvailableBudget(transactions),
-      spent: calculateSpentBudget(transactions),
-      received: calculateReceivedBudget(transactions),
-    }),
-    [transactions],
-  );
+  const budgets = calculateBudget(transactions ?? []);
 
   return (
     <SidebarInset>
@@ -49,24 +38,24 @@ export default function Dashboard() {
         <PageHeader title="Dashboard" />
         <div className="grid grid-cols-2   lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
-            title={"Offenes Budget"}
-            amount={budgets.available ?? 0}
-            description="Geplante Einnahmen + erhaltene Einnahmen - Ausgaben"
+            title={"Kontostand"}
+            amount={budgets.currentBalance}
+            description="Verfügbarer Betrag auf dem Konto"
           />
           <BudgetCard
-            title={"Verplant"}
-            amount={budgets.allocated ?? 0}
-            description="Summe aller erwarteten Transaktionen"
+            title={"Kommt noch rein"}
+            amount={budgets.expectedIncome}
+            description="Zugesagtes Geld das noch nicht überwiesen wurde"
           />
           <BudgetCard
-            title={"Ausgegeben"}
-            amount={budgets.spent ?? 0}
-            description="Summe aller Ausgaben des Bankkontos"
+            title={"Muss noch bezahlt werden"}
+            amount={budgets.expectedExpenses}
+            description="Rechnungen und Zusagen die noch von uns bezahlt werden müssen"
           />
           <BudgetCard
-            title={"Eingenommen"}
-            amount={budgets.received ?? 0}
-            description="Summe aller Einnahmen des Bankkontos"
+            title={"Kann ausgegeben werden"}
+            amount={budgets.availableBudget}
+            description="Auf dem Konto + kommt rein - muss bezahlt werden"
           />
         </div>
         <div className="flex flex-col lg:flex-row h-auto lg:h-[400px] w-full gap-4 lg:gap-6 mt-4 lg:mt-6">
@@ -77,6 +66,7 @@ export default function Dashboard() {
         <h2 className="text-xl font-semibold mb-4 mt-4 lg:mt-6">Projekte</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4 lg:gap-6 ">
           {projects?.map((project: Doc<"projects">) => (
+
             <ProjectCard
               key={project._id}
               title={project.name}
