@@ -96,6 +96,7 @@ export const editableColumns = [
       return (
         <EditableProjectCell
           value={row.original.projectId}
+          displayValue={row.original.projectName}
           onSave={handleSave}
           onCancel={handleCancel}
           isEditing={isEditing}

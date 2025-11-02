@@ -1,19 +1,13 @@
 "use client";
 
 import BudgetCard from "@/components/Dashboard/BudgetCard";
-import { CategoryChart } from "@/components/Dashboard/CategoryChart";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { editableColumns } from "@/components/Tables/editableColumns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import {
-  calculateAllocatedBudget,
-  calculateAvailableBudget,
-  calculateReceivedBudget,
-  calculateSpentBudget,
-} from "@/lib/budgetCalculations";
+import { calculateBudget } from "@/lib/budgetCalculations";
 import { useMutation, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
@@ -43,27 +37,22 @@ export default function ProjectDetail() {
       startDate,
       endDate,
       projectId,
-    },
+    }
   );
 
   const budgets = useMemo(
-    () => ({
-      allocated: calculateAllocatedBudget(transactions),
-      available: calculateAvailableBudget(transactions),
-      spent: calculateSpentBudget(transactions),
-      received: calculateReceivedBudget(transactions),
-    }),
-    [transactions],
+    () => calculateBudget(transactions ?? []),
+    [transactions]
   );
 
   const updateTransaction = useMutation(
-    api.transactions.functions.updateProcessedTransaction,
+    api.transactions.functions.updateTransaction
   );
 
   const handleUpdateTransaction = async (
     transactionId: string,
     field: string,
-    value: any,
+    value: any
   ) => {
     try {
       await updateTransaction({
@@ -94,24 +83,24 @@ export default function ProjectDetail() {
 
         <div className="grid grid-cols-2 py-5 lg:grid-cols-4 gap-4 lg:gap-6">
           <BudgetCard
-            title={"Offenes Budget"}
-            amount={budgets.available ?? 0}
-            description="Geplante Einnahmen + erhaltene Einnahmen - Ausgaben"
+            title={"Kontostand"}
+            amount={budgets.currentBalance}
+            description="Verfügbarer Betrag auf dem Konto"
           />
           <BudgetCard
-            title={"Verplant"}
-            amount={budgets.allocated ?? 0}
-            description="Summe aller erwarteten Transaktionen"
+            title={"Kommt noch rein"}
+            amount={budgets.expectedIncome}
+            description="Zugesagtes Geld das noch nicht überwiesen wurde"
           />
           <BudgetCard
-            title={"Ausgegeben"}
-            amount={budgets.spent ?? 0}
-            description="Summe aller Ausgaben des Bankkontos"
+            title={"Muss noch bezahlt werden"}
+            amount={budgets.expectedExpenses}
+            description="Rechnungen und Zusagen die noch von uns bezahlt werden müssen"
           />
           <BudgetCard
-            title={"Eingenommen"}
-            amount={budgets.received ?? 0}
-            description="Summe aller Einnahmen des Bankkontos"
+            title={"Kann ausgegeben werden"}
+            amount={budgets.availableBudget}
+            description="Auf dem Konto + kommt rein - muss bezahlt werden"
           />
         </div>
 
@@ -131,7 +120,6 @@ export default function ProjectDetail() {
                 ))}
               </div>
             </div>
-            <CategoryChart />
           </div>
         )}
 

@@ -12,18 +12,43 @@ export const getTransactionsByDateRange = query({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
-    return await ctx.db
+    let query = ctx.db
       .query("transactions")
       .withIndex("by_organization", (q) =>
         q.eq("organizationId", user.organizationId),
       )
       .filter(
         (q) =>
-          q.gte(q.field("date"), args.startDate) &&
-          q.lte(q.field("date"), args.endDate),
+          q.and(
+            q.gte(q.field("date"), args.startDate),
+            q.lte(q.field("date"), args.endDate),
+          ),
+      );
+
+    if (args.projectId) {
+      query = query.filter((q) => q.eq(q.field("projectId"), args.projectId));
+    }
+
+    const transactions = await query.collect();
+
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
       )
-      .filter((q) => q.eq(q.field("projectId"), args.projectId || ""))
       .collect();
+
+    const projectMap = new Map(
+      projects.map((p) => [p._id.toString(), p.name]),
+    );
+
+    return transactions.map((transaction) => ({
+      ...transaction,
+      projectName:
+        transaction.projectId && projectMap.has(transaction.projectId)
+          ? projectMap.get(transaction.projectId)
+          : transaction.projectId || "",
+    }));
   },
 });
 
