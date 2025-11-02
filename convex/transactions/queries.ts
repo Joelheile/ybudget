@@ -17,12 +17,11 @@ export const getTransactionsByDateRange = query({
       .withIndex("by_organization", (q) =>
         q.eq("organizationId", user.organizationId),
       )
-      .filter(
-        (q) =>
-          q.and(
-            q.gte(q.field("date"), args.startDate),
-            q.lte(q.field("date"), args.endDate),
-          ),
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("date"), args.startDate),
+          q.lte(q.field("date"), args.endDate),
+        ),
       );
 
     if (args.projectId) {
@@ -38,9 +37,7 @@ export const getTransactionsByDateRange = query({
       )
       .collect();
 
-    const projectMap = new Map(
-      projects.map((p) => [p._id.toString(), p.name]),
-    );
+    const projectMap = new Map(projects.map((p) => [p._id.toString(), p.name]));
 
     return transactions.map((transaction) => ({
       ...transaction,

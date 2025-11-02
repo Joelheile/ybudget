@@ -29,7 +29,6 @@ export const createExpectedTransaction = mutation({
       status: args.status,
       organizationId: user.organizationId,
     });
-
   },
 });
 
@@ -49,10 +48,9 @@ export const createImportedTransaction = mutation({
     counterparty: v.string(),
     accountName: v.optional(v.string()),
   },
- 
+
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-
 
     // const existingTransaction = await ctx.runQuery(
     //   api..transactions.getTransactionById.getTransactionById,
@@ -98,10 +96,9 @@ export const updateTransaction = mutation({
 
   handler: async (ctx, { transactionId, ...updates }) => {
     const validUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, value]) => value !== undefined)
+      Object.entries(updates).filter(([_, value]) => value !== undefined),
     );
 
     return await ctx.db.patch(transactionId, validUpdates);
   },
 });
-

@@ -21,7 +21,7 @@ export type ChartDataPoint = {
 
 export function generateChartData(
   transactions: Doc<"transactions">[],
-  dateRange: { from: Date; to: Date }
+  dateRange: { from: Date; to: Date },
 ): ChartDataPoint[] {
   const isMultipleMonths = !isSameMonth(dateRange.from, dateRange.to);
 
@@ -34,11 +34,11 @@ export function generateChartData(
     return months.map((monthDate) => {
       const monthStart = startOfMonth(monthDate);
       const monthTransactions = transactions.filter((t) =>
-        isSameMonth(new Date(t.date), monthStart)
+        isSameMonth(new Date(t.date), monthStart),
       );
 
       const processed = monthTransactions.filter(
-        (t) => t.status === "processed"
+        (t) => t.status === "processed",
       );
       const expected = monthTransactions.filter((t) => t.status === "expected");
 
@@ -69,7 +69,7 @@ export function generateChartData(
   return days.map((day) => {
     const dayStart = startOfDay(day);
     const dayTransactions = transactions.filter((t) =>
-      isSameDay(new Date(t.date), dayStart)
+      isSameDay(new Date(t.date), dayStart),
     );
 
     const processed = dayTransactions.filter((t) => t.status === "processed");
@@ -118,4 +118,3 @@ export function formatCurrency(value: number): string {
     maximumFractionDigits: 0,
   }).format(value);
 }
-

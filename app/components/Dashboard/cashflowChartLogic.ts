@@ -1,15 +1,15 @@
 import {
-    addDays,
-    addMonths,
-    addWeeks,
-    differenceInDays,
-    differenceInMonths,
-    eachDayOfInterval,
-    eachMonthOfInterval,
-    format,
-    startOfDay,
-    startOfMonth,
-    startOfWeek,
+  addDays,
+  addMonths,
+  addWeeks,
+  differenceInDays,
+  differenceInMonths,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+  format,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
 } from "date-fns";
 import { de } from "date-fns/locale";
 import type { Doc } from "../../../convex/_generated/dataModel";
@@ -28,7 +28,7 @@ export function generateCashflowData(
   transactions: Doc<"transactions">[],
   startBalance: number,
   rangeStart: Date,
-  rangeEnd: Date
+  rangeEnd: Date,
 ): CashflowDataPoint[] {
   const filteredTransactions = transactions.filter((t) => {
     const transactionDate = new Date(t.date);
@@ -36,7 +36,7 @@ export function generateCashflowData(
   });
 
   const sortedTransactions = filteredTransactions.sort(
-    (a, b) => a.date - b.date
+    (a, b) => a.date - b.date,
   );
 
   const monthsDiff = differenceInMonths(rangeEnd, rangeStart);
@@ -61,7 +61,7 @@ export function generateCashflowData(
   } else if (monthsDiff >= 3 || daysDiff > 90) {
     const weekStart = startOfWeek(rangeStart, { weekStartsOn: 1 });
     const totalWeeks = Math.ceil(
-      (rangeEnd.getTime() - weekStart.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      (rangeEnd.getTime() - weekStart.getTime()) / (7 * 24 * 60 * 60 * 1000),
     );
     for (let i = 0; i <= totalWeeks; i++) {
       const weekDate = addWeeks(weekStart, i);
@@ -96,14 +96,14 @@ export function generateCashflowData(
     const periodEndTime = period.end.getTime();
 
     const periodTransactions = sortedTransactions.filter(
-      (t) => t.date >= periodStartTime && t.date < periodEndTime
+      (t) => t.date >= periodStartTime && t.date < periodEndTime,
     );
 
     const processedTransactions = periodTransactions.filter(
-      (t) => t.status === "processed"
+      (t) => t.status === "processed",
     );
     const expectedTransactions = periodTransactions.filter(
-      (t) => t.status === "expected"
+      (t) => t.status === "expected",
     );
 
     let processedIncome = 0;
@@ -163,7 +163,7 @@ export function formatCurrency(value: number): string {
 }
 
 export function calculateStartBalance(
-  transactions: Doc<"transactions">[] | undefined
+  transactions: Doc<"transactions">[] | undefined,
 ): number {
   if (!transactions) return 0;
 
@@ -191,7 +191,7 @@ function getTickInterval(maxValue: number): number {
 export function calculateAxisConfig(
   dataPoints: CashflowDataPoint[],
   rangeStart: Date,
-  rangeEnd: Date
+  rangeEnd: Date,
 ) {
   const monthsDiff = differenceInMonths(rangeEnd, rangeStart);
   const daysDiff = differenceInDays(rangeEnd, rangeStart);

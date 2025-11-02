@@ -29,7 +29,7 @@ export default function Dashboard() {
     {
       startDate: new Date(2020, 0, 1).getTime(),
       endDate: new Date(2100, 0, 1).getTime(),
-    }
+    },
   );
 
   const transactions = useQuery(
@@ -37,7 +37,7 @@ export default function Dashboard() {
     {
       startDate,
       endDate,
-    }
+    },
   );
 
   const budgets = calculateBudget(allTransactions ?? []);

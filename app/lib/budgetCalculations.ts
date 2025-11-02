@@ -22,10 +22,10 @@ export const calculateBudget = (transactions: Doc<"transactions">[]) => {
     expectedExpenses,
     availableBudget,
   };
-}
+};
 
 export const calculateProgressPercentage = (
-  transactions: Doc<"transactions">[]
+  transactions: Doc<"transactions">[],
 ): number => {
   const totalIncome = transactions
     .filter((t) => t.amount > 0)
@@ -35,5 +35,7 @@ export const calculateProgressPercentage = (
     .filter((t) => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  return totalIncome === 0 ? 0 : Math.min(100, (totalExpenses / totalIncome) * 100);
-}
+  return totalIncome === 0
+    ? 0
+    : Math.min(100, (totalExpenses / totalIncome) * 100);
+};

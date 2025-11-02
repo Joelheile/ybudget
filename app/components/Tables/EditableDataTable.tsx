@@ -141,7 +141,7 @@ export function EditableDataTable<T extends { _id: string }>({
                 <TableHead key={header.id}>
                   {flexRender(
                     header.column.columnDef.header,
-                    header.getContext()
+                    header.getContext(),
                   )}
                 </TableHead>
               ))}
@@ -157,7 +157,7 @@ export function EditableDataTable<T extends { _id: string }>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

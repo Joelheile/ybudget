@@ -72,7 +72,7 @@ export function CashflowChartUI() {
     {
       startDate: selectedDateRange.from.getTime(),
       endDate: selectedDateRange.to.getTime(),
-    }
+    },
   );
 
   const pastTransactions = useQuery(
@@ -80,7 +80,7 @@ export function CashflowChartUI() {
     {
       startDate: new Date(1970, 0, 1).getTime(),
       endDate: pastEndDate.getTime(),
-    }
+    },
   );
 
   const startBalance = calculateStartBalance(pastTransactions);
@@ -91,14 +91,14 @@ export function CashflowChartUI() {
           allTransactions,
           startBalance,
           selectedDateRange.from,
-          selectedDateRange.to
+          selectedDateRange.to,
         )
       : [];
 
   const axisConfig = calculateAxisConfig(
     dataPoints,
     selectedDateRange.from,
-    selectedDateRange.to
+    selectedDateRange.to,
   );
 
   const dateRangeText = `${format(selectedDateRange.from, "d. MMM yyyy", {
