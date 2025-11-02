@@ -56,7 +56,7 @@ export function BudgetChart() {
     );
 
   return (
-    <Card className="flex-[3] h-full flex flex-col">
+    <Card className="flex-[1] h-full flex flex-col">
       <CardHeader>
         <CardTitle>Cashflow</CardTitle>
         <CardDescription>{dateRangeText}</CardDescription>

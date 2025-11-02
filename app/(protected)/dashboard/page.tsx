@@ -1,7 +1,6 @@
 "use client";
 import BudgetCard from "@/components/Dashboard/BudgetCard";
-import { BudgetChart } from "@/components/Dashboard/BudgetChart";
-import { CategoryChart } from "@/components/Dashboard/CategoryChart";
+import { CashflowChartUI } from "@/components/Dashboard/CashflowChartUI";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { SidebarInset } from "@/components/ui/sidebar";
@@ -22,9 +21,17 @@ export default function Dashboard() {
 
   const startDate = selectedDateRange.from.getTime();
   const endDate = selectedDateRange.to.getTime();
-  console.log(new Date(startDate), new Date(endDate));
 
   const projects = useQuery(api.projects.queries.getAllProjects);
+
+  const allTransactions = useQuery(
+    api.transactions.queries.getTransactionsByDateRange,
+    {
+      startDate: new Date(2020, 0, 1).getTime(),
+      endDate: new Date(2100, 0, 1).getTime(),
+    }
+  );
+
   const transactions = useQuery(
     api.transactions.queries.getTransactionsByDateRange,
     {
@@ -33,7 +40,7 @@ export default function Dashboard() {
     }
   );
 
-  const budgets = calculateBudget(transactions ?? []);
+  const budgets = calculateBudget(allTransactions ?? []);
 
   return (
     <SidebarInset>
@@ -61,9 +68,9 @@ export default function Dashboard() {
             description="Auf dem Konto + kommt rein - muss bezahlt werden"
           />
         </div>
-        <div className="flex flex-col lg:flex-row h-auto lg:h-[400px] w-full gap-4 lg:gap-6 mt-4 lg:mt-6">
-          <BudgetChart />
-          <CategoryChart />
+        <div className="flex flex-col lg:flex-row  w-full gap-4 lg:gap-6 mt-4 lg:mt-6">
+          <CashflowChartUI />
+          {/* <BudgetChart /> */}
         </div>
 
         <h2 className="text-xl font-semibold mb-4 mt-4 lg:mt-6">Projekte</h2>
