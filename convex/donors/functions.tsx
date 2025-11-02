@@ -1,16 +1,15 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
-import { getCurrentUser } from "../queries/users/getCurrentUser";
+import { getCurrentUser } from "../users/getCurrentUser";
 
 export const createDonationExpenseLink = mutation({
   args: {
     expenseId: v.id("transactions"),
     donationId: v.id("transactions"),
   },
-  returns: v.id("donationExpenseLinks"),
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    if (!user) throw new Error("User not found");
+
 
     return await ctx.db.insert("donationExpenseLinks", {
       expenseId: args.expenseId,
@@ -26,12 +25,10 @@ export const createDonor = mutation({
     name: v.string(),
     type: v.union(v.literal("donation"), v.literal("sponsoring")),
   },
-  returns: v.id("donors"),
+
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    if (!user) {
-      throw new Error("Unauthenticated");
-    }
+
 
     return await ctx.db.insert("donors", {
       name: args.name,

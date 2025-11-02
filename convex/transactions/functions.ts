@@ -1,3 +1,6 @@
+import { v } from "convex/values";
+import { mutation } from "../_generated/server";
+import { getCurrentUser } from "../users/getCurrentUser";
 
 
 export const createExpectedTransaction = mutation({
@@ -13,7 +16,6 @@ export const createExpectedTransaction = mutation({
     },
     handler: async (ctx, args) => {
       const user = await getCurrentUser(ctx);
-      if (!user) throw new Error("User not found");
   
       await ctx.db.insert("transactions", {
         projectId: args.projectId,
@@ -54,14 +56,14 @@ export const createExpectedTransaction = mutation({
       const user = await getCurrentUser(ctx);
       if (!user) throw new Error("Unauthenticated");
   
-      const existingTransaction = await ctx.runQuery(
-        api.queries.transactions.getTransactionById.getTransactionById,
-        {
-          importedTransactionId: args.importedTransactionId,
-        }
-      );
+      // const existingTransaction = await ctx.runQuery(
+      //   api..transactions.getTransactionById.getTransactionById,
+      //   {
+      //     importedTransactionId: args.importedTransactionId,
+      //   }
+      // );
   
-      if (existingTransaction) return { skipped: true };
+      // if (existingTransaction) return { skipped: true };
   
       await ctx.db.insert("transactions", {
         organizationId: user.organizationId,

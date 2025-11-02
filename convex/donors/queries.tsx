@@ -1,13 +1,12 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
-import { getCurrentUser } from "../queries/users/getCurrentUser";
+import { getCurrentUser } from "../users/getCurrentUser";
 
 export const getAllDonors = query({
   args: {},
 
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-    if (!user) return console.error("User not found");
 
     return await ctx.db
       .query("donors")
@@ -23,13 +22,15 @@ export const getDonorById = query({
 
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    if (!user) return console.error("User not found");
+    if (!user) throw new Error("User not found");
 
     return await ctx.db
       .query("donors")
       .withIndex("by_organization", (q) =>
         q.eq("organizationId", user.organizationId)
-      );
+      )
+      .filter((q) => q.eq(q.field("_id"), args.donorId))
+      .first();
   },
 });
 
@@ -38,14 +39,14 @@ export const getDonorTransactions = query({
 
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    if (!user) return console.error("User not found");
+    if (!user) throw new Error("User not found");
 
     return await ctx.db
       .query("transactions")
       .withIndex("by_organization", (q) =>
         q.eq("organizationId", user.organizationId)
       )
-      .filter((q) => q.eq(q.field("donorId"), args.donorId.toString()))
+      .filter((q) => q.eq(q.field("donorId"), args.donorId))
       .collect();
   },
 });

@@ -5,20 +5,20 @@ import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { columns } from "@/components/Tables/columns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 export default function Transactions() {
   const { selectedDateRange } = useDateRange();
   const updateTransaction = useMutation(
-    api.functions.transactionMutations.updateTransaction
+    api.transactions.functions.updateProcessedTransaction
   );
 
   const startDate = selectedDateRange.from.getTime();
   const endDate = selectedDateRange.to.getTime();
 
   const transactions = useQuery(
-    api.queries.transactions.getTransactionsByDateRange,
+    api.transactions.queries.getTransactionsByDateRange,
     {
       startDate,
       endDate,

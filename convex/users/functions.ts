@@ -8,8 +8,6 @@ export const addUserToOrganization = mutation({
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-    if (!user) throw new Error("User not found");
 
     await ctx.db.patch(args.userId, {
       organizationId: args.organizationId,

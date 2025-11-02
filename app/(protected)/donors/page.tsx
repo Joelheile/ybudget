@@ -7,7 +7,12 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 export default function Donors() {
-  const donors = useQuery(api.queries.donors.getAllDonors);
+  const donors = useQuery(api.donors.queries.getAllDonors);
+
+  //TODO implement
+  const totalAgreed = 0;
+  const totalPaid = 0;
+  const totalOpen = 0;
 
   return (
     <SidebarInset>
@@ -17,19 +22,19 @@ export default function Donors() {
           <div className="text-center py-8 text-muted-foreground">
             Lade Förderer...
           </div>
-        ) : donors.length === 0 ? (
+        ) : donors && donors.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Keine Förderer vorhanden
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full gap-4 lg:gap-6">
-            {donors.map((donor) => (
+            {donors?.map((donor) => (
               <DonorCard
                 key={donor._id}
                 name={donor.name}
-                totalAgreed={donor.totalAgreed}
-                totalPaid={donor.totalPaid}
-                totalOpen={donor.totalOpen}
+                totalAgreed={totalAgreed}
+                totalPaid={totalPaid}
+                totalOpen={totalOpen}
                 donorId={donor._id}
               />
             ))}

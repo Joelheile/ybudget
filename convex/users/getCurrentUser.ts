@@ -1,12 +1,11 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { Doc, Id } from "../_generated/dataModel";
+import { Doc, getAuthUserId } from "@convex-dev/auth/server";
+import { Id } from "../_generated/dataModel";
 import { MutationCtx, QueryCtx } from "../_generated/server";
 
 export async function getCurrentUser(ctx: QueryCtx | MutationCtx) {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return null;
-    const user = await ctx.db.get(userId);
-  
-    return user as (Doc<"users"> & { organizationId: Id<"organizations"> }) | undefined;
-  }
-  
+  const userId = await getAuthUserId(ctx);
+  if (!userId) throw new Error("Unauthorized");
+  const user = await ctx.db.get(userId);
+  if (!user) throw new Error("User not found");
+  return user as (Doc<"users"> & { organizationId: Id<"organizations"> });
+}

@@ -6,7 +6,7 @@ export const getOrganizationName = query({
   args: {},
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-    if (!user) throw new Error("User not found");
+
 
     const organization = await ctx.db.get(user.organizationId);
     return organization?.name;

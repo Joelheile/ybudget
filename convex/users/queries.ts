@@ -6,7 +6,6 @@ import { getCurrentUser } from "./getCurrentUser";
     args: {},
     handler: async (ctx) => {
   const user = await getCurrentUser(ctx);
-  if (!user) return console.error("User not found");
 
   return user.organizationId;
     },

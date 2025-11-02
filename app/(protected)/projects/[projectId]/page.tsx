@@ -8,17 +8,18 @@ import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { editableColumns } from "@/components/Tables/editableColumns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import { useMutation, useQuery } from "convex/react";
-import { useParams } from "next/navigation";
-import { useMemo } from "react";
-import toast from "react-hot-toast";
-import { api } from "../../../../convex/_generated/api";
 import {
   calculateAllocatedBudget,
   calculateAvailableBudget,
   calculateReceivedBudget,
   calculateSpentBudget,
 } from "@/lib/budgetCalculations";
+import { useMutation, useQuery } from "convex/react";
+import { useParams } from "next/navigation";
+import { useMemo } from "react";
+import toast from "react-hot-toast";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 export default function ProjectDetail() {
   const params = useParams();
@@ -28,16 +29,16 @@ export default function ProjectDetail() {
   const startDate = selectedDateRange.from.getTime();
   const endDate = selectedDateRange.to.getTime();
 
-  const project = useQuery(api.queries.projects.getProjectById, {
+  const project = useQuery(api.projects.queries.getProjectById, {
     projectId,
   });
 
-  const children = useQuery(api.queries.projects.getChildProjects, {
+  const children = useQuery(api.projects.queries.getChildProjects, {
     parentId: projectId,
   });
 
   const transactions = useQuery(
-    api.queries.transactions.getTransactqionsByDateRange,
+    api.transactions.queries.getTransactionsByDateRange,
     {
       startDate,
       endDate,
@@ -45,15 +46,18 @@ export default function ProjectDetail() {
     }
   );
 
-  const budgets = useMemo(() => ({
-    allocated: calculateAllocatedBudget(transactions),
-    available: calculateAvailableBudget(transactions),
-    spent: calculateSpentBudget(transactions),
-    received: calculateReceivedBudget(transactions),
-  }), [transactions]);
+  const budgets = useMemo(
+    () => ({
+      allocated: calculateAllocatedBudget(transactions),
+      available: calculateAvailableBudget(transactions),
+      spent: calculateSpentBudget(transactions),
+      received: calculateReceivedBudget(transactions),
+    }),
+    [transactions]
+  );
 
   const updateTransaction = useMutation(
-    api.functions.transactionMutations.updateTransaction
+    api.transactions.functions.updateProcessedTransaction
   );
 
   const handleUpdateTransaction = async (
@@ -63,7 +67,7 @@ export default function ProjectDetail() {
   ) => {
     try {
       await updateTransaction({
-        transactionId,
+        transactionId: transactionId as Id<"transactions">,
         [field]: value,
       });
       toast.success("Transaktion aktualisiert");

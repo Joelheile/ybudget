@@ -24,9 +24,9 @@ export default function Dashboard() {
   const startDate = selectedDateRange.from.getTime();
   const endDate = selectedDateRange.to.getTime();
 
-  const projects = useQuery(api.queries.projects.getAllProjects);
+  const projects = useQuery(api.projects.queries.getAllProjects);
   const transactions = useQuery(
-    api.queries.transactions.getTransactqionsByDateRange,
+    api.transactions.queries.getTransactionsByDateRange,
     {
       startDate,
       endDate,

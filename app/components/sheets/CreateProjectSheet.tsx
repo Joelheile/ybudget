@@ -31,23 +31,20 @@ export function CreateProjectSheet({
   const [description, setDescription] = useState("");
   const [parentId, setParentId] = useState("");
 
-  const user = useQuery(api.queries.users.getCurrentUserQuery);
-  const addProject = useMutation(api.functions.projectMutations.addProject);
+
+  const addProject = useMutation(api.projects.functions.createProject);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user?.organizationId) {
-      toast.error("Keine Organisation gefunden");
-      return;
-    }
+   
 
     try {
       await addProject({
         name: name,
         description: description,
         parentId: parentId ? (parentId as any)   : undefined,
-        organizationId: user.organizationId,
+
       });
       toast.success("Projekt erstellt!");
       onOpenChange(false);

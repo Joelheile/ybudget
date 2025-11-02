@@ -5,8 +5,8 @@ import { PageHeader } from "@/components/Layout/PageHeader";
 import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { columns } from "@/components/Tables/columns";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useParams } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
+import { useParams } from "next/navigation";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 
@@ -14,16 +14,16 @@ export default function DonorDetail() {
   const params = useParams();
   const donorId = params.donorId as string;
   const updateTransaction = useMutation(
-    api.functions.transactionMutations.updateTransaction
+    api.transactions.functions.updateProcessedTransaction
   );
 
   const donor = useQuery(
-    api.queries.donors.getDonorById,
+    api.donors.queries.getDonorById,
     donorId ? { donorId: donorId as Id<"donors"> } : "skip"
   );
 
   const donorTransactions = useQuery(
-    api.queries.donors.getDonorTransactions,
+    api.donors.queries.getDonorTransactions,
     donorId ? { donorId: donorId as Id<"donors"> } : "skip"
   );
 

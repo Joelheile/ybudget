@@ -6,15 +6,13 @@ import { getCurrentUser } from "../users/getCurrentUser";
     export const getAllProjects = query({
     handler: async (ctx) => {
       const user = await getCurrentUser(ctx);
-      if (!user) return [];
   
-      const projects = await ctx.db
+      return await ctx.db
         .query("projects")
         .withIndex("by_organization", (q) =>
           q.eq("organizationId", user.organizationId)
         )
         .collect();
-      return projects;
     },
   });
 
@@ -22,16 +20,15 @@ import { getCurrentUser } from "../users/getCurrentUser";
     args: { parentId: v.string() },
     handler: async (ctx, args) => {
       const user = await getCurrentUser(ctx);
-      if (!user) return [];
   
-      const projects = await ctx.db
+      return await ctx.db
         .query("projects")
         .withIndex("by_organization", (q) =>
           q.eq("organizationId", user.organizationId)
         )
         .filter((q) => q.eq(q.field("parentId"), args.parentId as Id<"projects">))
         .collect();
-      return projects;
+
     },
   });
   
@@ -41,9 +38,8 @@ import { getCurrentUser } from "../users/getCurrentUser";
   
     handler: async (ctx, args) => {
       const user = await getCurrentUser(ctx);
-      if (!user) return null;
+      if (!user) throw new Error("User not found");
   
-      const project = await ctx.db.get(args.projectId as Id<"projects">);
-      return project;
+      return await ctx.db.get(args.projectId as Id<"projects">);
     },
   });

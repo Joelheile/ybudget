@@ -29,11 +29,11 @@ const chartConfig = {
 export function BudgetChart() {
   const { selectedDateRange } = useDateRange();
   const rawTransactions = useQuery(
-    api.queries.transactions.getTransactionsByDateRange,
+    api.transactions.queries.getTransactionsByDateRange,
     {
       startDate: selectedDateRange.from.getTime(),
       endDate: selectedDateRange.to.getTime(),
-      status: "processed",
+
     }
   );
 

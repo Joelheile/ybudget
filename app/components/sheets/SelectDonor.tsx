@@ -29,7 +29,7 @@ interface SelectDonorProps {
 export function SelectDonor({ value, onValueChange }: SelectDonorProps) {
   const [open, setOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const donors = useQuery(api.queries.donors.getAllDonors);
+  const donors = useQuery(api.donors.queries.getAllDonors);
 
   const selectedDonor = donors?.find((d) => d._id.toString() === value);
   const displayText = selectedDonor?.name || "Förderer suchen...";

@@ -20,12 +20,8 @@ export default function DonorCard({
   donorId,
 }: DonorCardProps) {
   const router = useRouter();
-  
-  const safeTotalAgreed = typeof totalAgreed === "number" && !isNaN(totalAgreed) ? totalAgreed : 0;
-  const safeTotalPaid = typeof totalPaid === "number" && !isNaN(totalPaid) ? totalPaid : 0;
-  const safeTotalOpen = typeof totalOpen === "number" && !isNaN(totalOpen) ? totalOpen : 0;
-  
-  const progress = safeTotalAgreed > 0 ? (safeTotalPaid / safeTotalAgreed) * 100 : 0;
+
+  const progress = totalAgreed > 0 ? (totalPaid / totalAgreed) * 100 : 0;
 
   const handleClick = () => {
     if (donorId) {
@@ -58,19 +54,19 @@ export default function DonorCard({
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Zugesagt</span>
             <span className="text-sm font-semibold">
-              {formatAmount(safeTotalAgreed)}
+              {formatAmount(totalAgreed)}
             </span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Bezahlt</span>
             <span className="text-sm font-semibold">
-              {formatAmount(safeTotalPaid)}
+              {formatAmount(totalPaid)}
             </span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Offen</span>
             <span className="text-sm font-semibold">
-              {formatAmount(safeTotalOpen)}
+              {formatAmount(totalOpen)}
             </span>
           </div>
         </div>

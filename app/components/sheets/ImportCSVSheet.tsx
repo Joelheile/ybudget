@@ -38,10 +38,10 @@ export function ImportCSVSheet({
   const [isDragging, setIsDragging] = useState(false);
 
   const existingIds = useQuery(
-    api.queries.transactions.getImportedTransactionIds
+    api.transactions.queries.getImportedTransactionIds
   );
   const addTransaction = useMutation(
-    api.functions.transactions.addImportedTransaction
+    api.transactions.functions.createImportedTransaction
   );
 
   const handleFile = (file: File) => {

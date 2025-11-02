@@ -51,15 +51,12 @@ function UnauthenticatedRedirect() {
 }
 
 function ProtectedContent({ children }: { children: React.ReactNode }) {
-  const needsOrg = useQuery(
-    api.queries.users.getUserOrganizationId.getUserOrganizationId,
-    {}
-  );
+  const needsOrg = useQuery(api.users.queries.getUserOrganizationId, {});
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (needsOrg === undefined) return;
-    if (needsOrg === false) {
+    if (!needsOrg) {
       setOnboardingComplete(true);
       setShowOnboarding(false);
     } else {
