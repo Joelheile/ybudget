@@ -13,10 +13,11 @@ export const createExpectedTransaction = mutation({
     status: v.literal("expected"),
     donorId: v.optional(v.string()),
   },
+
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
-    await ctx.db.insert("transactions", {
+    return await ctx.db.insert("transactions", {
       projectId: args.projectId,
       date: args.date,
       amount: args.amount,
@@ -28,6 +29,7 @@ export const createExpectedTransaction = mutation({
       status: args.status,
       organizationId: user.organizationId,
     });
+
   },
 });
 
@@ -47,13 +49,10 @@ export const createImportedTransaction = mutation({
     counterparty: v.string(),
     accountName: v.optional(v.string()),
   },
-  returns: v.object({
-    skipped: v.optional(v.boolean()),
-    inserted: v.optional(v.boolean()),
-  }),
+ 
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    if (!user) throw new Error("Unauthenticated");
+
 
     // const existingTransaction = await ctx.runQuery(
     //   api..transactions.getTransactionById.getTransactionById,
@@ -84,36 +83,25 @@ export const createImportedTransaction = mutation({
   },
 });
 
-export const updateProcessedTransaction = mutation({
+export const updateTransaction = mutation({
   args: {
     transactionId: v.id("transactions"),
+    date: v.optional(v.number()),
+    amount: v.optional(v.number()),
+    description: v.optional(v.string()),
     projectId: v.optional(v.string()),
     categoryId: v.optional(v.string()),
     donorId: v.optional(v.string()),
     matchedTransactionId: v.optional(v.string()),
+    status: v.optional(v.union(v.literal("expected"), v.literal("processed"))),
   },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-    if (!user) throw new Error("User not found");
 
-    const updateData: {
-      projectId?: string;
-      categoryId?: string;
-      donorId?: string;
-      matchedTransactionId?: string;
-    } = {};
-    if (
-      args.projectId !== undefined &&
-      args.categoryId !== undefined &&
-      args.donorId !== undefined
-    ) {
-      updateData.projectId = args.projectId;
-      updateData.categoryId = args.categoryId;
-      updateData.donorId = args.donorId;
-      updateData.matchedTransactionId = args.matchedTransactionId;
-    }
+  handler: async (ctx, { transactionId, ...updates }) => {
+    const validUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    );
 
-    await ctx.db.patch(args.transactionId, updateData);
+    return await ctx.db.patch(transactionId, validUpdates);
   },
 });
+

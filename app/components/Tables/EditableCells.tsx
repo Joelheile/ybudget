@@ -32,6 +32,25 @@ interface EditableCellProps {
   displayValue?: string;
 }
 
+const formatAmount = (amount: number) => {
+  const formatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(Math.abs(amount || 0));
+  return amount < 0 ? `- ${formatted}` : `+ ${formatted}`;
+};
+
+const convertToDate = (value: any): Date | null => {
+  if (!value) return null;
+  return typeof value === "number" ? new Date(value) : value;
+};
+
+const convertToTimestamp = (value: any): number | null => {
+  if (!value) return null;
+  if (typeof value === "number") return value;
+  return value?.getTime() || null;
+};
+
 export function EditableTextCell({
   value,
   onSave,
@@ -119,14 +138,6 @@ export function EditableAmountCell({
     onCancel();
   };
 
-  const formatAmount = (amount: number) => {
-    const formatted = new Intl.NumberFormat("de-DE", {
-      style: "currency",
-      currency: "EUR",
-    }).format(Math.abs(amount || 0));
-    return amount < 0 ? `- ${formatted}` : `+ ${formatted}`;
-  };
-
   if (isEditing) {
     return (
       <Input
@@ -160,46 +171,52 @@ export function EditableDateCell({
   isEditing,
   onEdit,
 }: EditableCellProps) {
-  const dateValue = typeof value === "number" ? new Date(value) : value;
+  const dateValue = convertToDate(value);
   const [editValue, setEditValue] = useState(
     dateValue ? format(dateValue, "yyyy-MM-dd") : ""
   );
 
-  const handleSave = () => {
-    const newDate = new Date(editValue);
-    if (!isNaN(newDate.getTime())) {
-      onSave(newDate.getTime());
-    } else {
-      handleCancel();
+  useEffect(() => {
+    if (!isEditing) {
+      const newDateValue = convertToDate(value);
+      const formatted = newDateValue ? format(newDateValue, "yyyy-MM-dd") : "";
+      setEditValue(formatted);
     }
-  };
+  }, [value, isEditing]);
 
   const handleCancel = () => {
+    const dateValue = convertToDate(value);
     setEditValue(dateValue ? format(dateValue, "yyyy-MM-dd") : "");
     onCancel();
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setEditValue(newValue);
+    if (newValue) {
+      const newDate = new Date(newValue);
+      if (!isNaN(newDate.getTime())) {
+        const newTimestamp = newDate.getTime();
+        const currentTimestamp = convertToTimestamp(value);
+        if (newTimestamp !== currentTimestamp) {
+          onSave(newTimestamp);
+        }
+      }
+    }
+  };
+
   if (isEditing) {
     return (
-      <div className="flex items-center gap-2">
-        <Input
-          type="date"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          className="h-8 w-36"
-          autoFocus
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSave();
-            if (e.key === "Escape") handleCancel();
-          }}
-        />
-        <Button size="sm" variant="ghost" onClick={handleSave}>
-          <Check className="h-4 w-4" />
-        </Button>
-        <Button size="sm" variant="ghost" onClick={handleCancel}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
+      <Input
+        type="date"
+        value={editValue}
+        onChange={handleDateChange}
+        className="h-8 w-36"
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === "Escape") handleCancel();
+        }}
+      />
     );
   }
 
@@ -274,8 +291,15 @@ export function EditableSelectCell({
 }: EditableSelectCellProps) {
   const [editValue, setEditValue] = useState(value || "");
 
-  const handleSave = () => {
-    onSave(editValue);
+  useEffect(() => {
+    setEditValue(value || "");
+  }, [value]);
+
+  const handleValueChange = (newValue: string) => {
+    setEditValue(newValue);
+    if (newValue !== value) {
+      onSave(newValue);
+    }
   };
 
   const handleCancel = () => {
@@ -288,26 +312,18 @@ export function EditableSelectCell({
 
   if (isEditing) {
     return (
-      <div className="flex items-center gap-2">
-        <Select value={editValue} onValueChange={setEditValue}>
-          <SelectTrigger className="h-8 w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button size="sm" variant="ghost" onClick={handleSave}>
-          <Check className="h-4 w-4" />
-        </Button>
-        <Button size="sm" variant="ghost" onClick={handleCancel}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
+      <Select value={editValue} onValueChange={handleValueChange}>
+        <SelectTrigger className="h-8 w-48">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
   }
 
@@ -411,26 +427,14 @@ export function EditableDateCellWithCalendar({
   onEdit,
   pendingValue,
 }: EditableCellProps) {
-  const getDateFromValue = (val: any): Date | undefined => {
-    if (val === undefined) return undefined;
-    const date = typeof val === "number" ? new Date(val) : val;
-    return date && !isNaN(date.getTime()) ? date : undefined;
-  };
-
-  const valueDate = getDateFromValue(value);
-  const pendingDate = getDateFromValue(pendingValue);
+  const valueDate = convertToDate(value);
+  const pendingDate = convertToDate(pendingValue);
   const displayDate = pendingDate || valueDate;
 
-  const getTimestamp = (val: any): number | undefined => {
-    if (val === undefined) return undefined;
-    if (typeof val === "number") return val;
-    return val?.getTime();
-  };
+  const valueTimestamp = convertToTimestamp(value);
+  const pendingTimestamp = convertToTimestamp(pendingValue);
 
-  const valueTimestamp = getTimestamp(value);
-  const pendingTimestamp = getTimestamp(pendingValue);
-
-  const initialDate = pendingDate || valueDate;
+  const initialDate = pendingDate || valueDate || undefined;
   const [editValue, setEditValue] = useState<Date | undefined>(initialDate);
   const [open, setOpen] = useState(false);
 
@@ -439,6 +443,7 @@ export function EditableDateCellWithCalendar({
     const currentEditTimestamp = editValue?.getTime();
 
     if (
+      currentTimestamp !== null &&
       currentTimestamp !== undefined &&
       currentTimestamp !== currentEditTimestamp
     ) {

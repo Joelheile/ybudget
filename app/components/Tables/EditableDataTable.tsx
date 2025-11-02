@@ -34,6 +34,7 @@ export function EditableDataTable<T extends { _id: string }>({
   ]);
   const [visibleRows, setVisibleRows] = useState(20);
   const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
+  const [editingCell, setEditingCell] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<
     Record<string, Record<string, any>>
   >({});
@@ -100,6 +101,8 @@ export function EditableDataTable<T extends { _id: string }>({
     meta: {
       editingRows,
       setEditingRows,
+      editingCell,
+      setEditingCell,
       pendingChanges,
       setPendingChanges,
       onUpdate: updatePendingChanges,
@@ -138,7 +141,7 @@ export function EditableDataTable<T extends { _id: string }>({
                 <TableHead key={header.id}>
                   {flexRender(
                     header.column.columnDef.header,
-                    header.getContext(),
+                    header.getContext()
                   )}
                 </TableHead>
               ))}
@@ -154,7 +157,7 @@ export function EditableDataTable<T extends { _id: string }>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}

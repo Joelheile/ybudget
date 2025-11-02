@@ -29,7 +29,7 @@ interface SelectProjectProps {
 export function SelectProject({ value, onValueChange }: SelectProjectProps) {
   const [open, setOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const projects = useQuery(api.queries.projects.getAllProjects);
+  const projects = useQuery(api.projects.queries.getAllProjects);
 
   const selectedProject = projects?.find((p) => p._id === value);
   const displayText = selectedProject?.name || "Projekt suchen...";
@@ -58,7 +58,7 @@ export function SelectProject({ value, onValueChange }: SelectProjectProps) {
             <span
               className={cn(
                 "font-medium",
-                value ? "text-foreground" : "text-muted-foreground",
+                value ? "text-foreground" : "text-muted-foreground"
               )}
             >
               {displayText}
@@ -85,7 +85,7 @@ export function SelectProject({ value, onValueChange }: SelectProjectProps) {
                     <Check
                       className={cn(
                         "ml-auto",
-                        value === project._id ? "opacity-100" : "opacity-0",
+                        value === project._id ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>
