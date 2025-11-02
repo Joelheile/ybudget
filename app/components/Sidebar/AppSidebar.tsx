@@ -22,7 +22,6 @@ import {
 
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Skeleton } from "../ui/skeleton";
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
 import { SearchForm } from "./SearchForm";
@@ -59,7 +58,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const organizationName = useQuery(
-    api.organizations.queries.getOrganizationName,
+    api.organizations.queries.getOrganizationName
   );
   return (
     <Sidebar variant="sidebar" {...props}>
@@ -73,9 +72,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">YBudget</span>
-                  <span className="truncate font-medium text-xs">
-                    {organizationName ?? <Skeleton className="w-10 h-4" />}
-                  </span>
                 </div>
               </a>
             </SidebarMenuButton>
