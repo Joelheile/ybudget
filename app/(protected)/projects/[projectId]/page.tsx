@@ -43,7 +43,7 @@ export default function ProjectDetail() {
       startDate,
       endDate,
       projectId,
-    }
+    },
   );
 
   const budgets = useMemo(
@@ -53,17 +53,17 @@ export default function ProjectDetail() {
       spent: calculateSpentBudget(transactions),
       received: calculateReceivedBudget(transactions),
     }),
-    [transactions]
+    [transactions],
   );
 
   const updateTransaction = useMutation(
-    api.transactions.functions.updateProcessedTransaction
+    api.transactions.functions.updateProcessedTransaction,
   );
 
   const handleUpdateTransaction = async (
     transactionId: string,
     field: string,
-    value: any
+    value: any,
   ) => {
     try {
       await updateTransaction({

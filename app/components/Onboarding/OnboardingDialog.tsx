@@ -25,7 +25,7 @@ export const OnboardingDialog = ({
   const [name, setName] = useState("");
 
   const setupUserOrganization = useMutation(
-    api.organizations.functions.setupUserOrganization
+    api.organizations.functions.setupUserOrganization,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

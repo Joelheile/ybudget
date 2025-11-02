@@ -11,7 +11,10 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           email: profile.email,
           image: profile.picture,
           firstName: profile.given_name || profile.name?.split(" ")[0] || "",
-          lastName: profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+          lastName:
+            profile.family_name ||
+            profile.name?.split(" ").slice(1).join(" ") ||
+            "",
         };
       },
     }),

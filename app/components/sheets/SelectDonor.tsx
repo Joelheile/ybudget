@@ -58,7 +58,7 @@ export function SelectDonor({ value, onValueChange }: SelectDonorProps) {
             <span
               className={cn(
                 "font-medium",
-                value ? "text-foreground" : "text-muted-foreground"
+                value ? "text-foreground" : "text-muted-foreground",
               )}
             >
               {displayText}
@@ -92,7 +92,7 @@ export function SelectDonor({ value, onValueChange }: SelectDonorProps) {
                         "ml-auto",
                         value === donor._id.toString()
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                   </CommandItem>

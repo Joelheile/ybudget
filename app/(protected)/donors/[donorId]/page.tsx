@@ -14,23 +14,23 @@ export default function DonorDetail() {
   const params = useParams();
   const donorId = params.donorId as string;
   const updateTransaction = useMutation(
-    api.transactions.functions.updateProcessedTransaction
+    api.transactions.functions.updateProcessedTransaction,
   );
 
   const donor = useQuery(
     api.donors.queries.getDonorById,
-    donorId ? { donorId: donorId as Id<"donors"> } : "skip"
+    donorId ? { donorId: donorId as Id<"donors"> } : "skip",
   );
 
   const donorTransactions = useQuery(
     api.donors.queries.getDonorTransactions,
-    donorId ? { donorId: donorId as Id<"donors"> } : "skip"
+    donorId ? { donorId: donorId as Id<"donors"> } : "skip",
   );
 
   const handleUpdateTransaction = async (
     rowId: string,
     field: string,
-    value: any
+    value: any,
   ) => {
     await updateTransaction({
       transactionId: rowId as Id<"transactions">,

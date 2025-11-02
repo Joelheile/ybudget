@@ -1,11 +1,11 @@
 import {
-    eachDayOfInterval,
-    eachMonthOfInterval,
-    format,
-    isSameDay,
-    isSameMonth,
-    startOfDay,
-    startOfMonth,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+  format,
+  isSameDay,
+  isSameMonth,
+  startOfDay,
+  startOfMonth,
 } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -33,7 +33,7 @@ function spansMultipleMonths(dateRange: DateRange): boolean {
 
 function aggregateTransactionsByMonth(
   transactions: Transaction[],
-  dateRange: DateRange
+  dateRange: DateRange,
 ): ChartDataPoint[] {
   const months = eachMonthOfInterval({
     start: dateRange.from,
@@ -42,7 +42,7 @@ function aggregateTransactionsByMonth(
 
   return months.map((monthDate) => {
     const monthStart = startOfMonth(monthDate);
-    
+
     const monthTransactions = transactions.filter((t) => {
       const transactionDate = new Date(t.date);
       return isSameMonth(transactionDate, monthStart);
@@ -67,7 +67,7 @@ function aggregateTransactionsByMonth(
 
 function aggregateTransactionsByDay(
   transactions: Transaction[],
-  dateRange: DateRange
+  dateRange: DateRange,
 ): ChartDataPoint[] {
   const days = eachDayOfInterval({
     start: dateRange.from,
@@ -76,7 +76,7 @@ function aggregateTransactionsByDay(
 
   return days.map((day) => {
     const dayStart = startOfDay(day);
-    
+
     const dayTransactions = transactions.filter((t) => {
       const transactionDate = new Date(t.date);
       return isSameDay(transactionDate, dayStart);
@@ -101,7 +101,7 @@ function aggregateTransactionsByDay(
 
 export function generateChartData(
   transactions: Transaction[],
-  dateRange: DateRange
+  dateRange: DateRange,
 ): ChartDataPoint[] {
   const isMultipleMonths = spansMultipleMonths(dateRange);
 
@@ -111,4 +111,3 @@ export function generateChartData(
 
   return aggregateTransactionsByDay(transactions, dateRange);
 }
-

@@ -108,8 +108,9 @@ export const editableColumns = [
     accessorKey: "description",
     header: "Beschreibung",
     cell: ({ row }: any) => {
-      const description = row.getValue("description") || row.original.reference || "";
-      
+      const description =
+        row.getValue("description") || row.original.reference || "";
+
       return (
         <div className="max-w-64 min-w-32">
           <div className="whitespace-pre-wrap text-muted-foreground break-words text-sm">
@@ -219,10 +220,7 @@ export const editableColumns = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={handleEditClick}
-              disabled={isEditing}
-            >
+            <DropdownMenuItem onClick={handleEditClick} disabled={isEditing}>
               {isEditing ? "Bearbeitung aktiv..." : "Bearbeiten"}
             </DropdownMenuItem>
           </DropdownMenuContent>

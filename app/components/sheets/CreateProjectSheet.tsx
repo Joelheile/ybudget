@@ -31,20 +31,16 @@ export function CreateProjectSheet({
   const [description, setDescription] = useState("");
   const [parentId, setParentId] = useState("");
 
-
   const addProject = useMutation(api.projects.functions.createProject);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-   
-
     try {
       await addProject({
         name: name,
         description: description,
-        parentId: parentId ? (parentId as any)   : undefined,
-
+        parentId: parentId ? (parentId as any) : undefined,
       });
       toast.success("Projekt erstellt!");
       onOpenChange(false);

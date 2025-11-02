@@ -27,7 +27,7 @@ export function SelectCategory({
   const itemRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
   const selectedItem = MOCK_CATEGORY_GROUPS.flatMap((g) => g.items).find(
-    (item) => item.value === value
+    (item) => item.value === value,
   );
 
   const filteredGroups = useMemo(() => {
@@ -39,7 +39,7 @@ export function SelectCategory({
         (item) =>
           item.label.toLowerCase().includes(searchLower) ||
           item.description.toLowerCase().includes(searchLower) ||
-          group.group.toLowerCase().includes(searchLower)
+          group.group.toLowerCase().includes(searchLower),
       ),
     })).filter((group) => group.items.length > 0);
   }, [search]);
@@ -50,12 +50,12 @@ export function SelectCategory({
     if (!open) {
       setSearch("");
       const groupIdx = MOCK_CATEGORY_GROUPS.findIndex((g) =>
-        g.items.some((i) => i.value === value)
+        g.items.some((i) => i.value === value),
       );
       setActiveGroupIdx(groupIdx >= 0 ? groupIdx : 0);
       if (groupIdx >= 0) {
         const itemIdx = MOCK_CATEGORY_GROUPS[groupIdx].items.findIndex(
-          (i) => i.value === value
+          (i) => i.value === value,
         );
         setActiveItemIdx(itemIdx >= 0 ? itemIdx : 0);
       } else {
@@ -78,26 +78,26 @@ export function SelectCategory({
       case "ArrowDown":
         e.preventDefault();
         setActiveItemIdx((prev) =>
-          prev < activeItems.length - 1 ? prev + 1 : 0
+          prev < activeItems.length - 1 ? prev + 1 : 0,
         );
         break;
       case "ArrowUp":
         e.preventDefault();
         setActiveItemIdx((prev) =>
-          prev > 0 ? prev - 1 : activeItems.length - 1
+          prev > 0 ? prev - 1 : activeItems.length - 1,
         );
         break;
       case "ArrowRight":
         e.preventDefault();
         setActiveGroupIdx((prev) =>
-          prev < filteredGroups.length - 1 ? prev + 1 : 0
+          prev < filteredGroups.length - 1 ? prev + 1 : 0,
         );
         setActiveItemIdx(0);
         break;
       case "ArrowLeft":
         e.preventDefault();
         setActiveGroupIdx((prev) =>
-          prev > 0 ? prev - 1 : filteredGroups.length - 1
+          prev > 0 ? prev - 1 : filteredGroups.length - 1,
         );
         setActiveItemIdx(0);
         break;
@@ -125,7 +125,7 @@ export function SelectCategory({
                 <span
                   className={cn(
                     "font-medium",
-                    value ? "text-foreground" : "text-muted-foreground"
+                    value ? "text-foreground" : "text-muted-foreground",
                   )}
                 >
                   {value ? selectedItem?.label : "Kategorie wählen..."}
@@ -173,7 +173,7 @@ export function SelectCategory({
                     key={group.group}
                     className={cn(
                       "w-full text-left px-4 py-2 text-sm font-semibold hover:bg-accent",
-                      idx === activeGroupIdx && "bg-muted"
+                      idx === activeGroupIdx && "bg-muted",
                     )}
                     onMouseEnter={() => {
                       setActiveGroupIdx(idx);
@@ -196,7 +196,7 @@ export function SelectCategory({
                     className={cn(
                       "w-full text-left px-3 py-2 rounded-md hover:bg-accent",
                       (itemIdx === activeItemIdx || value === item.value) &&
-                        "bg-accent"
+                        "bg-accent",
                     )}
                     onClick={() => {
                       onValueChange(item.value);
@@ -212,7 +212,7 @@ export function SelectCategory({
                       <Check
                         className={cn(
                           "h-4 w-4 shrink-0",
-                          value === item.value ? "opacity-100" : "opacity-0"
+                          value === item.value ? "opacity-100" : "opacity-0",
                         )}
                       />
                     </div>

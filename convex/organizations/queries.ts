@@ -7,7 +7,6 @@ export const getOrganizationName = query({
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
 
-
     const organization = await ctx.db.get(user.organizationId);
     return organization?.name;
   },

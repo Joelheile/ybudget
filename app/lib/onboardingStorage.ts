@@ -5,6 +5,8 @@ export function getOnboardingComplete(): boolean {
 
 export function setOnboardingComplete(value: boolean): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem("ybudget:onboardingComplete", value ? "true" : "false");
+  window.localStorage.setItem(
+    "ybudget:onboardingComplete",
+    value ? "true" : "false",
+  );
 }
-

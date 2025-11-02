@@ -38,10 +38,10 @@ export function ImportCSVSheet({
   const [isDragging, setIsDragging] = useState(false);
 
   const existingIds = useQuery(
-    api.transactions.queries.getImportedTransactionIds
+    api.transactions.queries.getImportedTransactionIds,
   );
   const addTransaction = useMutation(
-    api.transactions.functions.createImportedTransaction
+    api.transactions.functions.createImportedTransaction,
   );
 
   const handleFile = (file: File) => {
@@ -77,7 +77,7 @@ export function ImportCSVSheet({
 
     const skipped = csvData.length - newTransactions.length;
     const toastId = toast.loading(
-      `Importiere 0/${newTransactions.length} Transaktionen...`
+      `Importiere 0/${newTransactions.length} Transaktionen...`,
     );
 
     try {
@@ -102,13 +102,13 @@ export function ImportCSVSheet({
           `Importiere ${processed}/${newTransactions.length} Transaktionen...`,
           {
             id: toastId,
-          }
+          },
         );
       }
 
       toast.success(
         `${inserted} neue Transaktionen importiert, ${skipped} Duplikate übersprungen`,
-        { id: toastId }
+        { id: toastId },
       );
       setCsvData([]);
       setImportSource("");

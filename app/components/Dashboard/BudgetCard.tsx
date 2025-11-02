@@ -1,7 +1,5 @@
 import { Card } from "../ui/card";
 
-
-
 interface BudgetCardTypes {
   title: string;
   amount: number;

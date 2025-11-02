@@ -30,7 +30,8 @@ export const mockProjects: Project[] = [
   {
     id: "1-2",
     name: "YFN 9.0 Catering",
-    description: "Verpflegung und Catering für YFN 9.0. Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende.",
+    description:
+      "Verpflegung und Catering für YFN 9.0. Unser 9. Event, welches im Anschluss an die YFC stattfindet. Es wird finanziert aus dem Bertelsmann Geld, 100 Teilnehmende.",
     progress: 20,
     isActive: true,
     parentId: "1",
@@ -82,4 +83,3 @@ export const mockProjects: Project[] = [
     organizationId: "org1",
   },
 ];
-

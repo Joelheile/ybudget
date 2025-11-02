@@ -1,12 +1,11 @@
 import { query } from "../_generated/server";
 import { getCurrentUser } from "./getCurrentUser";
 
+export const getUserOrganizationId = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
 
-  export const getUserOrganizationId = query({
-    args: {},
-    handler: async (ctx) => {
-  const user = await getCurrentUser(ctx);
-
-  return user.organizationId;
-    },
-  });
+    return user.organizationId;
+  },
+});

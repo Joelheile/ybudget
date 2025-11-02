@@ -22,7 +22,10 @@ function parseGermanAmount(amountString: string): number {
 
 function createImportId(buchungstag: string, verwendungszweck: string): string {
   if (buchungstag && verwendungszweck) {
-    return `${buchungstag}-${verwendungszweck}`.replace(/[^a-zA-Z0-9\-_]/g, "-");
+    return `${buchungstag}-${verwendungszweck}`.replace(
+      /[^a-zA-Z0-9\-_]/g,
+      "-",
+    );
   }
   return `volksbank-${Date.now()}-${Math.random()}`;
 }
@@ -30,7 +33,7 @@ function createImportId(buchungstag: string, verwendungszweck: string): string {
 export function mapVolksbankCSV(row: Record<string, string>): TransactionData {
   const buchungstag = row["Buchungstag"] || "";
   const verwendungszweck = row["Verwendungszweck"] || "";
-  
+
   return {
     date: buchungstag ? parseDate(buchungstag) : Date.now(),
     amount: parseGermanAmount(row["Betrag"] || "0"),
@@ -40,4 +43,3 @@ export function mapVolksbankCSV(row: Record<string, string>): TransactionData {
     accountName: row["Bezeichnung Auftragskonto"] || "",
   };
 }
-

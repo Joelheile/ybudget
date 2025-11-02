@@ -1,18 +1,18 @@
 import type { Doc } from "../../convex/_generated/dataModel";
 
 export function calculateAllocatedBudget(
-  transactions: Doc<"transactions">[] | undefined
+  transactions: Doc<"transactions">[] | undefined,
 ): number {
   if (!transactions) return 0;
   return Math.abs(
     transactions
       .filter((t) => t.status === "expected")
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.amount, 0),
   );
 }
 
 export function calculateAvailableBudget(
-  transactions: Doc<"transactions">[] | undefined
+  transactions: Doc<"transactions">[] | undefined,
 ): number {
   if (!transactions) return 0;
   let plannedIncomeAmount = 0;
@@ -44,22 +44,21 @@ export function calculateAvailableBudget(
 }
 
 export function calculateSpentBudget(
-  transactions: Doc<"transactions">[] | undefined
+  transactions: Doc<"transactions">[] | undefined,
 ): number {
   if (!transactions) return 0;
   return Math.abs(
     transactions
       .filter((t) => t.status === "processed")
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.amount, 0),
   );
 }
 
 export function calculateReceivedBudget(
-  transactions: Doc<"transactions">[] | undefined
+  transactions: Doc<"transactions">[] | undefined,
 ): number {
   if (!transactions) return 0;
   return transactions
     .filter((t) => t.status === "processed" && t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
 }
-

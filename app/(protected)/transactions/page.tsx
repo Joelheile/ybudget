@@ -11,7 +11,7 @@ import { api } from "../../../convex/_generated/api";
 export default function Transactions() {
   const { selectedDateRange } = useDateRange();
   const updateTransaction = useMutation(
-    api.transactions.functions.updateProcessedTransaction
+    api.transactions.functions.updateProcessedTransaction,
   );
 
   const startDate = selectedDateRange.from.getTime();
@@ -22,13 +22,13 @@ export default function Transactions() {
     {
       startDate,
       endDate,
-    }
+    },
   );
 
   const handleUpdateTransaction = async (
     rowId: string,
     field: string,
-    value: any
+    value: any,
   ) => {
     await updateTransaction({
       transactionId: rowId,

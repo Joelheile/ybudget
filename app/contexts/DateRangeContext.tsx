@@ -14,7 +14,7 @@ interface DateRangeContextType {
 }
 
 const DateRangeContext = createContext<DateRangeContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function DateRangeProvider({ children }: { children: ReactNode }) {

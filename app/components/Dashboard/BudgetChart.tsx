@@ -33,8 +33,7 @@ export function BudgetChart() {
     {
       startDate: selectedDateRange.from.getTime(),
       endDate: selectedDateRange.to.getTime(),
-
-    }
+    },
   );
 
   const dateRangeText = `${format(selectedDateRange.from, "d. MMM yyyy", {

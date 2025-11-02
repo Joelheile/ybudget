@@ -295,4 +295,3 @@ export const MOCK_CATEGORY_GROUPS = [
     ],
   },
 ];
-

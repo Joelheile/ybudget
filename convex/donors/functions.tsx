@@ -10,7 +10,6 @@ export const createDonationExpenseLink = mutation({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
-
     return await ctx.db.insert("donationExpenseLinks", {
       expenseId: args.expenseId,
       donationId: args.donationId,
@@ -28,7 +27,6 @@ export const createDonor = mutation({
 
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-
 
     return await ctx.db.insert("donors", {
       name: args.name,

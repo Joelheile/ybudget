@@ -30,7 +30,7 @@ export default function Dashboard() {
     {
       startDate,
       endDate,
-    }
+    },
   );
 
   const budgets = useMemo(
@@ -40,7 +40,7 @@ export default function Dashboard() {
       spent: calculateSpentBudget(transactions),
       received: calculateReceivedBudget(transactions),
     }),
-    [transactions]
+    [transactions],
   );
 
   return (

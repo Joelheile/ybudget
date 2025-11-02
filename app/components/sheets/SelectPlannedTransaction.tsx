@@ -42,7 +42,7 @@ export function SelectPlannedTransaction({
           <span
             className={cn(
               "font-medium",
-              value ? "text-foreground" : "text-muted-foreground"
+              value ? "text-foreground" : "text-muted-foreground",
             )}
           >
             {selectedLabel || "Transaktion suchen..."}
@@ -65,7 +65,7 @@ export function SelectPlannedTransaction({
                   value={transaction.value}
                   onSelect={() => {
                     onValueChange(
-                      transaction.value === value ? "" : transaction.value
+                      transaction.value === value ? "" : transaction.value,
                     );
                     setOpen(false);
                   }}
@@ -74,7 +74,7 @@ export function SelectPlannedTransaction({
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === transaction.value ? "opacity-100" : "opacity-0"
+                      value === transaction.value ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>

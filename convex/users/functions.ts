@@ -8,7 +8,6 @@ export const addUserToOrganization = mutation({
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
-
     await ctx.db.patch(args.userId, {
       organizationId: args.organizationId,
     });

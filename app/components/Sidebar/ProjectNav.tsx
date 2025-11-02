@@ -51,7 +51,7 @@ export function ProjectNav() {
 
   const items = parentProjects.map((project: Doc<"projects">) => {
     const childProjects = projects.filter(
-      (p: Doc<"projects">) => p.parentId === project._id
+      (p: Doc<"projects">) => p.parentId === project._id,
     );
 
     return {
@@ -119,7 +119,7 @@ export function ProjectNav() {
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
-                          )
+                          ),
                         )}
                       </SidebarMenuSub>
                     </CollapsibleContent>
@@ -127,7 +127,7 @@ export function ProjectNav() {
                 ) : null}
               </SidebarMenuItem>
             </Collapsible>
-          )
+          ),
         )}
       </SidebarMenu>
       <CreateProjectSheet open={sheetOpen} onOpenChange={setSheetOpen} />

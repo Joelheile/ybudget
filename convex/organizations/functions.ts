@@ -4,7 +4,6 @@ import { Id } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
 
-
 function getUserDomain(email: string | undefined): string | null {
   if (!email) return null;
   const domain = email.split("@")[1];
@@ -17,10 +16,6 @@ export const findOrganizationByDomain = mutation({
   },
 
   handler: async (ctx, args) => {
-
-
-
-
     const organization = await ctx.db
       .query("organizations")
       .withIndex("by_domain", (q) => q.eq("domain", args.domain))
@@ -52,10 +47,7 @@ export const setupUserOrganization = mutation({
   },
 
   handler: async (ctx, args) => {
-
-
     const user = await getCurrentUser(ctx);
-
 
     if (user.organizationId) return user.organizationId;
 
@@ -64,7 +56,7 @@ export const setupUserOrganization = mutation({
 
     const existingOrgId = (await ctx.runMutation(
       api.organizations.functions.findOrganizationByDomain,
-      { domain }
+      { domain },
     )) as Id<"organizations"> | null;
 
     if (existingOrgId) {
@@ -81,7 +73,7 @@ export const setupUserOrganization = mutation({
         name: args.organizationName ?? `${domain} Organization`,
         domain,
         userId: user._id,
-      }
+      },
     )) as Id<"organizations">;
 
     await ctx.runMutation(api.users.functions.addUserToOrganization, {

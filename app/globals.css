@@ -46,15 +46,20 @@
   --shadow-color: #000000;
   --shadow-2xs: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.01);
   --shadow-xs: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.01);
-  --shadow-sm: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
+  --shadow-sm:
+    0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
     0rem 1px 2px -1px hsl(0 0% 0% / 0.03);
-  --shadow: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
+  --shadow:
+    0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
     0rem 1px 2px -1px hsl(0 0% 0% / 0.03);
-  --shadow-md: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
+  --shadow-md:
+    0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
     0rem 2px 4px -1px hsl(0 0% 0% / 0.03);
-  --shadow-lg: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
+  --shadow-lg:
+    0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
     0rem 4px 6px -1px hsl(0 0% 0% / 0.03);
-  --shadow-xl: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
+  --shadow-xl:
+    0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.03),
     0rem 8px 10px -1px hsl(0 0% 0% / 0.03);
   --shadow-2xl: 0rem 0.125rem 1px 0rem hsl(0 0% 0% / 0.06);
   --tracking-normal: 0em;
@@ -109,15 +114,20 @@
   --shadow-color: #ffffff;
   --shadow-2xs: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.01);
   --shadow-xs: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.01);
-  --shadow-sm: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
+  --shadow-sm:
+    0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
     0rem 1px 2px -1px hsl(0 0% 100% / 0.03);
-  --shadow: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
+  --shadow:
+    0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
     0rem 1px 2px -1px hsl(0 0% 100% / 0.03);
-  --shadow-md: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
+  --shadow-md:
+    0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
     0rem 2px 4px -1px hsl(0 0% 100% / 0.03);
-  --shadow-lg: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
+  --shadow-lg:
+    0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
     0rem 4px 6px -1px hsl(0 0% 100% / 0.03);
-  --shadow-xl: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
+  --shadow-xl:
+    0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.03),
     0rem 8px 10px -1px hsl(0 0% 100% / 0.03);
   --shadow-2xl: 0rem 0.125rem 1px 0rem hsl(0 0% 100% / 0.06);
   --shadow-offset-x: 0rem;

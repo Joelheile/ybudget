@@ -51,7 +51,7 @@ export function TransactionSheet({
   const [donor, setDonor] = useState("");
 
   const addTransaction = useMutation(
-    api.functions.transactionMutations.addExpectedTransaction
+    api.functions.transactionMutations.addExpectedTransaction,
   );
 
   const dateColor = date ? "text-foreground" : "text-muted-foreground";
@@ -85,7 +85,7 @@ export function TransactionSheet({
         donorId: type === "income" ? donor : "",
       });
       toast.success(
-        type === "expense" ? "Ausgabe gespeichert!" : "Einnahme gespeichert!"
+        type === "expense" ? "Ausgabe gespeichert!" : "Einnahme gespeichert!",
       );
       onOpenChange(false);
     } catch (error) {
@@ -97,7 +97,8 @@ export function TransactionSheet({
 
   const title = type === "expense" ? "Ausgabe planen" : "Einnahme erfassen";
   const counterpartyLabel = type === "expense" ? "Empfänger" : "Von";
-  const submitButtonText = type === "expense" ? "Ausgabe planen" : "Einnahme erfassen";
+  const submitButtonText =
+    type === "expense" ? "Ausgabe planen" : "Einnahme erfassen";
 
   const renderStepOne = () => (
     <div className="flex-1 flex flex-col gap-8 px-6 py-4">
@@ -163,7 +164,9 @@ export function TransactionSheet({
         <Input
           id="counterparty"
           placeholder={
-            type === "expense" ? "z.B. Lieferant, Firma..." : "z.B. Kunde, Firma..."
+            type === "expense"
+              ? "z.B. Lieferant, Firma..."
+              : "z.B. Kunde, Firma..."
           }
           value={counterparty}
           onChange={(e) => setCounterparty(e.target.value)}
@@ -176,7 +179,9 @@ export function TransactionSheet({
         <Textarea
           id="description"
           placeholder={
-            type === "expense" ? "Details zur Ausgabe..." : "Details zur Einnahme..."
+            type === "expense"
+              ? "Details zur Ausgabe..."
+              : "Details zur Einnahme..."
           }
           value={description}
           onChange={(e) => setDescription(e.target.value)}

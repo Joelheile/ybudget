@@ -48,4 +48,3 @@ export const mockDonors = [
     totalOpen: 15000,
   },
 ];
-
