@@ -43,3 +43,4 @@ next-env.d.ts
 .gitignore
 CLAUDE.md
 .cursor/rules/convex_rules.mdc
+.claude/settings.local.json

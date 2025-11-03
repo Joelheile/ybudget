@@ -10,7 +10,7 @@ import { SelectProject } from "../Sheets/SelectProject";
 import { Card } from "../ui/card";
 import { Label } from "../ui/label";
 
-interface ImportCSVCardProps {
+interface ImportTransactionCardProps {
   title: string;
   description?: string;
   amount: number;
@@ -27,7 +27,7 @@ interface ImportCSVCardProps {
   onDonationIdsChange: (donationIds: Id<"transactions">[]) => void;
 }
 
-export const ImportCSVCard = ({
+export const ImportTransactionCard = ({
   title,
   description,
   amount,
@@ -42,7 +42,7 @@ export const ImportCSVCard = ({
   onCategoryChange,
   onDonorChange,
   onDonationIdsChange,
-}: ImportCSVCardProps) => {
+}: ImportTransactionCardProps) => {
   const isExpense = amount < 0;
   const isIncome = amount > 0;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { ExpectedTransactionMatches } from "@/components/ImportTransaction/ExpectedTransactionMatches";
-import { ImportCSVCard } from "@/components/ImportTransaction/ImportCSVCard";
+import { ImportTransactionCard } from "@/components/ImportTransaction/ImportTransactionCard";
 import { ImportTransactionsSkeleton } from "@/components/ImportTransaction/ImportTransactionsSkeleton";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { Progress } from "@/components/ui/progress";
@@ -40,9 +40,6 @@ export default function ImportTransactionsPage() {
   );
   const updateTransaction = useMutation(
     api.transactions.functions.updateTransaction
-  );
-  const createDonationLink = useMutation(
-    api.donors.functions.createDonationExpenseLink
   );
 
   const clearForm = () => {
@@ -120,22 +117,6 @@ export default function ImportTransactionsPage() {
         });
       }
 
-      const isExpense = transactions[index].amount < 0;
-      if (isExpense && selectedDonationIds.length > 0) {
-        for (const donationId of selectedDonationIds) {
-          try {
-            await createDonationLink({
-              expenseId: transactionId,
-              donationId: donationId,
-            });
-          } catch (error: any) {
-            toast.error(
-              `Fehler bei Zuordnung: ${error.message || "Unbekannter Fehler"}`
-            );
-          }
-        }
-      }
-
       toast.success("Transaktion gespeichert");
       goToNext();
     } catch (error) {
@@ -180,7 +161,7 @@ export default function ImportTransactionsPage() {
             onSelect={handleExpectedTransactionSelect}
           />
           <div className="mt-16 flex-shrink-0">
-            <ImportCSVCard
+            <ImportTransactionCard
               title={current?.counterparty || ""}
               description={current?.description || ""}
               amount={current?.amount || 0}

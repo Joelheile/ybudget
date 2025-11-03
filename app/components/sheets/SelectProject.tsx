@@ -19,7 +19,7 @@ import { useQuery } from "convex-helpers/react/cache";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import { CreateProjectSheet } from "./CreateProjectSheet";
+import { CreateProjectDialog } from "./CreateProjectDialog";
 
 interface SelectProjectProps {
   value: string;
@@ -28,7 +28,7 @@ interface SelectProjectProps {
 
 export function SelectProject({ value, onValueChange }: SelectProjectProps) {
   const [open, setOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const projects = useQuery(api.projects.queries.getAllProjects);
 
   const selectedProject = projects?.find((p) => p._id === value);
@@ -41,8 +41,12 @@ export function SelectProject({ value, onValueChange }: SelectProjectProps) {
   };
 
   const handleCreateNew = () => {
-    setSheetOpen(true);
+    setDialogOpen(true);
     setOpen(false);
+  };
+
+  const handleProjectCreated = (projectId: string) => {
+    onValueChange(projectId);
   };
 
   return (
@@ -105,7 +109,11 @@ export function SelectProject({ value, onValueChange }: SelectProjectProps) {
         </PopoverContent>
       </Popover>
 
-      <CreateProjectSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+      <CreateProjectDialog 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen}
+        onProjectCreated={handleProjectCreated}
+      />
     </>
   );
 }

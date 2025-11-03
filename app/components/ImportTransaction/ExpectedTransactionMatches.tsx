@@ -5,7 +5,7 @@ interface ExpectedTransaction {
   description: string;
   amount: number;
   date: number;
-  projectName: string;
+  projectName: string | undefined;
   counterparty: string;
 }
 
