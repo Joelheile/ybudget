@@ -3,32 +3,24 @@ import { query } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { createCategoryMap } from "../utils/categoryMapping";
 
-export const getTransactionsByDateRange = query({
+export const getAllTransactions = query({
   args: {
-    startDate: v.number(),
-    endDate: v.number(),
     projectId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
-    let query = ctx.db
+    let dbQuery = ctx.db
       .query("transactions")
       .withIndex("by_organization", (q) =>
         q.eq("organizationId", user.organizationId),
-      )
-      .filter((q) =>
-        q.and(
-          q.gte(q.field("date"), args.startDate),
-          q.lte(q.field("date"), args.endDate),
-        ),
       );
 
     if (args.projectId) {
-      query = query.filter((q) => q.eq(q.field("projectId"), args.projectId));
+      dbQuery = dbQuery.filter((q) => q.eq(q.field("projectId"), args.projectId));
     }
 
-    const transactions = await query.collect();
+    const transactions = await dbQuery.collect();
 
     const projects = await ctx.db
       .query("projects")
@@ -48,6 +40,8 @@ export const getTransactionsByDateRange = query({
     }));
   },
 });
+
+
 
 // TODO: Simpler
 export const getTransactionById = query({

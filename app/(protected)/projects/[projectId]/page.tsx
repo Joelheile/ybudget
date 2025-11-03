@@ -8,6 +8,7 @@ import { editableColumns } from "@/components/Tables/editableColumns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
 import { calculateBudget } from "@/lib/budgetCalculations";
+import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
 import { useMutation, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
@@ -20,9 +21,6 @@ export default function ProjectDetail() {
   const projectId = params.projectId as string;
   const { selectedDateRange } = useDateRange();
 
-  const startDate = selectedDateRange.from.getTime();
-  const endDate = selectedDateRange.to.getTime();
-
   const project = useQuery(api.projects.queries.getProjectById, {
     projectId,
   });
@@ -31,13 +29,14 @@ export default function ProjectDetail() {
     parentId: projectId,
   });
 
-  const transactions = useQuery(
-    api.transactions.queries.getTransactionsByDateRange,
-    {
-      startDate,
-      endDate,
-      projectId,
-    },
+  const allTransactions = useQuery(
+    api.transactions.queries.getAllTransactions,
+    { projectId },
+  );
+
+  const transactions = useMemo(
+    () => filterTransactionsByDateRange(allTransactions, selectedDateRange),
+    [allTransactions, selectedDateRange],
   );
 
   const budgets = useMemo(

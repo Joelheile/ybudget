@@ -10,8 +10,9 @@ import {
   calculateBudget,
   calculateProgressPercentage,
 } from "@/lib/budgetCalculations";
+import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
 import { useQuery } from "convex/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -19,28 +20,22 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const { selectedDateRange } = useDateRange();
 
-  const startDate = selectedDateRange.from.getTime();
-  const endDate = selectedDateRange.to.getTime();
-
   const projects = useQuery(api.projects.queries.getAllProjects);
 
   const allTransactions = useQuery(
-    api.transactions.queries.getTransactionsByDateRange,
-    {
-      startDate: new Date(2020, 0, 1).getTime(),
-      endDate: new Date(2100, 0, 1).getTime(),
-    },
+    api.transactions.queries.getAllTransactions,
+    {}
   );
 
-  const transactions = useQuery(
-    api.transactions.queries.getTransactionsByDateRange,
-    {
-      startDate,
-      endDate,
-    },
+  const transactions = useMemo(
+    () => filterTransactionsByDateRange(allTransactions, selectedDateRange),
+    [allTransactions, selectedDateRange]
   );
 
-  const budgets = calculateBudget(allTransactions ?? []);
+  const budgets = useMemo(
+    () => calculateBudget(allTransactions ?? []),
+    [allTransactions]
+  );
 
   return (
     <SidebarInset>

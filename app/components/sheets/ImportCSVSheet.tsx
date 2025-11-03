@@ -19,7 +19,7 @@ import {
 import { useMutation, useQuery } from "convex/react";
 import { Upload } from "lucide-react";
 import Papa from "papaparse";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../../convex/_generated/api";
 import { mapCSVRow } from "../../lib/csvMappers";
@@ -37,11 +37,19 @@ export function ImportCSVSheet({
   const [importSource, setImportSource] = useState<ImportSource | "">("");
   const [isDragging, setIsDragging] = useState(false);
 
-  const existingIds = useQuery(
-    api.transactions.queries.getImportedTransactionIds,
+  const allTransactions = useQuery(
+    api.transactions.queries.getAllTransactions,
+    {}
   );
+
+  const existingIds = useMemo(() => {
+    if (!allTransactions) return undefined;
+    return allTransactions
+      .map((t) => t.importedTransactionId)
+      .filter(Boolean) as string[];
+  }, [allTransactions]);
   const addTransaction = useMutation(
-    api.transactions.functions.createImportedTransaction,
+    api.transactions.functions.createImportedTransaction
   );
 
   const handleFile = (file: File) => {
@@ -77,7 +85,7 @@ export function ImportCSVSheet({
 
     const skipped = csvData.length - newTransactions.length;
     const toastId = toast.loading(
-      `Importiere 0/${newTransactions.length} Transaktionen...`,
+      `Importiere 0/${newTransactions.length} Transaktionen...`
     );
 
     try {
@@ -102,13 +110,13 @@ export function ImportCSVSheet({
           `Importiere ${processed}/${newTransactions.length} Transaktionen...`,
           {
             id: toastId,
-          },
+          }
         );
       }
 
       toast.success(
         `${inserted} neue Transaktionen importiert, ${skipped} Duplikate übersprungen`,
-        { id: toastId },
+        { id: toastId }
       );
       setCsvData([]);
       setImportSource("");

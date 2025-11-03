@@ -5,7 +5,9 @@ import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { columns } from "@/components/Tables/columns";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useDateRange } from "@/contexts/DateRangeContext";
+import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
 import { useMutation, useQuery } from "convex/react";
+import { useMemo } from "react";
 import { api } from "../../../convex/_generated/api";
 
 export default function Transactions() {
@@ -14,15 +16,13 @@ export default function Transactions() {
     api.transactions.functions.updateProcessedTransaction,
   );
 
-  const startDate = selectedDateRange.from.getTime();
-  const endDate = selectedDateRange.to.getTime();
+  const allTransactions = useQuery(
+    api.transactions.queries.getAllTransactions,
+  );
 
-  const transactions = useQuery(
-    api.transactions.queries.getTransactionsByDateRange,
-    {
-      startDate,
-      endDate,
-    },
+  const transactions = useMemo(
+    () => filterTransactionsByDateRange(allTransactions, selectedDateRange),
+    [allTransactions, selectedDateRange],
   );
 
   const handleUpdateTransaction = async (

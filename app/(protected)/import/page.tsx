@@ -25,24 +25,24 @@ export default function ImportTransactionsPage() {
   >([]);
 
   const transactions = useQuery(
-    api.queries.transactions.getUnassignedProcessedTransactions,
+    api.transactions.queries.getUnassignedProcessedTransactions
   );
 
   const currentTransaction = transactions?.[index];
   const expectedTransactions = useQuery(
-    api.queries.transactions.getTransactionRecommendations,
+    api.transactions.queries.getTransactionRecommendations,
     currentTransaction
       ? {
           amount: currentTransaction.amount,
           projectId: currentTransaction.projectId || undefined,
         }
-      : "skip",
+      : "skip"
   );
   const updateTransaction = useMutation(
-    api.functions.transactionMutations.updateProcessedTransaction,
+    api.transactions.functions.updateTransaction
   );
   const createDonationLink = useMutation(
-    api.functions.donationExpenseLinkMutations.createDonationExpenseLink,
+    api.donors.functions.createDonationExpenseLink
   );
 
   const clearForm = () => {
@@ -56,7 +56,7 @@ export default function ImportTransactionsPage() {
   const handleExpectedTransactionSelect = (expectedTransactionId: string) => {
     setMatchedTransactionId(expectedTransactionId);
     const expected = expectedTransactions?.find(
-      (t) => t._id === expectedTransactionId,
+      (t) => t._id === expectedTransactionId
     );
     if (expected) {
       if (expected.projectId) setProjectId(expected.projectId);
@@ -122,7 +122,7 @@ export default function ImportTransactionsPage() {
             });
           } catch (error: any) {
             toast.error(
-              `Fehler bei Zuordnung: ${error.message || "Unbekannter Fehler"}`,
+              `Fehler bei Zuordnung: ${error.message || "Unbekannter Fehler"}`
             );
           }
         }

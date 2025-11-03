@@ -6,7 +6,9 @@
       "Bash(for file in *.tsx)",
       "Bash(do mv \"$file\" \"$file%.tsx.ts\")",
       "Bash(done)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": []
   }
