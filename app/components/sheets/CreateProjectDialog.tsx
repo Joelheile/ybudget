@@ -1,0 +1,116 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "convex/react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { api } from "../../../convex/_generated/api";
+import { SelectProject } from "./SelectProject";
+
+interface CreateProjectDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onProjectCreated?: (projectId: string) => void;
+}
+
+export function CreateProjectDialog({
+  open,
+  onOpenChange,
+  onProjectCreated,
+}: CreateProjectDialogProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [parentId, setParentId] = useState("");
+
+  const addProject = useMutation(api.projects.functions.createProject);
+
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setParentId("");
+  };
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !description.trim()) return;
+
+    try {
+      const projectId = await addProject({
+        name: name.trim(),
+        description: description.trim(),
+        parentId: parentId ? (parentId as any) : undefined,
+      });
+      toast.success("Projekt erstellt!");
+      onProjectCreated?.(projectId);
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      toast.error("Fehler beim Erstellen");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Neues Projekt erstellen</DialogTitle>
+          <DialogDescription>
+            Erstelle ein neues Projekt für deine Organisation.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="project-name">Projektname</Label>
+            <Input
+              id="project-name"
+              placeholder="z.B. YFN 9.0"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="project-description">Beschreibung</Label>
+            <Textarea
+              id="project-description"
+              placeholder="Beschreibe dein Projekt..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="resize-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Übergeordnetes Projekt (optional)</Label>
+            <SelectProject value={parentId} onValueChange={setParentId} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Abbrechen
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!name.trim() || !description.trim()}
+          >
+            Erstellen
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

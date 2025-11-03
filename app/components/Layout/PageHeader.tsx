@@ -4,14 +4,40 @@ import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
 import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarToggle";
 import { ImportCSVSheet } from "@/components/Sheets/ImportCSVSheet";
 import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AddDonorDialog } from "../Sheets/AddDonorDialog";
 
-export function PageHeader({ title }: { title?: string }) {
+interface PageHeaderProps {
+  title?: string;
+  subtitle?: string;
+  showBackButton?: boolean;
+  backUrl?: string;
+}
+
+export function PageHeader({ 
+  title, 
+  subtitle, 
+  showBackButton = false, 
+  backUrl 
+}: PageHeaderProps) {
+  const router = useRouter();
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
   const [isIncomeOpen, setIsIncomeOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isDonorOpen, setIsDonorOpen] = useState(false);
+
+  const handleBackClick = () => {
+    if (backUrl) {
+      router.push(backUrl);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <>
@@ -23,7 +49,24 @@ export function PageHeader({ title }: { title?: string }) {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <div className="flex w-full items-center justify-between">
-            <h1 className="text-xl font-semibold flex items-center">{title}</h1>
+            <div className="flex items-center gap-3">
+              {showBackButton && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBackClick}
+                  className="h-8 w-8"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              <div>
+                <h1 className="text-xl font-semibold">{title}</h1>
+                {subtitle && (
+                  <p className="text-sm text-muted-foreground">{subtitle}</p>
+                )}
+              </div>
+            </div>
             <div className="flex flex-row gap-4">
               <RangeCalendarToggle />
 
@@ -31,6 +74,7 @@ export function PageHeader({ title }: { title?: string }) {
                 onOpenExpense={() => setIsExpenseOpen(true)}
                 onOpenIncome={() => setIsIncomeOpen(true)}
                 onOpenImport={() => setIsImportOpen(true)}
+                onOpenDonor={() => setIsDonorOpen(true)}
               />
             </div>
           </div>
@@ -48,6 +92,7 @@ export function PageHeader({ title }: { title?: string }) {
         onOpenChange={setIsIncomeOpen}
       />
       <ImportCSVSheet open={isImportOpen} onOpenChange={setIsImportOpen} />
+      <AddDonorDialog open={isDonorOpen} onOpenChange={setIsDonorOpen} />
     </>
   );
 }

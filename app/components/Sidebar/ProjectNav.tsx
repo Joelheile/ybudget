@@ -25,10 +25,10 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { CreateProjectSheet } from "../Sheets/CreateProjectSheet";
+import { CreateProjectDialog } from "../Sheets/CreateProjectDialog";
 
 export function ProjectNav() {
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const pathname = usePathname();
   const projects = useQuery(api.projects.queries.getAllProjects);
 
@@ -71,7 +71,7 @@ export function ProjectNav() {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Projekte</SidebarGroupLabel>
-      <SidebarGroupAction onClick={() => setSheetOpen(true)}>
+      <SidebarGroupAction onClick={() => setDialogOpen(true)}>
         <Plus />
         <span className="sr-only">Projekt hinzufügen</span>
       </SidebarGroupAction>
@@ -130,7 +130,7 @@ export function ProjectNav() {
           )
         )}
       </SidebarMenu>
-      <CreateProjectSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+      <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </SidebarGroup>
   );
 }
