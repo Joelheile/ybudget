@@ -8,7 +8,10 @@
       "Bash(done)",
       "Bash(cat:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:stackoverflow.com)"
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:docs.convex.dev)",
+      "WebFetch(domain:docs.convex.dev)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

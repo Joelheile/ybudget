@@ -3,7 +3,7 @@
 import DonorCard from "@/components/Dashboard/DonorCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
 import { api } from "../../../convex/_generated/api";
 
 export default function Donors() {

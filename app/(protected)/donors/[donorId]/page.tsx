@@ -1,11 +1,11 @@
 "use client";
 
-import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { EditableDataTable } from "@/components/Tables/EditableDataTable";
 import { columns } from "@/components/Tables/columns";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
+import { useMutation } from "convex/react";
 import { useParams } from "next/navigation";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -14,23 +14,23 @@ export default function DonorDetail() {
   const params = useParams();
   const donorId = params.donorId as string;
   const updateTransaction = useMutation(
-    api.transactions.functions.updateProcessedTransaction,
+    api.transactions.functions.updateTransaction
   );
 
   const donor = useQuery(
     api.donors.queries.getDonorById,
-    donorId ? { donorId: donorId as Id<"donors"> } : "skip",
+    donorId ? { donorId: donorId as Id<"donors"> } : "skip"
   );
 
   const donorTransactions = useQuery(
     api.donors.queries.getDonorTransactions,
-    donorId ? { donorId: donorId as Id<"donors"> } : "skip",
+    donorId ? { donorId: donorId as Id<"donors"> } : "skip"
   );
 
   const handleUpdateTransaction = async (
     rowId: string,
     field: string,
-    value: any,
+    value: any
   ) => {
     await updateTransaction({
       transactionId: rowId as Id<"transactions">,
@@ -69,11 +69,11 @@ export default function DonorDetail() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        {/* <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           <BudgetCard title="Zugesagt" amount={donor.totalAgreed} />
           <BudgetCard title="Bezahlt" amount={donor.totalPaid} />
           <BudgetCard title="Offen" amount={donor.totalOpen} />
-        </div>
+        </div> */}
 
         <div className="mt-4 lg:mt-6">
           <h2 className="text-xl font-semibold mb-4">Transaktionen</h2>

@@ -14,7 +14,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useDateRange } from "@/contexts/DateRangeContext";
-import { useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
@@ -35,7 +35,7 @@ export function BudgetChart() {
     {
       startDate: selectedDateRange.from.getTime(),
       endDate: selectedDateRange.to.getTime(),
-    },
+    }
   );
 
   const dateRangeText = `${format(selectedDateRange.from, "d. MMM yyyy", {
@@ -52,7 +52,7 @@ export function BudgetChart() {
         d.income === 0 &&
         d.expectedIncome === 0 &&
         d.expense === 0 &&
-        d.expectedExpense === 0,
+        d.expectedExpense === 0
     );
 
   return (

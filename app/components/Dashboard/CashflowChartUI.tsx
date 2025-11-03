@@ -20,7 +20,7 @@ import {
   filterTransactionsBeforeDate,
   filterTransactionsByDateRange,
 } from "@/lib/transactionFilters";
-import { useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useMemo } from "react";
