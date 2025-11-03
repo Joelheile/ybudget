@@ -131,6 +131,23 @@ export function EditableDataTable<T extends { _id: string }>({
     return () => observer.disconnect();
   }, [hasNextPage, isLoading, loadMore]);
 
+  useEffect(() => {
+    const hasUnsavedChanges = Object.keys(pendingChanges).length > 0;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [pendingChanges]);
+
   const rows = table.getRowModel().rows;
 
   return (
@@ -143,7 +160,7 @@ export function EditableDataTable<T extends { _id: string }>({
                 <TableHead key={header.id}>
                   {flexRender(
                     header.column.columnDef.header,
-                    header.getContext(),
+                    header.getContext()
                   )}
                 </TableHead>
               ))}
@@ -159,7 +176,7 @@ export function EditableDataTable<T extends { _id: string }>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
@@ -167,7 +184,10 @@ export function EditableDataTable<T extends { _id: string }>({
               ))}
               {hasNextPage && (
                 <TableRow ref={scrollRef}>
-                  <TableCell colSpan={columns.length} className="h-16 text-center">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-16 text-center"
+                  >
                     {isLoading ? "Lade mehr..." : ""}
                   </TableCell>
                 </TableRow>
@@ -176,7 +196,9 @@ export function EditableDataTable<T extends { _id: string }>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                Keine Ergebnisse
+                {isLoading
+                  ? "Transaktionen werden geladen..."
+                  : "Keine Ergebnisse"}
               </TableCell>
             </TableRow>
           )}
