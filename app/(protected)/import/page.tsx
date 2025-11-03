@@ -6,8 +6,8 @@ import { ImportTransactionsSkeleton } from "@/components/ImportTransaction/Impor
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { Progress } from "@/components/ui/progress";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache";
+import { useMutation } from "convex/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../../convex/_generated/api";
@@ -152,6 +152,30 @@ export default function ImportTransactionsPage() {
     return <ImportTransactionsSkeleton />;
   }
 
+  if (!transactions || transactions.length === 0) {
+    return (
+      <SidebarInset>
+        <div className="p-4 lg:px-6 pb-6 flex flex-col h-full">
+          <PageHeader title="Transaktionen zuordnen" />
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <p className="text-lg font-medium">
+                Keine Transaktionen zum Zuordnen
+              </p>
+              <p className="text-sm mt-2">
+                Alle importierten Transaktionen wurden bereits zugeordnet.
+              </p>
+            </div>
+          </div>
+        </div>
+      </SidebarInset>
+    );
+  }
+
+  if (!current) {
+    return null;
+  }
+
   return (
     <SidebarInset>
       <div className="p-4 lg:px-6 pb-6 flex flex-col h-full">
@@ -163,12 +187,12 @@ export default function ImportTransactionsPage() {
           />
           <div className="mt-16 flex-shrink-0">
             <ImportTransactionCard
-              title={current?.counterparty || ""}
-              description={current?.description || ""}
-              amount={current?.amount || 0}
-              date={new Date(current?.date || 0)}
+              title={current.counterparty}
+              description={current.description}
+              amount={current.amount}
+              date={new Date(current.date)}
               currentIndex={index + 1}
-              totalCount={transactions?.length || 0}
+              totalCount={transactions.length}
               projectId={projectId}
               categoryId={categoryId}
               donorId={donorId}
@@ -183,7 +207,7 @@ export default function ImportTransactionsPage() {
         <div className="mt-auto pt-6">
           <Progress
             className="w-3/4 mx-auto"
-            value={(index / (transactions?.length || 0)) * 100}
+            value={((index + 1) / transactions.length) * 100}
           />
         </div>
       </div>
