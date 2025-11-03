@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
-import { getProjectName } from "../helpers/getProjectName";
+import { addProjectNames } from "../helpers/addProjectNames";
 import { getCurrentUser } from "../users/getCurrentUser";
 
 export const getAllTransactions = query({
@@ -23,12 +23,7 @@ export const getAllTransactions = query({
           )
     ).collect();
 
-    return Promise.all(
-      transactions.map(async (t) => ({
-        ...t,
-        projectName: t.projectId ? await getProjectName(ctx, t.projectId) : undefined,
-      }))
-    );
+    return addProjectNames(ctx, transactions);
   },
 });
 
@@ -72,12 +67,7 @@ export const getTransactionRecommendations = query({
         (t) => !t.matchedTransactionId || t.matchedTransactionId === ""
       );
 
-    return Promise.all(
-      transactions.map(async (t) => ({
-        ...t,
-        projectName: t.projectId ? await getProjectName(ctx, t.projectId) : undefined,
-      }))
-    );
+    return addProjectNames(ctx, transactions);
   },
 });
 
@@ -115,12 +105,7 @@ export const getPaginatedTransactions = query({
         cursor: args.paginationOpts.cursor,
       });
 
-    const page = await Promise.all(
-      result.page.map(async (t) => ({
-        ...t,
-        projectName: t.projectId ? await getProjectName(ctx, t.projectId) : undefined,
-      }))
-    );
+    const page = await addProjectNames(ctx, result.page);
 
     return { ...result, page };
   },
