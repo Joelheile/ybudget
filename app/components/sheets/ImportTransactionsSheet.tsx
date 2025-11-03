@@ -16,7 +16,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
+import { useMutation } from "convex/react";
 import { Upload } from "lucide-react";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
@@ -26,7 +27,7 @@ import { mapCSVRow } from "../../lib/csvMappers";
 
 type ImportSource = "moss" | "sparkasse" | "volksbank";
 
-export function ImportCSVSheet({
+export function ImportTransactionsSheet({
   open,
   onOpenChange,
 }: {
