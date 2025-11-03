@@ -11,6 +11,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddDonorDialog } from "../Sheets/AddDonorDialog";
+import { Skeleton } from "../ui/skeleton";
 
 interface PageHeaderProps {
   title?: string;
@@ -61,7 +62,11 @@ export function PageHeader({
                 </Button>
               )}
               <div>
-                <h1 className="text-xl font-semibold">{title}</h1>
+                {title ? (
+                  <h1 className="text-xl font-semibold">{title}</h1>
+                ) : (
+                  <Skeleton className="h-7 w-48" />
+                )}
                 {subtitle && (
                   <p className="text-sm text-muted-foreground">{subtitle}</p>
                 )}
