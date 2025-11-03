@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { addProjectNames } from "../helpers/addProjectNames";
@@ -74,27 +75,40 @@ export const getTransactionRecommendations = query({
 export const getPaginatedTransactions = query({
   args: {
     projectId: v.optional(v.id("projects")),
-    donorId: v.optional(v.id("donors")),
-    paginationOpts: v.object({
-      numItems: v.number(),
-      cursor: v.union(v.string(), v.null()),
-      id: v.optional(v.number()),
-    }),
+    donorId: v.optional(v.string()),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
-    let dbQuery = ctx.db
-      .query("transactions")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId)
-      );
-
-    if (args.projectId) {
-      dbQuery = dbQuery.filter((q) => q.eq(q.field("projectId"), args.projectId));
+    let dbQuery;
+    if (args.projectId && args.donorId) {
+      dbQuery = ctx.db
+        .query("transactions")
+        .withIndex("by_organization_project", (q) =>
+          q.eq("organizationId", user.organizationId).eq("projectId", args.projectId)
+        );
+    } else if (args.projectId) {
+      dbQuery = ctx.db
+        .query("transactions")
+        .withIndex("by_organization_project", (q) =>
+          q.eq("organizationId", user.organizationId).eq("projectId", args.projectId)
+        );
+    } else if (args.donorId) {
+      dbQuery = ctx.db
+        .query("transactions")
+        .withIndex("by_organization_donor", (q) =>
+          q.eq("organizationId", user.organizationId).eq("donorId", args.donorId!)
+        );
+    } else {
+      dbQuery = ctx.db
+        .query("transactions")
+        .withIndex("by_organization", (q) =>
+          q.eq("organizationId", user.organizationId)
+        );
     }
 
-    if (args.donorId) {
+    if (args.donorId && args.projectId) {
       dbQuery = dbQuery.filter((q) => q.eq(q.field("donorId"), args.donorId));
     }
 
