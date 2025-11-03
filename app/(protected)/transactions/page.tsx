@@ -43,20 +43,6 @@ export default function Transactions() {
     });
   };
 
-  if (status === "LoadingFirstPage") {
-    return (
-      <SidebarInset>
-        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 md:p-5 pt-0 overflow-x-hidden w-full">
-          <PageHeader title="Transaktionen" />
-          <div className="flex items-center justify-center p-8">
-            <div className="text-sm text-muted-foreground">
-              Transaktionen werden geladen...
-            </div>
-          </div>
-        </div>
-      </SidebarInset>
-    );
-  }
 
   return (
     <SidebarInset>
@@ -81,7 +67,7 @@ export default function Transactions() {
           onUpdate={handleUpdateTransaction}
           hasNextPage={status === "CanLoadMore"}
           loadMore={() => loadMore(50)}
-          isLoading={status === "LoadingMore"}
+          isLoading={status === "LoadingMore" || status === "LoadingFirstPage"}
         />
       </div>
     </SidebarInset>
