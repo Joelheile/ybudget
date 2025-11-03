@@ -1,13 +1,13 @@
 "use client";
 
 import { type LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function MainNav({
@@ -19,18 +19,16 @@ export function MainNav({
     icon: LucideIcon;
   }[];
 }) {
-  const { isMobile } = useSidebar();
-
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarMenu>
         {mainNav.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
