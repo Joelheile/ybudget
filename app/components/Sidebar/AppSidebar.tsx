@@ -8,8 +8,8 @@ import {
   Users,
 } from "lucide-react";
 import * as React from "react";
+import { memo } from "react";
 
-import { NavUser } from "@/components/Sidebar/UserNav";
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +30,7 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    // avatar: "/avatars/shadcn.jpg",
   },
   mainNav: [
     {
@@ -56,7 +56,7 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+function AppSidebarComponent({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const organizationName = useQuery(
     api.organizations.queries.getOrganizationName
   );
@@ -83,9 +83,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <MainNav mainNav={data.mainNav} />
         <ProjectNav />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
     </Sidebar>
   );
 }
+
+export const AppSidebar = memo(AppSidebarComponent);

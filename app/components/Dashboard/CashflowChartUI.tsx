@@ -34,6 +34,7 @@ import {
   YAxis,
 } from "recharts";
 import { api } from "../../../convex/_generated/api";
+import type { Doc } from "../../../convex/_generated/dataModel";
 import {
   calculateAxisConfig,
   calculateStartBalance,
@@ -65,33 +66,41 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function CashflowChartUI() {
+interface CashflowChartUIProps {
+  transactions?: Doc<"transactions">[];
+}
+
+export function CashflowChartUI({ transactions: providedTransactions }: CashflowChartUIProps) {
   const { selectedDateRange } = useDateRange();
 
+  // Only fetch all transactions if not provided (for standalone usage)
   const allTransactionsQuery = useQuery(
     api.transactions.queries.getAllTransactions,
-    {}
+    providedTransactions ? undefined : {}
   );
 
-  const transactions = useMemo(
-    () =>
-      filterTransactionsByDateRange(allTransactionsQuery, selectedDateRange),
-    [allTransactionsQuery, selectedDateRange]
-  );
+  const transactions = useMemo(() => {
+    if (providedTransactions) {
+      // Use provided transactions (already filtered)
+      return providedTransactions;
+    }
+    return filterTransactionsByDateRange(allTransactionsQuery, selectedDateRange);
+  }, [providedTransactions, allTransactionsQuery, selectedDateRange]);
 
   const pastTransactions = useMemo(() => {
-    if (!allTransactionsQuery) return undefined;
+    const sourceTransactions = providedTransactions || allTransactionsQuery;
+    if (!sourceTransactions) return undefined;
 
     const pastEndDate = new Date(selectedDateRange.from);
     pastEndDate.setDate(pastEndDate.getDate() - 1);
     pastEndDate.setHours(23, 59, 59, 999);
 
     return filterTransactionsBeforeDate(
-      allTransactionsQuery,
+      sourceTransactions,
       pastEndDate,
       (t) => t.status === "processed"
     );
-  }, [allTransactionsQuery, selectedDateRange]);
+  }, [providedTransactions, allTransactionsQuery, selectedDateRange]);
 
   const startBalance = calculateStartBalance(pastTransactions);
 

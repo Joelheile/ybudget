@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
 import { api } from "../../../convex/_generated/api";
 import DonorCard from "../../components/Donors/DonorCard";
 

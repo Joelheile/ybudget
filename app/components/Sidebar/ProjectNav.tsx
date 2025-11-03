@@ -4,7 +4,7 @@ import { useQuery } from "convex-helpers/react/cache";
 import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import { CreateProjectDialog } from "../Sheets/CreateProjectDialog";
 
-export function ProjectNav() {
+function ProjectNavComponent() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const pathname = usePathname();
   const projects = useQuery(api.projects.queries.getAllProjects);
@@ -134,3 +134,5 @@ export function ProjectNav() {
     </SidebarGroup>
   );
 }
+
+export const ProjectNav = memo(ProjectNavComponent);

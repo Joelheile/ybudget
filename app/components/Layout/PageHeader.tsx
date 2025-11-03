@@ -2,7 +2,7 @@
 
 import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
 import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarToggle";
-import { ImportCSVSheet } from "@/components/Sheets/ImportCSVSheet";
+import { ImportTransactionsSheet } from "@/components/Sheets/ImportTransactionsSheet";
 import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,11 +19,11 @@ interface PageHeaderProps {
   backUrl?: string;
 }
 
-export function PageHeader({ 
-  title, 
-  subtitle, 
-  showBackButton = false, 
-  backUrl 
+export function PageHeader({
+  title,
+  subtitle,
+  showBackButton = false,
+  backUrl,
 }: PageHeaderProps) {
   const router = useRouter();
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
@@ -91,7 +91,10 @@ export function PageHeader({
         open={isIncomeOpen}
         onOpenChange={setIsIncomeOpen}
       />
-      <ImportCSVSheet open={isImportOpen} onOpenChange={setIsImportOpen} />
+      <ImportTransactionsSheet
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+      />
       <AddDonorDialog open={isDonorOpen} onOpenChange={setIsDonorOpen} />
     </>
   );

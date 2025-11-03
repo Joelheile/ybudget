@@ -6,7 +6,8 @@ import { ImportTransactionsSkeleton } from "@/components/ImportTransaction/Impor
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { Progress } from "@/components/ui/progress";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../../convex/_generated/api";
