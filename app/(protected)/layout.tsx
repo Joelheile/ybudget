@@ -9,10 +9,7 @@ import { OnboardingDialog } from "../components/Onboarding/OnboardingDialog";
 import { AppSidebar } from "../components/Sidebar/AppSidebar";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { DateRangeProvider } from "../contexts/DateRangeContext";
-import {
-  getOnboardingComplete,
-  setOnboardingComplete,
-} from "../lib/onboardingStorage";
+import { setOnboardingComplete } from "../lib/onboardingStorage";
 
 const StableContent = memo(function StableContent({
   children,
@@ -24,11 +21,10 @@ const StableContent = memo(function StableContent({
 
   useEffect(() => {
     if (needsOrg === undefined) return;
-    if (!needsOrg) {
-      setOnboardingComplete(true);
-      setShowOnboarding(false);
+    if (needsOrg === null) {
+      setShowOnboarding(true);
     } else {
-      setShowOnboarding(!getOnboardingComplete());
+      setShowOnboarding(false);
     }
   }, [needsOrg]);
 
