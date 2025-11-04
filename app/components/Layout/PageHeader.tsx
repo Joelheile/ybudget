@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CreateCategoryDialog } from "../dialogs/CreateCategoryDialog";
 import { AddDonorDialog } from "../Sheets/AddDonorDialog";
+import { CreateProjectDialog } from "../Sheets/CreateProjectDialog";
 import { Skeleton } from "../ui/skeleton";
 
 interface PageHeaderProps {
@@ -33,15 +34,25 @@ export function PageHeader({
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isDonorOpen, setIsDonorOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isProjectOpen, setIsProjectOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === "e") {
+      if (e.metaKey && (e.code === "KeyE" || e.key === "e")) {
         e.preventDefault();
         setIsExpenseOpen(true);
-      } else if (e.metaKey && e.key === "i") {
+      } else if (e.metaKey && (e.code === "KeyI" || e.key === "i")) {
         e.preventDefault();
         setIsIncomeOpen(true);
+      } else if (e.metaKey && e.code === "KeyP") {
+        e.preventDefault();
+        setIsProjectOpen(true);
+      } else if (e.metaKey && e.code === "KeyD") {
+        e.preventDefault();
+        setIsDonorOpen(true);
+      } else if (e.metaKey && e.code === "KeyK") {
+        e.preventDefault();
+        setIsCategoryOpen(true);
       }
     };
 
@@ -98,6 +109,7 @@ export function PageHeader({
                 onOpenImport={() => setIsImportOpen(true)}
                 onOpenDonor={() => setIsDonorOpen(true)}
                 onOpenCategory={() => setIsCategoryOpen(true)}
+                onOpenProject={() => setIsProjectOpen(true)}
               />
             </div>
           </div>
@@ -122,6 +134,10 @@ export function PageHeader({
       <CreateCategoryDialog
         open={isCategoryOpen}
         onOpenChange={setIsCategoryOpen}
+      />
+      <CreateProjectDialog
+        open={isProjectOpen}
+        onOpenChange={setIsProjectOpen}
       />
     </>
   );

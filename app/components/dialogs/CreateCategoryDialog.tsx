@@ -164,8 +164,13 @@ export function CreateCategoryDialog({
             </Select>
           </div>
 
-          <div className="flex pt-10 gap-2 ">
-            <Button type="submit">Kategorie erstellen</Button>
+          <div className="flex justify-end gap-2 ">
+            <Button
+              type="submit"
+              disabled={!name.trim() || !description.trim()}
+            >
+              Kategorie erstellen
+            </Button>
           </div>
         </form>
       </DialogContent>

@@ -27,7 +27,11 @@ interface SelectDonorProps {
   onTabPressed?: () => void;
 }
 
-export function SelectDonor({ value, onValueChange, onTabPressed }: SelectDonorProps) {
+export function SelectDonor({
+  value,
+  onValueChange,
+  onTabPressed,
+}: SelectDonorProps) {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -110,7 +114,7 @@ export function SelectDonor({ value, onValueChange, onTabPressed }: SelectDonorP
             <span
               className={cn(
                 "font-medium",
-                value ? "text-foreground" : "text-muted-foreground",
+                value ? "text-foreground" : "text-muted-foreground"
               )}
             >
               {displayText}
@@ -132,9 +136,7 @@ export function SelectDonor({ value, onValueChange, onTabPressed }: SelectDonorP
                     key={donor._id}
                     value={donor._id.toString()}
                     onSelect={handleSelect}
-                    className={cn(
-                      idx === highlightedIndex && "bg-accent"
-                    )}
+                    className={cn(idx === highlightedIndex && "bg-accent")}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                   >
                     <div className="flex items-center justify-between w-full">
@@ -148,7 +150,7 @@ export function SelectDonor({ value, onValueChange, onTabPressed }: SelectDonorP
                         "ml-auto",
                         value === donor._id.toString()
                           ? "opacity-100"
-                          : "opacity-0",
+                          : "opacity-0"
                       )}
                     />
                   </CommandItem>

@@ -27,7 +27,11 @@ interface SelectProjectProps {
   onTabPressed?: () => void;
 }
 
-export function SelectProject({ value, onValueChange, onTabPressed }: SelectProjectProps) {
+export function SelectProject({
+  value,
+  onValueChange,
+  onTabPressed,
+}: SelectProjectProps) {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -110,7 +114,7 @@ export function SelectProject({ value, onValueChange, onTabPressed }: SelectProj
             <span
               className={cn(
                 "font-medium",
-                value ? "text-foreground" : "text-muted-foreground",
+                value ? "text-foreground" : "text-muted-foreground"
               )}
             >
               {displayText}
@@ -132,16 +136,14 @@ export function SelectProject({ value, onValueChange, onTabPressed }: SelectProj
                     key={project._id}
                     value={project._id}
                     onSelect={handleSelect}
-                    className={cn(
-                      idx === highlightedIndex && "bg-accent"
-                    )}
+                    className={cn(idx === highlightedIndex && "bg-accent")}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                   >
                     {project.name}
                     <Check
                       className={cn(
                         "ml-auto",
-                        value === project._id ? "opacity-100" : "opacity-0",
+                        value === project._id ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>

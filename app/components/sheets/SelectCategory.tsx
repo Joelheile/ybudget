@@ -1,15 +1,15 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { forwardRef, useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
 import {
   filterGroups,
   findGroupIndex,
   findItemIndex,
   groupCategories,
 } from "@/lib/categoryHelpers";
+import { useQuery } from "convex/react";
+import { forwardRef, useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { SelectCategoryUI } from "./SelectCategoryUI";
 
 export const SelectCategory = forwardRef<
@@ -61,15 +61,11 @@ export const SelectCategory = forwardRef<
       );
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
-      setActiveGroupIdx((prev) =>
-        prev < filtered.length - 1 ? prev + 1 : 0
-      );
+      setActiveGroupIdx((prev) => (prev < filtered.length - 1 ? prev + 1 : 0));
       setActiveItemIdx(0);
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
-      setActiveGroupIdx((prev) =>
-        prev > 0 ? prev - 1 : filtered.length - 1
-      );
+      setActiveGroupIdx((prev) => (prev > 0 ? prev - 1 : filtered.length - 1));
       setActiveItemIdx(0);
     } else if (e.key === "Enter") {
       e.preventDefault();

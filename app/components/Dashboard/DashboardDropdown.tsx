@@ -14,12 +14,14 @@ export function DashboardDropdown({
   onOpenImport,
   onOpenDonor,
   onOpenCategory,
+  onOpenProject,
 }: {
   onOpenExpense: () => void;
   onOpenIncome: () => void;
   onOpenImport: () => void;
   onOpenDonor: () => void;
   onOpenCategory: () => void;
+  onOpenProject: () => void;
 }) {
   return (
     <DropdownMenu>
@@ -36,8 +38,14 @@ export function DashboardDropdown({
             <span className="font-semibold"> Einnahme planen</span>
             <DropdownMenuShortcut>⌘I</DropdownMenuShortcut>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={onOpenProject}>
+            <span> Projekt erstellen</span>
+            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenDonor}>
-            <span className=""> Förderer hinzufügen</span>
+            <span> Förderer hinzufügen</span>
+            <DropdownMenuShortcut>⇧⌘F</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenImport}>
             CSV importieren
@@ -45,6 +53,7 @@ export function DashboardDropdown({
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenCategory}>
             <span> Kategorie hinzufügen</span>
+            <DropdownMenuShortcut>⇧⌘K</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>

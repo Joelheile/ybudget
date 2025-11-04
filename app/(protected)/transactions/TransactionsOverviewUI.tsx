@@ -33,7 +33,7 @@ export default function TransactionsOverviewUI({
   return (
     <div>
       <PageHeader title="Transaktionen" />
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground pb-4 ">
         {fromDate} - {toDate}
       </div>
       <EditableDataTable
