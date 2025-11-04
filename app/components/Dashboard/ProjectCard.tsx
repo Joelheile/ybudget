@@ -1,8 +1,8 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { Card } from "../ui/card";
-import { Progress } from "../ui/progress";
 
 interface ProjectCardProps {
   title: string;

@@ -1,3 +1,4 @@
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   addDays,
   addMonths,
@@ -12,7 +13,6 @@ import {
   startOfWeek,
 } from "date-fns";
 import { de } from "date-fns/locale";
-import type { Doc } from "../../../convex/_generated/dataModel";
 
 export type CashflowDataPoint = {
   date: string;

@@ -1,12 +1,12 @@
 "use client";
 
+import ImportTransactionsPageUI from "@/(protected)/import/ImportTransactionsPageUI";
+import { ImportTransactionsSkeleton } from "@/(protected)/import/ImportTransactionsSkeleton";
+import { useFetchImportTransactions } from "@/hooks/ImportTransactions/useFetchImportTransactions";
+import { useImportForm } from "@/hooks/ImportTransactions/useImportForm";
+import { useImportKeyboard } from "@/hooks/ImportTransactions/useImportKeyboard";
+import { useImportSave } from "@/hooks/ImportTransactions/useImportSave";
 import { useCallback, useEffect } from "react";
-import { useFetchImportTransactions } from "../../hooks/ImportTransactions/useFetchImportTransactions";
-import { useImportForm } from "../../hooks/ImportTransactions/useImportForm";
-import { useImportKeyboard } from "../../hooks/ImportTransactions/useImportKeyboard";
-import { useImportSave } from "../../hooks/ImportTransactions/useImportSave";
-import ImportTransactionsPageUI from "./ImportTransactionsPageUI";
-import { ImportTransactionsSkeleton } from "./ImportTransactionsSkeleton";
 
 export default function ImportTransactionsPage() {
   const {
@@ -66,14 +66,14 @@ export default function ImportTransactionsPage() {
     (expectedTransactionId: string) => {
       form.setMatchedTransactionId(expectedTransactionId);
       const expected = expectedTransactions.find(
-        (t) => t._id === expectedTransactionId,
+        (t) => t._id === expectedTransactionId
       );
       if (expected) {
         if (expected.projectId) form.setProjectId(expected.projectId);
         if (expected.categoryId) form.setCategoryId(expected.categoryId);
       }
     },
-    [expectedTransactions, form],
+    [expectedTransactions, form]
   );
 
   useImportKeyboard(handleNext, handlePrev, handleSave);

@@ -1,7 +1,7 @@
 "use client";
 
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { useCallback, useState } from "react";
-import type { Doc, Id } from "../../../convex/_generated/dataModel";
 
 export type ImportFormState = {
   projectId: string;

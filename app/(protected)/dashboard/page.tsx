@@ -1,22 +1,22 @@
 "use client";
+import DashboardUI from "@/(protected)/dashboard/DashboardUI";
 import { useDateRange } from "@/contexts/DateRangeContext";
+import { api } from "@/convex/_generated/api";
 import { calculateBudget } from "@/lib/budgetCalculations";
 import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
 import { useQuery } from "convex-helpers/react/cache";
-import { api } from "../../../convex/_generated/api";
-import DashboardUI from "./DashboardUI";
 
 export default function Dashboard() {
   const { selectedDateRange } = useDateRange();
   const projects = useQuery(api.projects.queries.getAllProjects);
   const allTransactions = useQuery(
     api.transactions.queries.getAllTransactions,
-    {},
+    {}
   );
 
   const transactions = filterTransactionsByDateRange(
     allTransactions,
-    selectedDateRange,
+    selectedDateRange
   );
 
   const budgets = calculateBudget(transactions ?? []);

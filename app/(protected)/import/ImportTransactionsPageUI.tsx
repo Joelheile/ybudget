@@ -2,8 +2,8 @@ import { ExpectedTransactionMatches } from "@/components/ImportTransactions/Expe
 import { ImportTransactionCard } from "@/components/ImportTransactions/ImportTransactionCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { Progress } from "@/components/ui/progress";
-import type { Doc } from "../../../convex/_generated/dataModel";
-import type { ImportFormState } from "../../hooks/ImportTransactions/useImportForm";
+import type { Doc } from "@/convex/_generated/dataModel";
+import type { ImportFormState } from "@/hooks/ImportTransactions/useImportForm";
 
 interface ImportTransactionsPageUIProps {
   expectedTransactions: Doc<"transactions">[];

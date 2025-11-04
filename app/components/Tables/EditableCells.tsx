@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectCategory } from "@/components/Sheets/SelectCategory";
+import { SelectProject } from "@/components/Sheets/SelectProject";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -19,8 +21,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SelectCategory } from "../Sheets/SelectCategory";
-import { SelectProject } from "../Sheets/SelectProject";
 
 interface EditableCellProps {
   value: any;
@@ -116,7 +116,7 @@ export function EditableAmountCell({
 }: EditableCellProps) {
   const currentValue = pendingValue !== undefined ? pendingValue : value;
   const [editValue, setEditValue] = useState(
-    Math.abs(currentValue || 0).toString(),
+    Math.abs(currentValue || 0).toString()
   );
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export function EditableDateCell({
 }: EditableCellProps) {
   const dateValue = convertToDate(value);
   const [editValue, setEditValue] = useState(
-    dateValue ? format(dateValue, "yyyy-MM-dd") : "",
+    dateValue ? format(dateValue, "yyyy-MM-dd") : ""
   );
 
   useEffect(() => {

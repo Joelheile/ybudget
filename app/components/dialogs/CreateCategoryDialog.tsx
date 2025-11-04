@@ -18,11 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
 
 export function CreateCategoryDialog({
   children,
@@ -113,7 +113,7 @@ export function CreateCategoryDialog({
                     | "non-profit"
                     | "asset-management"
                     | "purpose-operations"
-                    | "commercial-operations",
+                    | "commercial-operations"
                 )
               }
             >
@@ -144,7 +144,7 @@ export function CreateCategoryDialog({
               value={parentId || "none"}
               onValueChange={(value) =>
                 setParentId(
-                  value === "none" ? undefined : (value as Id<"categories">),
+                  value === "none" ? undefined : (value as Id<"categories">)
                 )
               }
             >

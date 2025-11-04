@@ -1,5 +1,8 @@
 "use client";
 
+import { SelectCategoryUI } from "@/components/Sheets/SelectCategoryUI";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import {
   filterGroups,
   findGroupIndex,
@@ -8,9 +11,6 @@ import {
 } from "@/lib/categoryHelpers";
 import { useQuery } from "convex/react";
 import { forwardRef, useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { SelectCategoryUI } from "./SelectCategoryUI";
 
 export const SelectCategory = forwardRef<
   HTMLButtonElement,

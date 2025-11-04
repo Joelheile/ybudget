@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { ImportTransactionCardUI } from "@/components/ImportTransactions/ImportTransactionCardUI";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex-helpers/react/cache";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { ImportTransactionCardUI } from "./ImportTransactionCardUI";
+import { useMemo } from "react";
 
 interface ImportTransactionCardProps {
   title: string;
@@ -44,12 +44,12 @@ export const ImportTransactionCard = ({
 
   const availableDonations = useQuery(
     api.donations.queries.getAvailableDonationsForProject,
-    isExpense && projectId ? { projectId } : "skip",
+    isExpense && projectId ? { projectId } : "skip"
   );
 
   const hasDonations = useMemo(
     () => availableDonations !== undefined && availableDonations.length > 0,
-    [availableDonations],
+    [availableDonations]
   );
 
   return (

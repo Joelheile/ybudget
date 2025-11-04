@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../../node_modules/onborda/dist";
+@source "../../../node_modules/onborda/dist";
 
 @custom-variant dark (&:is(.dark *));
 :root {

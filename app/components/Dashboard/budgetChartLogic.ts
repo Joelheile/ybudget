@@ -1,3 +1,4 @@
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   eachDayOfInterval,
   eachMonthOfInterval,
@@ -8,7 +9,6 @@ import {
   startOfMonth,
 } from "date-fns";
 import { de } from "date-fns/locale";
-import type { Doc } from "../../../convex/_generated/dataModel";
 
 export type ChartDataPoint = {
   shortLabel: string;

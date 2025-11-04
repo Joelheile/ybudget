@@ -1,5 +1,6 @@
 "use client";
 
+import { SignOut } from "@/components/Auth/LogoutButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -24,8 +26,6 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
-import type { Doc } from "../../../convex/_generated/dataModel";
-import { SignOut } from "../Auth/LogoutButton";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
   const { isMobile } = useSidebar();

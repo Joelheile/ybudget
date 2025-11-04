@@ -19,9 +19,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+import { StartTourButton } from "@/components/Onboarding/StartTourButton";
+import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex-helpers/react/cache";
-import { api } from "../../../convex/_generated/api";
-import { StartTourButton } from "../Onboarding/StartTourButton";
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
 import { SearchForm } from "./SearchForm";

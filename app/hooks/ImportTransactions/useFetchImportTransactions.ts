@@ -1,9 +1,9 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex-helpers/react/cache";
 import { useMemo, useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import type { Doc } from "../../../convex/_generated/dataModel";
 
 type UseFetchImportTransactionsResult = {
   transactions: Array<Doc<"transactions">> | undefined;

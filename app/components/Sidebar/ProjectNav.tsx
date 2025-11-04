@@ -1,13 +1,14 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex-helpers/react/cache";
 import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { memo, useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import type { Doc } from "../../../convex/_generated/dataModel";
 
+import { CreateProjectDialog } from "@/components/Sheets/CreateProjectDialog";
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,7 +26,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { CreateProjectDialog } from "../Sheets/CreateProjectDialog";
 
 function ProjectNavComponent({ id }: { id?: string }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -51,7 +51,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
 
   const items = parentProjects.map((project: Doc<"projects">) => {
     const childProjects = projects.filter(
-      (p: Doc<"projects">) => p.parentId === project._id,
+      (p: Doc<"projects">) => p.parentId === project._id
     );
 
     return {
@@ -119,7 +119,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
-                          ),
+                          )
                         )}
                       </SidebarMenuSub>
                     </CollapsibleContent>
@@ -127,7 +127,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
                 ) : null}
               </SidebarMenuItem>
             </Collapsible>
-          ),
+          )
         )}
       </SidebarMenu>
       <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />

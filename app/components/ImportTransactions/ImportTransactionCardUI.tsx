@@ -1,10 +1,10 @@
-import type { Id } from "../../../convex/_generated/dataModel";
-import { SelectCategory } from "../Sheets/SelectCategory";
-import { SelectDonation } from "../Sheets/SelectDonation";
-import { SelectDonor } from "../Sheets/SelectDonor";
-import { SelectProject } from "../Sheets/SelectProject";
-import { Card } from "../ui/card";
-import { Label } from "../ui/label";
+import { SelectCategory } from "@/components/Sheets/SelectCategory";
+import { SelectDonation } from "@/components/Sheets/SelectDonation";
+import { SelectDonor } from "@/components/Sheets/SelectDonor";
+import { SelectProject } from "@/components/Sheets/SelectProject";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import type { Id } from "@/convex/_generated/dataModel";
 
 interface ImportTransactionCardUIProps {
   title: string;

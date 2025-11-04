@@ -18,10 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { api } from "../../../convex/_generated/api";
 
 interface AddDonorDialogProps {
   open: boolean;

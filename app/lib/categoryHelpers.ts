@@ -1,4 +1,4 @@
-import type { Id } from "../../convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 
 type Category = {
   _id: Id<"categories">;

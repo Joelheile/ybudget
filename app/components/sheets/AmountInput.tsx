@@ -1,12 +1,12 @@
 "use client";
 
-import { forwardRef } from "react";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
-} from "../ui/input-group";
+} from "@/components/ui/input-group";
+import { forwardRef } from "react";
 
 const sanitizeAmount = (value: string) => value.replace(/[^\d,]/g, "");
 
@@ -22,7 +22,7 @@ export const AmountInput = forwardRef<
 >(
   (
     { value, onChange, autoFocus = false, id = "amount", onTabPressed },
-    ref,
+    ref
   ) => {
     const valueColor = value ? "text-foreground" : "text-muted-foreground";
 
@@ -55,7 +55,7 @@ export const AmountInput = forwardRef<
         </InputGroupAddon>
       </InputGroup>
     );
-  },
+  }
 );
 
 AmountInput.displayName = "AmountInput";

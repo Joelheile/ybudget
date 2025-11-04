@@ -3,8 +3,8 @@ import { PageHeader } from "@/components/Layout/PageHeader";
 
 import { CashflowChartUI } from "@/components/Dashboard/CashflowChartUI";
 import ProjectCard from "@/components/Dashboard/ProjectCard";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { calculateProgressPercentage } from "@/lib/budgetCalculations";
-import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface DashboardUIProps {
   projects: Doc<"projects">[];

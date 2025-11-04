@@ -1,10 +1,10 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex-helpers/react/cache";
 import Link from "next/link";
-import { api } from "../../../convex/_generated/api";
-import { Card } from "../ui/card";
-import { Progress } from "../ui/progress";
 
 interface DonorCardProps {
   donorId: string;
@@ -14,7 +14,7 @@ interface DonorCardProps {
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
-    amount,
+    amount
   );
 
 export default function DonorCard({ donorId, name, type }: DonorCardProps) {

@@ -1,9 +1,4 @@
-import { DialogClose } from "@radix-ui/react-dialog";
-import { useMutation } from "convex/react";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { api } from "../../../convex/_generated/api";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +6,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { api } from "@/convex/_generated/api";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { useMutation } from "convex/react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export const OnboardingDialog = ({
   open,
@@ -25,7 +25,7 @@ export const OnboardingDialog = ({
   const [name, setName] = useState("");
 
   const setupUserOrganization = useMutation(
-    api.organizations.functions.setupUserOrganization,
+    api.organizations.functions.setupUserOrganization
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

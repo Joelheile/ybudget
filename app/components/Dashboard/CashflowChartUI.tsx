@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  calculateAxisConfig,
+  calculateStartBalance,
+  formatCurrency,
+  generateCashflowData,
+  type CashflowDataPoint,
+} from "@/components/Dashboard/cashflowChartLogic";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -16,6 +23,8 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { useDateRange } from "@/contexts/DateRangeContext";
+import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   filterTransactionsBeforeDate,
   filterTransactionsByDateRange,
@@ -33,15 +42,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { api } from "../../../convex/_generated/api";
-import type { Doc } from "../../../convex/_generated/dataModel";
-import {
-  calculateAxisConfig,
-  calculateStartBalance,
-  formatCurrency,
-  generateCashflowData,
-  type CashflowDataPoint,
-} from "./cashflowChartLogic";
 
 const chartConfig = {
   actualIncome: {

@@ -1,18 +1,18 @@
 "use client";
 
+import { OnboardingDialog } from "@/components/Onboarding/OnboardingDialog";
+import { TourCard } from "@/components/Onboarding/TourCard";
+import { tourSteps } from "@/components/Onboarding/tourSteps";
+import { AppSidebar } from "@/components/Sidebar/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { DateRangeProvider } from "@/contexts/DateRangeContext";
+import { api } from "@/convex/_generated/api";
+import { setOnboardingComplete } from "@/lib/onboardingStorage";
 import { useQuery } from "convex-helpers/react/cache";
 import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
 import { Onborda, OnbordaProvider } from "onborda";
 import { memo, useEffect, useState } from "react";
-import { api } from "../../convex/_generated/api";
-import { OnboardingDialog } from "../components/Onboarding/OnboardingDialog";
-import { TourCard } from "../components/Onboarding/TourCard";
-import { tourSteps } from "../components/Onboarding/tourSteps";
-import { AppSidebar } from "../components/Sidebar/AppSidebar";
-import { SidebarProvider } from "../components/ui/sidebar";
-import { DateRangeProvider } from "../contexts/DateRangeContext";
-import { setOnboardingComplete } from "../lib/onboardingStorage";
 
 const StableContent = memo(function StableContent({
   children,

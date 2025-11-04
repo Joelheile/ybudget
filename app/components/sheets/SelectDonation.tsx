@@ -15,12 +15,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex-helpers/react/cache";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
 
 interface SelectDonationProps {
   projectId: string;
@@ -37,7 +37,7 @@ export function SelectDonation({
 
   const availableDonations = useQuery(
     api.donations.queries.getAvailableDonationsForProject,
-    projectId ? { projectId } : "skip",
+    projectId ? { projectId } : "skip"
   );
 
   const selectedDonations =
@@ -79,7 +79,7 @@ export function SelectDonation({
                       onClick={(e) => {
                         e.stopPropagation();
                         onValueChange(
-                          value.filter((id) => id !== donation._id),
+                          value.filter((id) => id !== donation._id)
                         );
                       }}
                       className="ml-1 hover:bg-accent rounded-full p-0.5"
@@ -123,7 +123,7 @@ export function SelectDonation({
                         <Check
                           className={cn(
                             "ml-2 h-4 w-4 shrink-0",
-                            isSelected ? "opacity-100" : "opacity-0",
+                            isSelected ? "opacity-100" : "opacity-0"
                           )}
                         />
                       </div>
