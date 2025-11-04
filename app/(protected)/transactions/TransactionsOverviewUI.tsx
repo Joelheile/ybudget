@@ -15,7 +15,7 @@ interface TransactionsPageUIProps {
   onUpdateTransaction: (
     rowId: string,
     field: string,
-    value: any,
+    value: any
   ) => Promise<void>;
 }
 
@@ -31,7 +31,7 @@ export default function TransactionsOverviewUI({
 
   return (
     <SidebarInset>
-      <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 md:p-5 pt-0 overflow-x-hidden w-full">
+      <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
         <PageHeader title="Transaktionen" />
         <div className="text-sm text-muted-foreground">
           {fromDate} - {toDate}
