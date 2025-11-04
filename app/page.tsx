@@ -1,8 +1,8 @@
 "use client";
 import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
-
 import { useEffect } from "react";
+import { LandingPage } from "./components/Landing/LandingPage";
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -13,10 +13,16 @@ export default function Home() {
 
     if (isAuthenticated) {
       router.push("/dashboard");
-    } else {
-      router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
 
-  return null;
+  if (isLoading) {
+    return null;
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
+
+  return <LandingPage />;
 }
