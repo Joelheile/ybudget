@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
@@ -12,13 +12,14 @@ import {
 } from "@/lib/categoryHelpers";
 import { SelectCategoryUI } from "./SelectCategoryUI";
 
-export function SelectCategory({
-  value,
-  onValueChange,
-}: {
-  value: Id<"categories"> | undefined;
-  onValueChange: (value: Id<"categories">) => void;
-}) {
+export const SelectCategory = forwardRef<
+  HTMLButtonElement,
+  {
+    value: Id<"categories"> | undefined;
+    onValueChange: (value: Id<"categories">) => void;
+    onTabPressed?: () => void;
+  }
+>(function SelectCategory({ value, onValueChange, onTabPressed }, triggerRef) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeGroupIdx, setActiveGroupIdx] = useState(0);
@@ -32,6 +33,20 @@ export function SelectCategory({
   const activeItems = filtered[activeGroupIdx]?.children || [];
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Tab") {
+      if (!open) {
+        e.preventDefault();
+        setOpen(true);
+      } else {
+        e.preventDefault();
+        if (onTabPressed) {
+          setOpen(false);
+          onTabPressed();
+        }
+      }
+      return;
+    }
+
     if (!open) return;
 
     if (e.key === "ArrowDown") {
@@ -105,6 +120,7 @@ export function SelectCategory({
         onValueChange(id);
         setOpen(false);
       }}
+      triggerRef={triggerRef}
     />
   );
-}
+});

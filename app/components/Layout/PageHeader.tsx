@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateCategoryDialog } from "../dialogs/CreateCategoryDialog";
 import { AddDonorDialog } from "../Sheets/AddDonorDialog";
 import { Skeleton } from "../ui/skeleton";
@@ -33,6 +33,21 @@ export function PageHeader({
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isDonorOpen, setIsDonorOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey && e.key === "e") {
+        e.preventDefault();
+        setIsExpenseOpen(true);
+      } else if (e.metaKey && e.key === "i") {
+        e.preventDefault();
+        setIsIncomeOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleBackClick = () => {
     if (backUrl) {

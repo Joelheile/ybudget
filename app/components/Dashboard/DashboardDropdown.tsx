@@ -5,6 +5,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 export function DashboardDropdown({
@@ -29,11 +30,11 @@ export function DashboardDropdown({
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={onOpenExpense}>
             <span className="font-semibold"> Ausgabe planen</span>
-            {/* <DropdownMenuShortcut>⇧⌘A</DropdownMenuShortcut> */}
+            <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenIncome}>
             <span className="font-semibold"> Einnahme planen</span>
-            {/* <DropdownMenuShortcut>⇧⌘E</DropdownMenuShortcut> */}
+            <DropdownMenuShortcut>⌘I</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onOpenDonor}>
             <span className=""> Förderer hinzufügen</span>

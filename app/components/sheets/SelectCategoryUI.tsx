@@ -53,13 +53,16 @@ export function SelectCategoryUI({
   activeItems,
   onKeyDown,
   onSelect,
-}: SelectCategoryUIProps) {
+  triggerRef,
+}: SelectCategoryUIProps & { triggerRef?: React.Ref<HTMLButtonElement> }) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
+          ref={triggerRef}
           variant="outline"
           className="w-full justify-between h-auto py-2.5 hover:bg-accent/50 transition-all"
+          data-testid="category-trigger"
         >
           <span className="flex flex-col items-start gap-1 flex-1 min-w-0">
             <span
