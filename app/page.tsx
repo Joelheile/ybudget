@@ -1,14 +1,22 @@
 "use client";
+import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
 
 import { useEffect } from "react";
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/dashboard");
-  }, [router]);
+    if (isLoading) return;
+
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   return null;
 }

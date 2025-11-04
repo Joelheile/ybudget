@@ -7,7 +7,6 @@ import {
   Upload,
   Users,
 } from "lucide-react";
-import type * as React from "react";
 import { memo } from "react";
 
 import {
@@ -22,46 +21,22 @@ import {
 
 import { useQuery } from "convex-helpers/react/cache";
 import { api } from "../../../convex/_generated/api";
+import { StartTourButton } from "../Onboarding/StartTourButton";
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
 import { SearchForm } from "./SearchForm";
+import { NavUser } from "./UserNav";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    // avatar: "/avatars/shadcn.jpg",
-  },
-  mainNav: [
-    {
-      name: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Transaktionen",
-      url: "/transactions",
-      icon: SquareCheckBig,
-    },
-    {
-      name: "Import",
-      url: "/import",
-      icon: Upload,
-    },
-    {
-      name: "Förderer",
-      url: "/donors",
-      icon: Users,
-    },
-  ],
-};
+const mainNav = [
+  { name: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { name: "Transaktionen", url: "/transactions", icon: SquareCheckBig },
+  { name: "Import", url: "/import", icon: Upload },
+  { name: "Förderer", url: "/donors", icon: Users },
+];
 
-function AppSidebarComponent({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
-  const organizationName = useQuery(
-    api.organizations.queries.getOrganizationName,
-  );
+function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
+  const user = useQuery(api.users.queries.getCurrentUserProfile);
+
   return (
     <Sidebar variant="sidebar" {...props}>
       <SidebarHeader>
@@ -82,10 +57,13 @@ function AppSidebarComponent({
         <SearchForm />
       </SidebarHeader>
       <SidebarContent>
-        <MainNav mainNav={data.mainNav} />
-        <ProjectNav />
+        <MainNav mainNav={mainNav} id="tour-main-nav" />
+        <ProjectNav id="tour-project-nav" />
       </SidebarContent>
-      <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
+      <SidebarFooter className="flex flex-row items-center justify-between">
+        <NavUser user={user} />
+        <StartTourButton />
+      </SidebarFooter>
     </Sidebar>
   );
 }

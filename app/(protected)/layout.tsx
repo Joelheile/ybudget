@@ -3,16 +3,16 @@
 import { useQuery } from "convex-helpers/react/cache";
 import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
+import { Onborda, OnbordaProvider } from "onborda";
 import { memo, useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { OnboardingDialog } from "../components/Onboarding/OnboardingDialog";
+import { TourCard } from "../components/Onboarding/TourCard";
+import { tourSteps } from "../components/Onboarding/tourSteps";
 import { AppSidebar } from "../components/Sidebar/AppSidebar";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { DateRangeProvider } from "../contexts/DateRangeContext";
-import {
-  getOnboardingComplete,
-  setOnboardingComplete,
-} from "../lib/onboardingStorage";
+import { setOnboardingComplete } from "../lib/onboardingStorage";
 
 const StableContent = memo(function StableContent({
   children,
@@ -24,11 +24,10 @@ const StableContent = memo(function StableContent({
 
   useEffect(() => {
     if (needsOrg === undefined) return;
-    if (!needsOrg) {
-      setOnboardingComplete(true);
-      setShowOnboarding(false);
+    if (needsOrg === null) {
+      setShowOnboarding(true);
     } else {
-      setShowOnboarding(!getOnboardingComplete());
+      setShowOnboarding(false);
     }
   }, [needsOrg]);
 
@@ -40,20 +39,30 @@ const StableContent = memo(function StableContent({
   };
 
   return (
-    <DateRangeProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
-          {children}
-          {showOnboarding && (
-            <OnboardingDialog
-              open={true}
-              onOpenChange={handleOnboardingChange}
-            />
-          )}
-        </div>
-      </SidebarProvider>
-    </DateRangeProvider>
+    <OnbordaProvider>
+      <DateRangeProvider>
+        <SidebarProvider>
+          <AppSidebar />
+          <Onborda
+            steps={tourSteps}
+            showOnborda={false}
+            shadowRgb="0,0,0"
+            shadowOpacity="0.5"
+            cardComponent={TourCard}
+          >
+            <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
+              {children}
+              {showOnboarding && (
+                <OnboardingDialog
+                  open={true}
+                  onOpenChange={handleOnboardingChange}
+                />
+              )}
+            </div>
+          </Onborda>
+        </SidebarProvider>
+      </DateRangeProvider>
+    </OnbordaProvider>
   );
 });
 
