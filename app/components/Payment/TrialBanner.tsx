@@ -3,14 +3,8 @@ import { useQuery } from "convex/react";
 
 export function TrialBanner() {
   const organization = useQuery(api.organizations.queries.getUserOrganization);
-  const trialEndDate = organization?._creationTime
-    ? new Date(organization._creationTime + 14 * 24 * 60 * 60 * 1000)
-    : null;
-  const daysLeft = trialEndDate
-    ? Math.max(
-        0,
-        Math.ceil((trialEndDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
-      )
+  const daysLeft = organization?._creationTime
+    ? Math.max(0, Math.ceil((organization._creationTime + 14 * 24 * 60 * 60 * 1000 - Date.now()) / (24 * 60 * 60 * 1000)))
     : 0;
 
   return (
