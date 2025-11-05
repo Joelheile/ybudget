@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
+import { validateDonorForCategory } from "../donors/validation";
 import { getCurrentUser } from "../users/getCurrentUser";
 
 export const createExpectedTransaction = mutation({
@@ -11,11 +12,14 @@ export const createExpectedTransaction = mutation({
     counterparty: v.string(),
     categoryId: v.id("categories"),
     status: v.literal("expected"),
-    donorId: v.optional(v.string()),
+    donorId: v.optional(v.id("donors")),
   },
 
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
+
+
+    await validateDonorForCategory(ctx, args.donorId, args.categoryId);
 
     return await ctx.db.insert("transactions", {
       projectId: args.projectId,
@@ -24,7 +28,7 @@ export const createExpectedTransaction = mutation({
       description: args.description,
       counterparty: args.counterparty,
       categoryId: args.categoryId,
-      donorId: args.donorId || "",
+      donorId: args.donorId,
       importedBy: user._id,
       status: args.status,
       organizationId: user.organizationId,
@@ -73,7 +77,7 @@ export const createImportedTransaction = mutation({
       status: "processed",
       projectId: undefined,
       categoryId: undefined,
-      donorId: "",
+      donorId: undefined,
       accountName: args.accountName,
     });
 
@@ -89,15 +93,26 @@ export const updateTransaction = mutation({
     description: v.optional(v.string()),
     projectId: v.optional(v.id("projects")),
     categoryId: v.optional(v.id("categories")),
-    donorId: v.optional(v.string()),
+    donorId: v.optional(v.id("donors")),
     matchedTransactionId: v.optional(v.string()),
     status: v.optional(v.union(v.literal("expected"), v.literal("processed"))),
   },
 
   handler: async (ctx, { transactionId, ...updates }) => {
+    const transaction = await ctx.db.get(transactionId);
+    if (!transaction) {
+      throw new Error("Transaction not found");
+    }
+
+
+    const finalDonorId = updates.donorId !== undefined ? updates.donorId : transaction.donorId;
+    const finalCategoryId = updates.categoryId !== undefined ? updates.categoryId : transaction.categoryId;
+
+    await validateDonorForCategory(ctx, finalDonorId, finalCategoryId);
+
     const validUpdates = Object.fromEntries(
       Object.entries(updates).filter(
-        ([_, value]) => value !== undefined && value !== "",
+        ([_, value]) => value !== undefined,
       ),
     );
 
