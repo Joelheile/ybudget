@@ -21,15 +21,15 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { CustomerPortalLink } from "@convex-dev/polar/react";
 import {
-  BadgeCheck,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
   Settings,
 } from "lucide-react";
+import Link from "next/link";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
   const { isMobile } = useSidebar();
+  const isAdmin = user?.role === "admin";
 
   if (!user) {
     return (
@@ -98,32 +98,17 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Settings />
-                Einstelungen
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CustomerPortalLink
-                  polarApi={{
-                    generateCustomerPortalUrl:
-                      api.polar.generateCustomerPortalUrl,
-                  }}
-                >
-                  Manage Subscription
-                </CustomerPortalLink>
-                <CreditCard />
-                Zahlung
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            {isAdmin && (
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/users">
+                    <Settings />
+                    Users
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            )}
+            {isAdmin && <DropdownMenuSeparator />}
             <DropdownMenuItem>
               <LogOut />
               <SignOut>Abmelden</SignOut>
