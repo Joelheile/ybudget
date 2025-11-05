@@ -26,7 +26,7 @@ const problems = [
 
 export function ProblemSection() {
   return (
-    <section className="bg-slate-50 px-4 py-24 sm:px-6 lg:px-8">
+    <section id="problem" className="bg-slate-50 px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -58,7 +58,7 @@ export function ProblemSection() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="mt-6 text-xl font-semibold text-slate-900">

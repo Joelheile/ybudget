@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 px-4 py-24 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 px-4 pt-32 pb-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -19,7 +19,7 @@ export function HeroSection() {
           <h1 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
             Budgetverwaltung für
             <br />
-            <span className="text-sky-500">gemeinnützige Vereine.</span>
+            <span className="text-primary">gemeinnützige Vereine.</span>
           </h1>
           <p className="mt-6 text-xl text-slate-600 sm:text-2xl">
             Einfach. Transparent. Zuverlässig.
@@ -58,10 +58,10 @@ export function HeroSection() {
           className="mt-16"
         >
           <div className="relative mx-auto max-w-5xl">
-            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-sky-400 via-blue-500 to-purple-500 opacity-20 blur-2xl" />
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-primary/40 via-primary/60 to-primary/80 opacity-20 blur-2xl" />
             <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
               <Image
-                src="/screenshots/dashboard-overview.png"
+                src="/screenshots/Dashboard Overview.png"
                 alt="YBudget Dashboard mit Budget-Übersicht, Transaktionen und Projekten"
                 width={1200}
                 height={800}
@@ -75,4 +75,3 @@ export function HeroSection() {
     </section>
   );
 }
-

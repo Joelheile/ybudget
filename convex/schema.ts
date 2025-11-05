@@ -31,7 +31,7 @@ export default defineSchema({
     name: v.string(),
     parentId: v.optional(v.id("projects")),
     organizationId: v.id("organizations"),
-    description: v.string(),
+    description: v.optional(v.string()),
     isActive: v.boolean(),
     createdBy: v.string(),
   }).index("by_organization", ["organizationId"]),
@@ -85,6 +85,16 @@ export default defineSchema({
   donors: defineTable({
     name: v.string(),
     type: v.union(v.literal("donation"), v.literal("sponsoring")),
+    allowedTaxSpheres: v.optional(
+      v.array(
+        v.union(
+          v.literal("non-profit"),
+          v.literal("asset-management"),
+          v.literal("purpose-operations"),
+          v.literal("commercial-operations"),
+        ),
+      ),
+    ),
     organizationId: v.id("organizations"),
     createdBy: v.id("users"),
   }).index("by_organization", ["organizationId"]),

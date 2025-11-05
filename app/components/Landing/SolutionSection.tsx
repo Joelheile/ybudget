@@ -15,7 +15,7 @@ const features = [
       "Erwartete Ausgaben planen und tracken",
       "Budget-Warnungen bei Überschreitung",
     ],
-    screenshot: "/screenshots/budget-planning.png",
+    screenshot: "/screenshots/Dashboard Overview.png",
   },
   {
     side: "right",
@@ -27,7 +27,7 @@ const features = [
       "Smart Matching mit erwarteten Ausgaben",
       "Automatische Kategorisierung",
     ],
-    screenshot: "/screenshots/transaction-import.png",
+    screenshot: "/screenshots/Import Overview.png",
   },
   {
     side: "left",
@@ -39,7 +39,7 @@ const features = [
       "Echtzeit Budget-Verfolgung pro Projekt",
       "Klare Ausgabenhistorie und Audit Trail",
     ],
-    screenshot: "/screenshots/tax-compliance.png",
+    screenshot: "/screenshots/Project Overview.png",
   },
   {
     side: "right",
@@ -51,13 +51,13 @@ const features = [
       "Filterbar nach Projekt, Zeitraum, Förderer",
       "Transparente Aufschlüsselung aller Ausgaben",
     ],
-    screenshot: "/screenshots/reporting.png",
+    screenshot: "/screenshots/Donor Overview.png",
   },
 ];
 
 export function SolutionSection() {
   return (
-    <section className="bg-white px-4 py-24 sm:px-6 lg:px-8">
+    <section id="solution" className="bg-white px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -103,7 +103,7 @@ export function SolutionSection() {
               </div>
               <div className={feature.side === "right" ? "lg:col-start-1" : ""}>
                 <div className="relative">
-                  <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 opacity-10 blur-xl" />
+                  <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-gray-200 to-gray-300 opacity-10 blur-xl" />
                   <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-lg">
                     <Image
                       src={feature.screenshot}
@@ -122,4 +122,3 @@ export function SolutionSection() {
     </section>
   );
 }
-
