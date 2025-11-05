@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { validateDonorForCategory } from "../donors/validation";
 import { getCurrentUser } from "../users/getCurrentUser";
+import { requireRole } from "../users/permissions";
 
 export const createExpectedTransaction = mutation({
   args: {
@@ -16,6 +17,7 @@ export const createExpectedTransaction = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
 
 
@@ -52,6 +54,7 @@ export const createImportedTransaction = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
 
     const existing = await ctx.db
@@ -110,6 +113,7 @@ export const updateTransaction = mutation({
 
     await validateDonorForCategory(ctx, finalDonorId, finalCategoryId);
 
+    await requireRole(ctx, "editor");
     const validUpdates = Object.fromEntries(
       Object.entries(updates).filter(
         ([_, value]) => value !== undefined,

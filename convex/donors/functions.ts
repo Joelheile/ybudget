@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
+import { requireRole } from "../users/permissions";
 
 export const createDonor = mutation({
   args: {
@@ -16,6 +17,7 @@ export const createDonor = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
     return ctx.db.insert("donors", {
       name: args.name,
