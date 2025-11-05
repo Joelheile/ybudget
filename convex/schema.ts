@@ -47,7 +47,7 @@ export default defineSchema({
     counterparty: v.string(),
     categoryId: v.optional(v.id("categories")),
     donorId: v.optional(v.id("donors")),
-    importedBy: v.string(),
+    importedBy: v.id("users"),
     importedTransactionId: v.optional(v.string()),
     importSource: v.optional(
       v.union(

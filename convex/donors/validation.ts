@@ -1,8 +1,8 @@
 import { Id } from "../_generated/dataModel";
-import { QueryCtx } from "../_generated/server";
+import { MutationCtx, QueryCtx } from "../_generated/server";
 
 export async function validateDonorForCategory(
-  ctx: QueryCtx,
+  ctx: QueryCtx | MutationCtx,
   donorId: Id<"donors"> | undefined,
   categoryId: Id<"categories"> | undefined,
 ): Promise<void> {
@@ -25,18 +25,14 @@ export async function validateDonorForCategory(
     throw new Error("Category not found");
   }
 
-  // Check if the donor's allowed tax spheres include the category's tax sphere
-  if (!donor.allowedTaxSpheres.includes(category.taxsphere)) {
-    const taxSphereNames: Record<string, string> = {
-      "non-profit": "Ideeller Bereich",
-      "asset-management": "Vermögensverwaltung",
-      "purpose-operations": "Zweckbetrieb",
-      "commercial-operations": "Wirtschaftlicher Geschäftsbetrieb",
-    };
+  if (!donor.allowedTaxSpheres || donor.allowedTaxSpheres.length === 0) {
+    return;
+  }
 
+  if (!donor.allowedTaxSpheres.includes(category.taxsphere)) {
     throw new Error(
-      `Förderer "${donor.name}" darf nicht für "${taxSphereNames[category.taxsphere]}" verwendet werden. ` +
-        `Erlaubte Bereiche: ${donor.allowedTaxSpheres.map((ts) => taxSphereNames[ts]).join(", ")}`,
+      `Donor "${donor.name}" cannot be used for category "${category.name}" (tax sphere: ${category.taxsphere}). ` +
+        `Allowed tax spheres: ${donor.allowedTaxSpheres.join(", ")}`,
     );
   }
 }

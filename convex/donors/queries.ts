@@ -21,44 +21,24 @@ export const getEligibleDonorsForCategory = query({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
-    const allDonors = await ctx.db
-      .query("donors")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId),
-      )
-      .collect();
+    const [donor, transactions] = await Promise.all([
+      ctx.db
+        .query("donors")
+        .withIndex("by_organization", (q) =>
+          q.eq("organizationId", user.organizationId),
+        )
+        .filter((q) => q.eq(q.field("_id"), args.donorId))
+        .first(),
+      ctx.db
+        .query("transactions")
+        .withIndex("by_organization", (q) =>
+          q.eq("organizationId", user.organizationId),
+        )
+        .filter((q) => q.eq(q.field("donorId"), args.donorId))
+        .collect(),
+    ]);
 
-    if (!args.categoryId) {
-      return allDonors;
-    }
-
-    const category = await ctx.db.get(args.categoryId);
-    if (!category) {
-      return allDonors;
-    }
-
-    return allDonors.filter((donor) =>
-      donor.allowedTaxSpheres.includes(category.taxsphere),
-    );
-  },
-});
-
-export const getDonorSummary = query({
-  args: { donorId: v.id("donors") },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-
-    const donor = await ctx.db.get(args.donorId);
-    if (!donor || donor.organizationId !== user.organizationId) {
-      throw new Error("Donor not found");
-    }
-
-    const transactions = await ctx.db
-      .query("transactions")
-      .withIndex("by_organization_donor", (q) =>
-        q.eq("organizationId", user.organizationId).eq("donorId", args.donorId),
-      )
-      .collect();
+    if (!donor) throw new Error("Donor not found");
 
     let committedIncome = 0;
     let paidIncome = 0;

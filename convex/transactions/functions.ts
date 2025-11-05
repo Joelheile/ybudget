@@ -114,6 +114,7 @@ export const updateTransaction = mutation({
     await validateDonorForCategory(ctx, finalDonorId, finalCategoryId);
 
     await requireRole(ctx, "editor");
+
     const validUpdates = Object.fromEntries(
       Object.entries(updates).filter(
         ([_, value]) => value !== undefined,
