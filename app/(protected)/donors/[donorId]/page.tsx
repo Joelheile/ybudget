@@ -13,7 +13,7 @@ import { useParams } from "next/navigation";
 
 export default function DonorDetail() {
   const params = useParams();
-  const donorId = params.donorId as string;
+  const donorId = params.donorId as Id<"donors">;
 
   const donor = useQuery(api.donors.queries.getDonorSummary, { donorId });
 

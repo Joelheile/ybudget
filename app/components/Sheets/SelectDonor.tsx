@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex-helpers/react/cache";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
@@ -25,18 +26,22 @@ interface SelectDonorProps {
   value: string;
   onValueChange: (value: string) => void;
   onTabPressed?: () => void;
+  categoryId?: Id<"categories">;
 }
 
 export function SelectDonor({
   value,
   onValueChange,
   onTabPressed,
+  categoryId,
 }: SelectDonorProps) {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const donors = useQuery(api.donors.queries.getAllDonors);
+  const donors = useQuery(api.donors.queries.getEligibleDonorsForCategory, {
+    categoryId: categoryId || undefined,
+  });
 
   const selectedDonor = donors?.find((d) => d._id.toString() === value);
   const displayText = selectedDonor?.name || "Förderer suchen...";

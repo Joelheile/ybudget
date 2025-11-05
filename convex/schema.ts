@@ -44,7 +44,7 @@ export default defineSchema({
     description: v.string(),
     counterparty: v.string(),
     categoryId: v.optional(v.id("categories")),
-    donorId: v.string(),
+    donorId: v.optional(v.id("donors")),
     importedBy: v.string(),
     importedTransactionId: v.optional(v.string()),
     importSource: v.optional(
@@ -85,6 +85,14 @@ export default defineSchema({
   donors: defineTable({
     name: v.string(),
     type: v.union(v.literal("donation"), v.literal("sponsoring")),
+    allowedTaxSpheres: v.array(
+      v.union(
+        v.literal("non-profit"),
+        v.literal("asset-management"),
+        v.literal("purpose-operations"),
+        v.literal("commercial-operations"),
+      ),
+    ),
     organizationId: v.id("organizations"),
     createdBy: v.id("users"),
   }).index("by_organization", ["organizationId"]),
