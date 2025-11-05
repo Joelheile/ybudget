@@ -1,14 +1,13 @@
 {
   "name": "ybudget",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": " npx convex deploy --cmd 'npm run build'",
+    "build": " npx convex deploy && next build",
     "start": "next start",
     "format": "prettier --write .",
-    "lint": "biome lint --write",
-    "lint:fix": "biome lint --write --fix"
+    "lint": "biome lint --write"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
