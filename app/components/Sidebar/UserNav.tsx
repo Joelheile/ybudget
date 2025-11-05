@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Doc } from "@/convex/_generated/dataModel";
-import {
-  ChevronsUpDown,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, Users } from "lucide-react";
 import Link from "next/link";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
@@ -101,8 +97,8 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                   <Link href="/settings/users">
-                    <Settings />
-                    Users
+                    <Users />
+                    Team
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
