@@ -2,16 +2,24 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 
 export function TrialBanner() {
-  const organization = useQuery(api.organizations.queries.getUserOrganization);
-  const daysLeft = organization?._creationTime
-    ? Math.max(0, Math.ceil((organization._creationTime + 14 * 24 * 60 * 60 * 1000 - Date.now()) / (24 * 60 * 60 * 1000)))
-    : 0;
+  const subscription = useQuery(
+    api.subscriptions.queries.getSubscriptionStatus
+  );
+
+  if (
+    !subscription ||
+    subscription.status !== "trial" ||
+    !subscription.daysLeftInTrial
+  ) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-100 py-2 items-center flex justify-center w-full">
-      <div className="  mr-60">
-        <h2 className=" text-muted-foreground font-medium">
-          Dein Trial läuft in {daysLeft} {daysLeft === 1 ? "Tag" : "Tagen"} ab.
+      <div className="mr-60">
+        <h2 className=" font-medium">
+          Dein Trial läuft in {subscription.daysLeftInTrial}
+          {subscription.daysLeftInTrial === 1 ? "Tag" : "Tagen"} ab.
         </h2>
       </div>
     </div>

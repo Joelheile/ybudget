@@ -1,10 +1,8 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { api } from "../../../convex/_generated/api";
 import { Button } from "../ui/button";
 
 interface Tier {
@@ -16,11 +14,10 @@ interface Tier {
   cta: string;
   href: string;
   popular: boolean;
-  productId?: string;
   priceCalculation?: string;
 }
 
-const staticTiers: Tier[] = [
+const tiers: Tier[] = [
   {
     name: "YBudget Premium",
     price: "49,99€",
@@ -41,7 +38,7 @@ const staticTiers: Tier[] = [
     popular: false,
   },
   {
-    name: "YBudget  Premium Yearly",
+    name: "YBudget Premium Yearly",
     price: "499,99€",
     period: "/ Jahr",
     priceCalculation: "49,99€ × 12 = 499,99€",
@@ -63,25 +60,6 @@ const staticTiers: Tier[] = [
 ];
 
 export function PricingSection() {
-  const products = useQuery(api.polar.getConfiguredProducts);
-
-  // Merge Polar products with static tiers
-  const tiers: Tier[] = staticTiers.map((tier) => {
-    // Map Professional tier to premiumMonthly
-    if (tier.name === "Professional" && products?.premiumMonthly) {
-      const product = products.premiumMonthly;
-      const price = product.prices?.[0];
-      if (price?.priceAmount) {
-        return {
-          ...tier,
-          price: `${(price.priceAmount / 100).toFixed(0)}€`,
-          productId: product.id,
-        };
-      }
-    }
-    return tier;
-  });
-
   return (
     <section id="pricing" className="bg-slate-50 px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">

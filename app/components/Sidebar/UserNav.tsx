@@ -17,16 +17,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
-import { ChevronsUpDown, LogOut, Users } from "lucide-react";
+import { ChevronsUpDown, CreditCard, LogOut, Users } from "lucide-react";
 import Link from "next/link";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
   const { isMobile } = useSidebar();
   const isAdmin = user?.role === "admin";
-  const products = useQuery(api.polar.getConfiguredProducts);
 
   if (!user) {
     return (
@@ -104,10 +101,10 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  {/* <CustomerPortalLink polarApi={api.polar}>
+                  <Link href="/subscription">
                     <CreditCard />
                     Abrechnung
-                  </CustomerPortalLink> */}
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             )}

@@ -14,10 +14,11 @@ export function Paywall() {
 
   async function handlePayment(event: FormEvent) {
     event.preventDefault();
-    const paymentUrl = await initializePayment(interval);
+    const paymentUrl = await initializePayment({ tier: interval });
 
-    // redirect to stripe checkout
-    window.location.href = paymentUrl;
+    if (paymentUrl) {
+      window.location.href = paymentUrl;
+    }
   }
 
   return (
@@ -54,7 +55,7 @@ export function Paywall() {
           <div className="space-y-3">
             <form onSubmit={handlePayment}>
               <Button
-              //await stripe.redirecttocheckout({sessionId: session.id}) session id from checkout method
+                type="submit"
                 className="w-full bg-primary text-primary-foreground hover:opacity-90"
                 size="lg"
               >

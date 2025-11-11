@@ -8,9 +8,20 @@ export default defineSchema({
     name: v.string(),
     domain: v.string(),
     createdBy: v.string(),
+    subscriptionStatus: v.optional(v.union(
+      v.literal("trial"),
+      v.literal("active"),
+      v.literal("canceled"),
+      v.literal("expired")
+    )),
+    subscriptionTier: v.optional(v.union(v.literal("monthly"), v.literal("yearly"))),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    trialEndsAt: v.optional(v.number()),
   })
     .index("by_name", ["name"])
-    .index("by_domain", ["domain"]),
+    .index("by_domain", ["domain"])
+    .index("by_stripeCustomerId", ["stripeCustomerId"]),
   users: defineTable({
     name: v.optional(v.string()),
     image: v.optional(v.string()),
@@ -101,8 +112,17 @@ export default defineSchema({
 
   payments: defineTable({
     tier: v.union(v.literal("monthly"), v.literal("yearly")),
-    stripeId: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
     organizationId: v.id("organizations"),
-
-  }).index("by_stripeId", ["stripeId"]),
+    stripeSessionId: v.optional(v.string()),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    paidAt: v.optional(v.number()),
+  })
+    .index("by_stripeSessionId", ["stripeSessionId"])
+    .index("by_organization", ["organizationId"]),
 });

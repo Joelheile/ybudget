@@ -9,7 +9,6 @@ import { AppSidebar } from "@/components/Sidebar/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DateRangeProvider } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
-import { setOnboardingComplete } from "@/lib/onboardingStorage";
 import { useQuery } from "convex-helpers/react/cache";
 import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -35,23 +34,22 @@ const StableContent = memo(function StableContent({
 
   const handleOnboardingChange = (open: boolean) => {
     if (!open) {
-      setOnboardingComplete(true);
       setShowOnboarding(false);
     }
   };
 
   const user = useQuery(api.users.queries.getCurrentUserProfile);
-  const subscription = useQuery(api.subscriptions.queries.getSubscription);
+  const subscription = useQuery(
+    api.subscriptions.queries.getSubscriptionStatus
+  );
 
   const shouldShowPaywall =
     subscription &&
-    subscription.status === "trial" &&
-    subscription.trialEndDate &&
-    Date.now() > subscription.trialEndDate &&
-    !user?.isPremium;
+    subscription.status !== "no_subscription" &&
+    !subscription.hasAccess;
 
-  const hasActiveSubscription =
-    user?.isPremium || subscription?.status === "active";
+  const shouldShowTrialBanner =
+    subscription?.status === "trial" && subscription.hasAccess;
 
   return (
     <OnbordaProvider>
@@ -65,9 +63,8 @@ const StableContent = memo(function StableContent({
             shadowOpacity="0.5"
             cardComponent={TourCard}
           >
-            {!hasActiveSubscription && <TrialBanner />}
-            {/* {shouldShowPaywall && <Paywall />} */}
-            <Paywall />
+            {shouldShowTrialBanner && <TrialBanner />}
+            {shouldShowPaywall && <Paywall />}
             <div className="flex flex-col w-full">
               <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
                 {children}
