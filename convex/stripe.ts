@@ -14,13 +14,17 @@ export const pay = action({
   args: { tier: v.union(v.literal("monthly"), v.literal("yearly")) },
   returns: v.union(v.string(), v.null()),
   handler: async (ctx, args): Promise<string | null> => {
-    const user: any = await ctx.runQuery(internal.users.queries.getCurrentUserInternal);
+    const user: any = await ctx.runQuery(
+      internal.users.queries.getCurrentUserInternal,
+    );
     const domain = process.env.HOSTING_URL ?? "http://localhost:3000";
     const stripe = new Stripe(process.env.STRIPE_KEY!, {
       apiVersion: "2025-10-29.clover",
     });
 
-    const paymentId: any = await ctx.runMutation(internal.payments.create, { tier: args.tier });
+    const paymentId: any = await ctx.runMutation(internal.payments.create, {
+      tier: args.tier,
+    });
     const priceId = tiers[args.tier];
 
     const session: any = await stripe.checkout.sessions.create({
@@ -52,7 +56,11 @@ export const fulfill = internalAction({
     const webhookSecret = process.env.STRIPE_WEBHOOKS_SECRET as string;
 
     try {
-      const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      const event = stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        webhookSecret,
+      );
 
       if (event.type === "checkout.session.completed") {
         const session = event.data.object as any;
@@ -65,9 +73,12 @@ export const fulfill = internalAction({
 
       if (event.type === "customer.subscription.deleted") {
         const subscription = event.data.object as any;
-        await ctx.runMutation(internal.subscriptions.mutations.cancelSubscription, {
-          stripeSubscriptionId: subscription.id,
-        });
+        await ctx.runMutation(
+          internal.subscriptions.mutations.cancelSubscription,
+          {
+            stripeSubscriptionId: subscription.id,
+          },
+        );
       }
 
       return { success: true };

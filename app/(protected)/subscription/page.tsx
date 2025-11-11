@@ -8,7 +8,7 @@ import { Check, X } from "lucide-react";
 
 export default function SubscriptionPage() {
   const subscription = useQuery(
-    api.subscriptions.queries.getSubscriptionStatus
+    api.subscriptions.queries.getSubscriptionStatus,
   );
   const payments = useQuery(api.subscriptions.queries.getOrganizationPayments);
 

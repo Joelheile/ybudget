@@ -29,11 +29,11 @@ export const checkOrganizationExistsByUserDomain = query({
     }),
     v.object({
       exists: v.literal(false),
-    })
+    }),
   ),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-    
+
     if (!user.email) {
       return { exists: false as const };
     }

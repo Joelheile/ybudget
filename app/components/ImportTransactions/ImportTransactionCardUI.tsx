@@ -97,7 +97,9 @@ export const ImportTransactionCardUI = ({
           <SelectDonor
             value={donorId}
             onValueChange={onDonorChange}
-            categoryId={categoryId ? (categoryId as Id<"categories">) : undefined}
+            categoryId={
+              categoryId ? (categoryId as Id<"categories">) : undefined
+            }
           />
         </div>
       )}

@@ -1,4 +1,3 @@
-
 import polar from "@convex-dev/polar/convex.config";
 import { defineApp } from "convex/server";
 

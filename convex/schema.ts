@@ -8,13 +8,17 @@ export default defineSchema({
     name: v.string(),
     domain: v.string(),
     createdBy: v.string(),
-    subscriptionStatus: v.optional(v.union(
-      v.literal("trial"),
-      v.literal("active"),
-      v.literal("canceled"),
-      v.literal("expired")
-    )),
-    subscriptionTier: v.optional(v.union(v.literal("monthly"), v.literal("yearly"))),
+    subscriptionStatus: v.optional(
+      v.union(
+        v.literal("trial"),
+        v.literal("active"),
+        v.literal("canceled"),
+        v.literal("expired"),
+      ),
+    ),
+    subscriptionTier: v.optional(
+      v.union(v.literal("monthly"), v.literal("yearly")),
+    ),
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
     trialEndsAt: v.optional(v.number()),
@@ -34,7 +38,9 @@ export default defineSchema({
     lastName: v.optional(v.string()),
 
     organizationId: v.optional(v.id("organizations")),
-    role: v.optional(v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer"))),
+    role: v.optional(
+      v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
+    ),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
@@ -115,7 +121,7 @@ export default defineSchema({
     status: v.union(
       v.literal("pending"),
       v.literal("completed"),
-      v.literal("failed")
+      v.literal("failed"),
     ),
     organizationId: v.id("organizations"),
     stripeSessionId: v.optional(v.string()),

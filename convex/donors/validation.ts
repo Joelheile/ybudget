@@ -10,7 +10,6 @@ export async function validateDonorForCategory(
     return;
   }
 
-
   if (!categoryId) {
     return;
   }

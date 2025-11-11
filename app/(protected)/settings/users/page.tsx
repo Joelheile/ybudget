@@ -36,7 +36,7 @@ export default function UsersPage() {
       toast.success("Rolle erfolgreich aktualisiert");
     } catch (error) {
       toast.error(
-        "Fehler beim aktualisieren der Rolle. Mindestens ein Admin ist erforderlich."
+        "Fehler beim aktualisieren der Rolle. Mindestens ein Admin ist erforderlich.",
       );
     }
   };

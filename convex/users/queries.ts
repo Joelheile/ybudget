@@ -31,7 +31,6 @@ export const getCurrentUserInternal = internalQuery({
   },
 });
 
-
 export const listOrganizationUsers = query({
   args: {},
   returns: v.array(
@@ -40,8 +39,12 @@ export const listOrganizationUsers = query({
       name: v.optional(v.string()),
       email: v.optional(v.string()),
       image: v.optional(v.string()),
-      role: v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
-    })
+      role: v.union(
+        v.literal("admin"),
+        v.literal("editor"),
+        v.literal("viewer"),
+      ),
+    }),
   ),
   handler: async (ctx) => {
     await requireRole(ctx, "admin");
@@ -50,7 +53,7 @@ export const listOrganizationUsers = query({
     const users = await ctx.db
       .query("users")
       .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId)
+        q.eq("organizationId", user.organizationId),
       )
       .collect();
 

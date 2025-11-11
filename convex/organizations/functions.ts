@@ -12,7 +12,7 @@ function getUserDomain(email: string | undefined): string | null {
 
 async function getOrganizationByDomain(
   ctx: MutationCtx,
-  domain: string
+  domain: string,
 ): Promise<Id<"organizations"> | null> {
   const organization = await ctx.db
     .query("organizations")
@@ -26,7 +26,7 @@ async function addUserToOrganization(
   ctx: MutationCtx,
   userId: Id<"users">,
   organizationId: Id<"organizations">,
-  role: "admin" | "editor" | "viewer"
+  role: "admin" | "editor" | "viewer",
 ): Promise<void> {
   await ctx.db.patch(userId, {
     organizationId,
@@ -59,7 +59,7 @@ export const setupUserOrganization = mutation({
       organizationId: v.id("organizations"),
       isNew: v.boolean(),
     }),
-    v.null()
+    v.null(),
   ),
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -92,9 +92,13 @@ export const setupUserOrganization = mutation({
 
     await addUserToOrganization(ctx, user._id, organizationId, "admin");
 
-    await ctx.scheduler.runAfter(0, internal.subscriptions.mutations.initializeTrial, {
-      organizationId,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.subscriptions.mutations.initializeTrial,
+      {
+        organizationId,
+      },
+    );
 
     return {
       organizationId,

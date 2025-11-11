@@ -20,7 +20,6 @@ export const createExpectedTransaction = mutation({
     await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
 
-
     await validateDonorForCategory(ctx, args.donorId, args.categoryId);
 
     return await ctx.db.insert("transactions", {
@@ -107,18 +106,19 @@ export const updateTransaction = mutation({
       throw new Error("Transaction not found");
     }
 
-
-    const finalDonorId = updates.donorId !== undefined ? updates.donorId : transaction.donorId;
-    const finalCategoryId = updates.categoryId !== undefined ? updates.categoryId : transaction.categoryId;
+    const finalDonorId =
+      updates.donorId !== undefined ? updates.donorId : transaction.donorId;
+    const finalCategoryId =
+      updates.categoryId !== undefined
+        ? updates.categoryId
+        : transaction.categoryId;
 
     await validateDonorForCategory(ctx, finalDonorId, finalCategoryId);
 
     await requireRole(ctx, "editor");
 
     const validUpdates = Object.fromEntries(
-      Object.entries(updates).filter(
-        ([_, value]) => value !== undefined,
-      ),
+      Object.entries(updates).filter(([_, value]) => value !== undefined),
     );
 
     return await ctx.db.patch(transactionId, validUpdates);

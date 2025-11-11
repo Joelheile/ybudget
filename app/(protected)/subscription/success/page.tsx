@@ -4,7 +4,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function SubscriptionSuccessPage() {
   const router = useRouter();
@@ -52,11 +58,7 @@ export default function SubscriptionSuccessPage() {
             </div>
           </div>
 
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => router.push("/")}
-          >
+          <Button className="w-full" size="lg" onClick={() => router.push("/")}>
             Go to Dashboard
           </Button>
 

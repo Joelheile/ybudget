@@ -3,7 +3,7 @@ import { useQuery } from "convex/react";
 
 export function TrialBanner() {
   const subscription = useQuery(
-    api.subscriptions.queries.getSubscriptionStatus
+    api.subscriptions.queries.getSubscriptionStatus,
   );
 
   if (
