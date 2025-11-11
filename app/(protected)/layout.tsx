@@ -3,6 +3,7 @@
 import { OnboardingDialog } from "@/components/Onboarding/OnboardingDialog";
 import { TourCard } from "@/components/Onboarding/TourCard";
 import { tourSteps } from "@/components/Onboarding/tourSteps";
+import { Paywall } from "@/components/Payment/Paywall";
 import { TrialBanner } from "@/components/Payment/TrialBanner";
 import { AppSidebar } from "@/components/Sidebar/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -39,6 +40,19 @@ const StableContent = memo(function StableContent({
     }
   };
 
+  const user = useQuery(api.users.queries.getCurrentUserProfile);
+  const subscription = useQuery(api.subscriptions.queries.getSubscription);
+
+  const shouldShowPaywall =
+    subscription &&
+    subscription.status === "trial" &&
+    subscription.trialEndDate &&
+    Date.now() > subscription.trialEndDate &&
+    !user?.isPremium;
+
+  const hasActiveSubscription =
+    user?.isPremium || subscription?.status === "active";
+
   return (
     <OnbordaProvider>
       <DateRangeProvider>
@@ -51,7 +65,9 @@ const StableContent = memo(function StableContent({
             shadowOpacity="0.5"
             cardComponent={TourCard}
           >
-            <TrialBanner />
+            {!hasActiveSubscription && <TrialBanner />}
+            {/* {shouldShowPaywall && <Paywall />} */}
+            <Paywall />
             <div className="flex flex-col w-full">
               <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
                 {children}

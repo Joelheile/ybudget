@@ -69,7 +69,7 @@ export const setupUserOrganization = mutation({
       role: "admin",
     });
 
-    // Start trial automatically for new organization
+
     await ctx.runMutation(api.subscriptions.functions.startTrial, {
       organizationId,
     });
