@@ -10,7 +10,7 @@ export const getUserOrganizationId = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
-    
+
     const user = await ctx.db.get(userId);
     return user?.organizationId ?? null;
   },

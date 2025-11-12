@@ -195,7 +195,9 @@ export const getTeamProjects = query({
     );
 
     return teamProjects
-      .map((tp, i) => (projects[i] ? { ...projects[i], assignmentId: tp._id } : null))
+      .map((tp, i) =>
+        projects[i] ? { ...projects[i], assignmentId: tp._id } : null,
+      )
       .filter(Boolean);
   },
 });
@@ -239,7 +241,10 @@ export const getUserAccessibleProjects = query({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
 
-    const projectMap = new Map<string, { project: any; teams: { name: string; role: string }[] }>();
+    const projectMap = new Map<
+      string,
+      { project: any; teams: { name: string; role: string }[] }
+    >();
 
     for (const membership of memberships) {
       const team = await ctx.db.get(membership.teamId);
@@ -277,4 +282,3 @@ export const getUserAccessibleProjects = query({
     }));
   },
 });
-

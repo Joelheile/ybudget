@@ -15,4 +15,3 @@ export function AccessDenied({ title }: { title: string }) {
     </div>
   );
 }
-

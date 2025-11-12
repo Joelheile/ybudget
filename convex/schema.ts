@@ -106,13 +106,13 @@ export default defineSchema({
     name: v.string(),
     type: v.union(v.literal("donation"), v.literal("sponsoring")),
     allowedTaxSpheres: v.array(
-        v.union(
-          v.literal("non-profit"),
-          v.literal("asset-management"),
-          v.literal("purpose-operations"),
-          v.literal("commercial-operations"),
-        ),
+      v.union(
+        v.literal("non-profit"),
+        v.literal("asset-management"),
+        v.literal("purpose-operations"),
+        v.literal("commercial-operations"),
       ),
+    ),
     organizationId: v.id("organizations"),
     createdBy: v.id("users"),
   }).index("by_organization", ["organizationId"]),
@@ -144,11 +144,7 @@ export default defineSchema({
   teamMemberships: defineTable({
     userId: v.id("users"),
     teamId: v.id("teams"),
-    role: v.union(
-      v.literal("viewer"),
-      v.literal("editor"),
-      v.literal("admin"),
-    ),
+    role: v.union(v.literal("viewer"), v.literal("editor"), v.literal("admin")),
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])

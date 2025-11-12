@@ -91,13 +91,20 @@ export async function isTeamAdmin(
   return membership?.role === "admin";
 }
 
-export async function filterByProjectAccess<T extends { projectId?: Id<"projects"> }>(
+export async function filterByProjectAccess<
+  T extends { projectId?: Id<"projects"> },
+>(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">,
   organizationId: Id<"organizations">,
   items: T[],
 ): Promise<T[]> {
-  const accessibleIds = await getUserAccessibleProjectIds(ctx, userId, organizationId);
-  return items.filter((item) => item.projectId && accessibleIds.includes(item.projectId));
+  const accessibleIds = await getUserAccessibleProjectIds(
+    ctx,
+    userId,
+    organizationId,
+  );
+  return items.filter(
+    (item) => item.projectId && accessibleIds.includes(item.projectId),
+  );
 }
-

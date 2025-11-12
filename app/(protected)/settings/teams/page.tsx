@@ -103,14 +103,14 @@ function TeamRow({ team }: { team: any }) {
   });
   const assignProject = useMutation(api.teams.functions.assignProjectToTeam);
   const removeProjectFromTeam = useMutation(
-    api.teams.functions.removeProjectFromTeam
+    api.teams.functions.removeProjectFromTeam,
   );
 
   const assignedProjectIds = new Set(
-    teamProjects?.map((p: any) => p._id) || []
+    teamProjects?.map((p: any) => p._id) || [],
   );
   const projectAssignmentMap = new Map(
-    teamProjects?.map((p: any) => [p._id, p.assignmentId]) || []
+    teamProjects?.map((p: any) => [p._id, p.assignmentId]) || [],
   );
 
   const handleToggleProject = async (projectId: Id<"projects">) => {

@@ -46,4 +46,3 @@ export function mapSparkasseCSV(row: Record<string, string>): TransactionData {
     accountName: row["Auftragskonto"] || "",
   };
 }
-
