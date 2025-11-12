@@ -6,7 +6,9 @@ export const calculateBudget = (transactions: Doc<"transactions">[]) => {
   let expectedExpenses = 0;
 
   for (const transaction of transactions) {
-    currentBalance += transaction.amount;
+    if (transaction.status === "processed") {
+      currentBalance += transaction.amount;
+    }
 
     if (transaction.status === "expected") {
       if (transaction.amount > 0) expectedIncome += transaction.amount;
