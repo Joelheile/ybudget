@@ -24,12 +24,12 @@ export function useFetchImportTransactions(): UseFetchImportTransactionsResult {
 
   useEffect(() => {
     if (transactions === undefined) return;
-    
+
     if (transactions.length === 0) {
       setIndex(0);
       return;
     }
-    
+
     if (index >= transactions.length) {
       setIndex(0);
     }

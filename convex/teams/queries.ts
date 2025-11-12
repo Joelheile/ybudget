@@ -32,7 +32,11 @@ export const getTeamMembers = query({
     v.object({
       membershipId: v.id("teamMemberships"),
       userId: v.id("users"),
-      role: v.union(v.literal("viewer"), v.literal("editor"), v.literal("admin")),
+      role: v.union(
+        v.literal("viewer"),
+        v.literal("editor"),
+        v.literal("admin"),
+      ),
       name: v.optional(v.string()),
       email: v.optional(v.string()),
       image: v.optional(v.string()),
@@ -105,7 +109,11 @@ export const getUserTeamMemberships = query({
       _id: v.id("teamMemberships"),
       teamId: v.id("teams"),
       teamName: v.string(),
-      role: v.union(v.literal("viewer"), v.literal("editor"), v.literal("admin")),
+      role: v.union(
+        v.literal("viewer"),
+        v.literal("editor"),
+        v.literal("admin"),
+      ),
       projectCount: v.number(),
     }),
   ),

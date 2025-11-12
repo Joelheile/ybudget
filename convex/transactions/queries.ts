@@ -71,29 +71,26 @@ export const getUnassignedProcessedTransactions = query({
       if (t.status !== "processed") {
         return false;
       }
-      
+
       if (!t.projectId) {
         console.log("Missing projectId:", t.counterparty);
         return true;
       }
-      
+
       if (!t.categoryId) {
         console.log("Missing categoryId:", t.counterparty);
         return true;
       }
-      
+
       if (t.amount > 0) {
         if (!t.donorId || t.donorId === "") {
           console.log("Missing donorId for income:", t.counterparty);
           return true;
         }
       }
-      
-   
+
       return false;
     });
-
-
 
     return unassigned.sort((a, b) => b.date - a.date);
   },

@@ -116,15 +116,15 @@ function TeamRow({ team }: { team: any }) {
   });
   const assignProject = useMutation(api.teams.functions.assignProjectToTeam);
   const removeProjectFromTeam = useMutation(
-    api.teams.functions.removeProjectFromTeam
+    api.teams.functions.removeProjectFromTeam,
   );
   const renameTeam = useMutation(api.teams.functions.renameTeam);
 
   const assignedProjectIds = new Set(
-    teamProjects?.map((p: any) => p._id) || []
+    teamProjects?.map((p: any) => p._id) || [],
   );
   const projectAssignmentMap = new Map(
-    teamProjects?.map((p: any) => [p._id, p.assignmentId]) || []
+    teamProjects?.map((p: any) => [p._id, p.assignmentId]) || [],
   );
 
   const handleToggleProject = async (projectId: Id<"projects">) => {
@@ -168,7 +168,7 @@ function TeamRow({ team }: { team: any }) {
       setIsEditing(false);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Fehler beim Umbenennen"
+        error instanceof Error ? error.message : "Fehler beim Umbenennen",
       );
       setEditedName(team.name);
       setIsEditing(false);

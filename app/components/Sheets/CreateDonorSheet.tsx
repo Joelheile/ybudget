@@ -42,7 +42,7 @@ export function CreateDonorSheet({
   const [name, setName] = useState("");
   const [type, setType] = useState<"donation" | "sponsoring">("donation");
   const [allowedTaxSpheres, setAllowedTaxSpheres] = useState<Set<TaxSphere>>(
-    new Set(["non-profit"])
+    new Set(["non-profit"]),
   );
 
   const addDonor = useMutation(api.donors.functions.createDonor);
@@ -154,7 +154,7 @@ export function CreateDonorSheet({
                     >
                       {taxSphereLabels[sphere]}
                     </Badge>
-                  )
+                  ),
                 )}
               </div>
             </div>
