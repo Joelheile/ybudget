@@ -1,7 +1,7 @@
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import { getCurrentUser } from "./getCurrentUser";
 
-export type UserRole = "admin" | "editor" | "viewer";
+export type UserRole = "admin" | "finance" | "editor" | "viewer";
 
 export async function requireRole(
   ctx: QueryCtx | MutationCtx,
@@ -13,7 +13,8 @@ export async function requireRole(
   const roleLevel: Record<UserRole, number> = {
     viewer: 0,
     editor: 1,
-    admin: 2,
+    finance: 2,
+    admin: 3,
   };
 
   if (roleLevel[userRole] < roleLevel[minRole]) {

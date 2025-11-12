@@ -83,10 +83,9 @@ export function SelectCategoryUI({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 shadow-xl border w-[640px] z-[100]"
+        className="mr-4 p-0 shadow-xl border w-[640px] z-[100]"
         align="start"
         side="bottom"
-        sideOffset={4}
         onKeyDown={onKeyDown}
       >
         <div className="border-b">

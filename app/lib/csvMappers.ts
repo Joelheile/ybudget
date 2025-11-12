@@ -1,3 +1,4 @@
+import { mapSparkasseCSV } from "./sparkasseMapper";
 import { mapVolksbankCSV } from "./volksbankMapper";
 
 export interface TransactionData {
@@ -71,6 +72,9 @@ export function mapCSVRow(
   }
   if (source === "volksbank") {
     return mapVolksbankCSV(row);
+  }
+  if (source === "sparkasse") {
+    return mapSparkasseCSV(row);
   }
   throw new Error(`Unbekannte Datenquelle: ${source}`);
 }

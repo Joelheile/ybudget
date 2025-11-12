@@ -57,7 +57,7 @@ const chartConfig = {
     color: "#ef4444",
   },
   expectedExpenses: {
-    label: "Erwartete Ausgaben",
+    label: "Geplante Ausgaben",
     color: "#fb923c",
   },
   balance: {

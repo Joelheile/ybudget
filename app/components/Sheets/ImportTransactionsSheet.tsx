@@ -189,7 +189,9 @@ export function ImportTransactionsSheet({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="moss">Moss</SelectItem>
-                  <SelectItem value="sparkasse">Sparkasse</SelectItem>
+                  <SelectItem value="sparkasse">
+                    Sparkasse (CSV-CAMT V8)
+                  </SelectItem>
                   <SelectItem value="volksbank">Volksbank</SelectItem>
                 </SelectContent>
               </Select>

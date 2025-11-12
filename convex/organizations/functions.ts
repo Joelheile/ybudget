@@ -94,7 +94,7 @@ export const setupUserOrganization = mutation({
 
     await ctx.scheduler.runAfter(
       0,
-      internal.subscriptions.mutations.initializeTrial,
+      internal.subscriptions.functions.initializeTrial,
       {
         organizationId,
       },

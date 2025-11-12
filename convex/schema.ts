@@ -39,7 +39,12 @@ export default defineSchema({
 
     organizationId: v.optional(v.id("organizations")),
     role: v.optional(
-      v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
+      v.union(
+        v.literal("admin"),
+        v.literal("finance"),
+        v.literal("editor"),
+        v.literal("viewer"),
+      ),
     ),
   })
     .index("email", ["email"])
@@ -97,7 +102,7 @@ export default defineSchema({
       v.literal("commercial-operations"), // Wirtschaftlicher Geschäftsbetrieb
     ),
     approved: v.boolean(),
-    createdBy: v.id("users"),
+    createdBy: v.optional(v.id("users")),
     parentId: v.optional(v.id("categories")),
     icon: v.optional(v.string()),
   }).index("by_parent", ["parentId"]),
@@ -132,4 +137,30 @@ export default defineSchema({
   })
     .index("by_stripeSessionId", ["stripeSessionId"])
     .index("by_organization", ["organizationId"]),
+
+  teams: defineTable({
+    name: v.string(),
+    organizationId: v.id("organizations"),
+    createdAt: v.number(),
+    createdBy: v.id("users"),
+  }).index("by_organization", ["organizationId"]),
+
+  teamMemberships: defineTable({
+    userId: v.id("users"),
+    teamId: v.id("teams"),
+    role: v.union(v.literal("viewer"), v.literal("editor"), v.literal("admin")),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_team", ["teamId"])
+    .index("by_user_team", ["userId", "teamId"]),
+
+  teamProjects: defineTable({
+    teamId: v.id("teams"),
+    projectId: v.id("projects"),
+    createdAt: v.number(),
+  })
+    .index("by_team", ["teamId"])
+    .index("by_project", ["projectId"])
+    .index("by_team_project", ["teamId", "projectId"]),
 });

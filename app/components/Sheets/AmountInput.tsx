@@ -18,10 +18,18 @@ export const AmountInput = forwardRef<
     autoFocus?: boolean;
     id?: string;
     onTabPressed?: () => void;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   }
 >(
   (
-    { value, onChange, autoFocus = false, id = "amount", onTabPressed },
+    {
+      value,
+      onChange,
+      autoFocus = false,
+      id = "amount",
+      onTabPressed,
+      onKeyDown,
+    },
     ref,
   ) => {
     const valueColor = value ? "text-foreground" : "text-muted-foreground";
@@ -31,6 +39,7 @@ export const AmountInput = forwardRef<
         e.preventDefault();
         onTabPressed();
       }
+      onKeyDown?.(e);
     };
 
     return (

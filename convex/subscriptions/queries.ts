@@ -1,3 +1,4 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
@@ -18,9 +19,17 @@ export const getSubscriptionStatus = query({
     daysLeftInTrial: v.optional(v.number()),
   }),
   handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return {
+        status: "no_subscription" as const,
+        hasAccess: false,
+      };
+    }
 
-    if (!user.organizationId) {
+    const user = await ctx.db.get(userId);
+
+    if (!user || !user.organizationId) {
       return {
         status: "no_subscription" as const,
         hasAccess: false,

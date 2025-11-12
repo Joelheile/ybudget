@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
 
@@ -26,5 +26,11 @@ export const createCategory = mutation({
       createdBy: user._id,
       parentId: args.parentId,
     });
+  },
+});
+
+export const getAllCategories = query({
+  handler: async (ctx) => {
+    return ctx.db.query("categories").collect();
   },
 });

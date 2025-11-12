@@ -57,13 +57,15 @@ export function SelectProject({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Tab") {
+    if (e.key === "Tab" || e.key === "Enter") {
       if (!open) {
         e.preventDefault();
         setOpen(true);
       } else {
         e.preventDefault();
-        if (onTabPressed) {
+        if (e.key === "Enter" && projects && projects[highlightedIndex]) {
+          handleSelect(projects[highlightedIndex]._id);
+        } else if (e.key === "Tab" && onTabPressed) {
           setOpen(false);
           onTabPressed();
         }
@@ -81,11 +83,6 @@ export function SelectProject({
       setHighlightedIndex((prev) =>
         prev > 0 ? prev - 1 : (projects?.length ?? 0) - 1,
       );
-    } else if (e.key === "Enter" && open) {
-      e.preventDefault();
-      if (projects && projects[highlightedIndex]) {
-        handleSelect(projects[highlightedIndex]._id);
-      }
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpen(false);

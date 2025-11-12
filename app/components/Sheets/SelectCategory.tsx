@@ -10,7 +10,7 @@ import {
   groupCategories,
 } from "@/lib/categoryHelpers";
 import { useQuery } from "convex/react";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 
 export const SelectCategory = forwardRef<
   HTMLButtonElement,
@@ -25,7 +25,7 @@ export const SelectCategory = forwardRef<
   const [activeGroupIdx, setActiveGroupIdx] = useState(0);
   const [activeItemIdx, setActiveItemIdx] = useState(0);
 
-  const categories = useQuery(api.categories.queries.getAllCategories);
+  const categories = useQuery(api.categories.functions.getAllCategories);
   const selectedItem = categories?.find((cat) => cat._id === value);
 
   const grouped = categories ? groupCategories(categories) : [];
@@ -33,13 +33,16 @@ export const SelectCategory = forwardRef<
   const activeItems = filtered[activeGroupIdx]?.children || [];
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Tab") {
+    if (e.key === "Tab" || e.key === "Enter") {
       if (!open) {
         e.preventDefault();
         setOpen(true);
       } else {
         e.preventDefault();
-        if (onTabPressed) {
+        if (e.key === "Enter" && activeItems[activeItemIdx]) {
+          onValueChange(activeItems[activeItemIdx]._id);
+          setOpen(false);
+        } else if (e.key === "Tab" && onTabPressed) {
           setOpen(false);
           onTabPressed();
         }
@@ -67,12 +70,6 @@ export const SelectCategory = forwardRef<
       e.preventDefault();
       setActiveGroupIdx((prev) => (prev > 0 ? prev - 1 : filtered.length - 1));
       setActiveItemIdx(0);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (activeItems[activeItemIdx]) {
-        onValueChange(activeItems[activeItemIdx]._id);
-        setOpen(false);
-      }
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpen(false);
@@ -100,10 +97,12 @@ export const SelectCategory = forwardRef<
     }
   };
 
-  if (search && filtered.length > 0) {
-    setActiveGroupIdx(0);
-    setActiveItemIdx(0);
-  }
+  useEffect(() => {
+    if (search && filtered.length > 0) {
+      setActiveGroupIdx(0);
+      setActiveItemIdx(0);
+    }
+  }, [search, filtered.length]);
 
   return (
     <SelectCategoryUI

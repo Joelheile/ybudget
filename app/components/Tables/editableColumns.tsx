@@ -111,10 +111,10 @@ export const editableColumns = [
     accessorKey: "projectName",
     header: "Projekt",
     cell: ({ row, table }: any) => {
-      const { isPlanned, isRowEditing } = getEditingState(row, table);
+      const { isRowEditing } = getEditingState(row, table);
       const handlers = createEditableCellHandlers(row.original._id, table);
 
-      if (isPlanned && isRowEditing) {
+      if (isRowEditing) {
         return renderEditableCell(
           EditableProjectCell,
           handlers,
@@ -135,12 +135,12 @@ export const editableColumns = [
     accessorKey: "description",
     header: "Beschreibung",
     cell: ({ row, table }: any) => {
-      const { isPlanned, isRowEditing } = getEditingState(row, table);
+      const { isRowEditing } = getEditingState(row, table);
       const handlers = createEditableCellHandlers(row.original._id, table);
       const description =
         row.getValue("description") || row.original.reference || "";
 
-      if (isPlanned && isRowEditing) {
+      if (isRowEditing) {
         return renderEditableCell(
           EditableTextareaCell,
           handlers,
@@ -163,10 +163,10 @@ export const editableColumns = [
     accessorKey: "categoryName",
     header: "Kategorie",
     cell: ({ row, table }: any) => {
-      const { isPlanned, isRowEditing } = getEditingState(row, table);
+      const { isRowEditing } = getEditingState(row, table);
       const handlers = createEditableCellHandlers(row.original._id, table);
 
-      if (isPlanned && isRowEditing) {
+      if (isRowEditing) {
         return renderEditableCell(
           EditableCategoryCell,
           handlers,
@@ -255,7 +255,7 @@ export const editableColumns = [
       const isUpdating = table.options.meta?.isUpdating || false;
 
       const handleEdit = () => {
-        if (isPlanned && !isRowEditing) {
+        if (!isRowEditing) {
           table.options.meta?.setEditingRows((prev: Set<string>) => {
             const updated = new Set(prev);
             updated.add(rowId);
@@ -287,10 +287,6 @@ export const editableColumns = [
             </Button>
           </div>
         );
-      }
-
-      if (!isPlanned) {
-        return null;
       }
 
       return (

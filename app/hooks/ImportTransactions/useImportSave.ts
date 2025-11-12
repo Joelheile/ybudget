@@ -23,6 +23,10 @@ export function useImportSave() {
     ) => {
       const { projectId, categoryId, donorId, matchedTransactionId } = formData;
 
+      if (!transaction || !transaction._id) {
+        return false;
+      }
+
       if (!projectId || !categoryId) {
         toast("Transaktion übersprungen", { icon: "⏭️" });
         return false;
@@ -35,13 +39,18 @@ export function useImportSave() {
 
       try {
         const isIncome = transaction.amount > 0;
-        await updateTransaction({
+        const updatePayload: Parameters<typeof updateTransaction>[0] = {
           transactionId: transaction._id,
           projectId: projectId as Id<"projects">,
           categoryId: categoryId as Id<"categories">,
-          ...(isIncome && donorId ? { donorId: donorId as Id<"donors"> } : {}),
           matchedTransactionId: normalizedMatchedId || undefined,
-        });
+        };
+
+        if (isIncome && donorId) {
+          updatePayload.donorId = donorId as Id<"donors">;
+        }
+
+        await updateTransaction(updatePayload);
 
         if (normalizedMatchedId) {
           await updateTransaction({

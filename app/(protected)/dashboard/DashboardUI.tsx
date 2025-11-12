@@ -37,17 +37,17 @@ export default function DashboardUI({
         <BudgetCard
           title="Kommt noch rein"
           amount={budgets.expectedIncome}
-          description="Zugesagtes Geld das noch nicht überwiesen wurde"
+          description="Geplante Einnahmen die noch nicht überwiesen wurden"
         />
         <BudgetCard
           title="Muss noch bezahlt werden"
           amount={budgets.expectedExpenses}
-          description="Rechnungen und Zusagen die noch von uns bezahlt werden müssen"
+          description="Geplante Ausgaben (müssen noch nicht bezahlt werden)"
         />
         <BudgetCard
           title="Kann ausgegeben werden"
           amount={budgets.availableBudget}
-          description="Auf dem Konto + kommt rein - muss bezahlt werden"
+          description="Kontostand + geplante Einnahmen - geplante Ausgaben"
         />
       </div>
       <div

@@ -25,8 +25,12 @@ export default function ImportTransactionsPage() {
   const { initFromTransaction, clearForm } = form;
 
   useEffect(() => {
+    if (totalCount === 0) {
+      clearForm();
+      return;
+    }
     initFromTransaction(current);
-  }, [current, initFromTransaction]);
+  }, [current, initFromTransaction, totalCount, clearForm]);
 
   const handleNext = useCallback(() => {
     if (!transactions || index >= transactions.length - 1) return;
@@ -41,8 +45,8 @@ export default function ImportTransactionsPage() {
   }, [index, setIndex, clearForm]);
 
   const handleSave = useCallback(async () => {
-    if (!transactions || !transactions[index]) return;
-    const success = await save(transactions[index], {
+    if (!transactions || !transactions[index] || !current) return;
+    const success = await save(current, {
       projectId: form.projectId,
       categoryId: form.categoryId,
       donorId: form.donorId,
@@ -54,6 +58,7 @@ export default function ImportTransactionsPage() {
   }, [
     transactions,
     index,
+    current,
     form.projectId,
     form.categoryId,
     form.donorId,

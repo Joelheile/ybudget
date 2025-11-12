@@ -2,8 +2,8 @@
 
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex-helpers/react/cache";
-import { useMemo, useState } from "react";
+import { useQuery } from "convex/react";
+import { useEffect, useMemo, useState } from "react";
 
 type UseFetchImportTransactionsResult = {
   transactions: Array<Doc<"transactions">> | undefined;
@@ -22,8 +22,23 @@ export function useFetchImportTransactions(): UseFetchImportTransactionsResult {
     api.transactions.queries.getUnassignedProcessedTransactions,
   );
 
+  useEffect(() => {
+    if (transactions === undefined) return;
+
+    if (transactions.length === 0) {
+      setIndex(0);
+      return;
+    }
+
+    if (index >= transactions.length) {
+      setIndex(0);
+    }
+  }, [transactions, index]);
+
   const current = useMemo(() => {
-    if (!transactions || !transactions[index]) return null;
+    if (!transactions || transactions.length === 0 || !transactions[index]) {
+      return null;
+    }
     return transactions[index];
   }, [transactions, index]);
 

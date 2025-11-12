@@ -1,7 +1,7 @@
 "use client";
 
 import { LayoutDashboard, SquareCheckBig, Upload, Users } from "lucide-react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import {
   Sidebar,
@@ -17,28 +17,33 @@ import { StartTourButton } from "@/components/Onboarding/StartTourButton";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex-helpers/react/cache";
 import Image from "next/image";
+import Link from "next/link";
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
-import { SearchForm } from "./SearchForm";
 import { NavUser } from "./UserNav";
 
-const mainNav = [
+const baseMainNav = [
   { name: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { name: "Transaktionen", url: "/transactions", icon: SquareCheckBig },
-  { name: "Import", url: "/import", icon: Upload },
+  { name: "Import", url: "/import", icon: Upload, adminOnly: true },
   { name: "Förderer", url: "/donors", icon: Users },
 ];
 
 function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
   const user = useQuery(api.users.queries.getCurrentUserProfile);
 
+  const mainNav = useMemo(() => {
+    const isAdmin = user?.role === "admin";
+    return baseMainNav.filter((item) => !item.adminOnly || isAdmin);
+  }, [user?.role]);
+
   return (
-    <Sidebar variant="sidebar" {...props}>
+    <Sidebar variant="sidebar" collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/dashboard">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Image
                     src="/AppIcon.png"
@@ -50,11 +55,11 @@ function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">YBudget</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SearchForm />
+        {/* <SearchForm /> */}
       </SidebarHeader>
       <SidebarContent>
         <MainNav mainNav={mainNav} id="tour-main-nav" />

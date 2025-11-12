@@ -22,11 +22,11 @@ export function MainNav({
   id?: string;
 }) {
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden" id={id}>
+    <SidebarGroup id={id}>
       <SidebarMenu>
         {mainNav.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip={item.name}>
               <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
