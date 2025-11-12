@@ -136,7 +136,6 @@ export default defineSchema({
   teams: defineTable({
     name: v.string(),
     organizationId: v.id("organizations"),
-    description: v.optional(v.string()),
     createdAt: v.number(),
     createdBy: v.id("users"),
   }).index("by_organization", ["organizationId"]),

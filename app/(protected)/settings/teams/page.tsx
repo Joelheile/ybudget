@@ -58,7 +58,6 @@ export default function TeamsPage() {
                       Team
                     </div>
                   </TableHead>
-                  <TableHead>Beschreibung</TableHead>
                   <TableHead>Mitglieder</TableHead>
                   <TableHead className="pr-6">
                     <div className="flex items-center gap-2">
@@ -94,6 +93,8 @@ export default function TeamsPage() {
 }
 
 function TeamRow({ team }: { team: any }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(team.name);
   const teamMembers = useQuery(api.teams.functions.getTeamMembers, {
     teamId: team._id,
   });
@@ -105,6 +106,7 @@ function TeamRow({ team }: { team: any }) {
   const removeProjectFromTeam = useMutation(
     api.teams.functions.removeProjectFromTeam,
   );
+  const renameTeam = useMutation(api.teams.functions.renameTeam);
 
   const assignedProjectIds = new Set(
     teamProjects?.map((p: any) => p._id) || [],
@@ -130,13 +132,64 @@ function TeamRow({ team }: { team: any }) {
     }
   };
 
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+    setEditedName(team.name);
+  };
+
+  const handleSave = async () => {
+    if (!editedName.trim()) {
+      toast.error("Team-Name darf nicht leer sein");
+      setEditedName(team.name);
+      setIsEditing(false);
+      return;
+    }
+
+    if (editedName === team.name) {
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      await renameTeam({ teamId: team._id, name: editedName });
+      toast.success("Team umbenannt");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Fehler beim Umbenennen",
+      );
+      setEditedName(team.name);
+      setIsEditing(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSave();
+    } else if (e.key === "Escape") {
+      setEditedName(team.name);
+      setIsEditing(false);
+    }
+  };
+
   return (
     <TableRow>
-      <TableCell className="pl-6">
-        <span className="font-medium">{team.name}</span>
-      </TableCell>
-      <TableCell className="text-muted-foreground">
-        {team.description || "Keine Beschreibung"}
+      <TableCell className="pl-6" onDoubleClick={handleDoubleClick}>
+        {isEditing ? (
+          <input
+            type="text"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            className="font-medium bg-background border border-input rounded px-2 py-1 w-full"
+          />
+        ) : (
+          <span className="font-medium cursor-pointer hover:text-primary transition-colors">
+            {team.name}
+          </span>
+        )}
       </TableCell>
       <TableCell>
         <Badge variant="secondary">{teamMembers?.length || 0} Mitglieder</Badge>
