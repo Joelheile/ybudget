@@ -3,6 +3,7 @@ import { mutation } from "../_generated/server";
 import { validateDonorForCategory } from "../donors/validation";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
+import { requireRole } from "../users/permissions";
 
 export const createExpectedTransaction = mutation({
   args: {
@@ -17,6 +18,7 @@ export const createExpectedTransaction = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, "editor");
     await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
 
@@ -53,6 +55,7 @@ export const createImportedTransaction = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, "editor");
     await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
 

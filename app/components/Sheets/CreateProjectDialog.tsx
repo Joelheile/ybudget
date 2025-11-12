@@ -43,10 +43,12 @@ export function CreateProjectDialog({
 
   const handleSubmit = async () => {
     if (!name.trim()) return;
+    if (!name.trim()) return;
 
     try {
       const projectId = await addProject({
         name: name.trim(),
+        description: description.trim() || undefined,
         description: description.trim() || undefined,
         parentId: parentId ? (parentId as any) : undefined,
       });
@@ -82,6 +84,7 @@ export function CreateProjectDialog({
           </div>
 
           <div className="flex flex-col gap-2">
+            <Label htmlFor="project-description">Beschreibung (optional)</Label>
             <Label htmlFor="project-description">Beschreibung (optional)</Label>
             <Textarea
               id="project-description"

@@ -1,6 +1,7 @@
 {
   "name": "ybudget",
   "version": "1.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev:stripe": "next dev --turbopack & npx convex dev & stripe listen --forward-to https://standing-firefly-934.convex.site/stripe",
@@ -8,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "format": "prettier --write .",
+    "lint": "biome lint --write"
     "lint": "biome lint --write"
   },
   "dependencies": {

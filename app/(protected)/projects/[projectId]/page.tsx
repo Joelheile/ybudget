@@ -32,6 +32,7 @@ export default function ProjectDetail() {
   );
 
   const filteredTransactions = useMemo(
+  const filteredTransactions = useMemo(
     () => filterTransactionsByDateRange(allTransactions, selectedDateRange),
     [allTransactions, selectedDateRange],
   );
@@ -69,6 +70,7 @@ export default function ProjectDetail() {
   return (
     <ProjectDashboardUI
       project={project}
+      transactions={filteredTransactions ?? []}
       transactions={filteredTransactions ?? []}
       budgets={budgets}
       status={status}
