@@ -56,7 +56,7 @@ export function TransactionSheet({
   const categoryButtonRef = useRef<HTMLButtonElement>(null);
 
   const addTransaction = useMutation(
-    api.transactions.functions.createExpectedTransaction
+    api.transactions.functions.createExpectedTransaction,
   );
 
   const dateColor = date ? "text-foreground" : "text-muted-foreground";
@@ -99,7 +99,7 @@ export function TransactionSheet({
         donorId: donor,
       });
       toast.success(
-        type === "expense" ? "Ausgabe gespeichert!" : "Einnahme gespeichert!"
+        type === "expense" ? "Ausgabe gespeichert!" : "Einnahme gespeichert!",
       );
       onOpenChange(false);
     } catch (error) {

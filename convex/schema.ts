@@ -23,7 +23,9 @@ export default defineSchema({
     lastName: v.optional(v.string()),
 
     organizationId: v.optional(v.id("organizations")),
-    role: v.optional(v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer"))),
+    role: v.optional(
+      v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
+    ),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])

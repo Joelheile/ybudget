@@ -28,7 +28,7 @@ export const listOrganizationUsers = query({
     const users = await ctx.db
       .query("users")
       .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId)
+        q.eq("organizationId", user.organizationId),
       )
       .collect();
 

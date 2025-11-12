@@ -5,7 +5,7 @@ export type UserRole = "admin" | "editor" | "viewer";
 
 export async function requireRole(
   ctx: QueryCtx | MutationCtx,
-  minRole: UserRole
+  minRole: UserRole,
 ): Promise<void> {
   const user = await getCurrentUser(ctx);
   const userRole: UserRole = user.role ?? "viewer";
