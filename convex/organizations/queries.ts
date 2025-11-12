@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query } from "../_generated/server";
+import { internalQuery, query } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
 
 export const getOrganizationName = query({
@@ -56,5 +56,36 @@ export const checkOrganizationExistsByUserDomain = query({
     }
 
     return { exists: false as const };
+  },
+});
+
+export const getOrganizationById = internalQuery({
+  args: { organizationId: v.id("organizations") },
+  returns: v.union(
+    v.object({
+      _id: v.id("organizations"),
+      _creationTime: v.number(),
+      name: v.string(),
+      domain: v.string(),
+      createdBy: v.string(),
+      subscriptionStatus: v.optional(
+        v.union(
+          v.literal("trial"),
+          v.literal("active"),
+          v.literal("canceled"),
+          v.literal("expired"),
+        ),
+      ),
+      subscriptionTier: v.optional(
+        v.union(v.literal("monthly"), v.literal("yearly")),
+      ),
+      stripeCustomerId: v.optional(v.string()),
+      stripeSubscriptionId: v.optional(v.string()),
+      trialEndsAt: v.optional(v.number()),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.organizationId);
   },
 });

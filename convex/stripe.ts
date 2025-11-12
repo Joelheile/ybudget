@@ -5,9 +5,20 @@ import Stripe from "stripe";
 import { internal } from "./_generated/api";
 import { action, internalAction } from "./_generated/server";
 
-const tiers = {
-  monthly: "price_1SSD0wRxVFqrremh8GocLXsZ",
-  yearly: "price_1SSD1hRxVFqrremh6nN2Efli",
+const getTiers = (stripeKey: string) => {
+  const isProduction = stripeKey.startsWith("sk_live_");
+  
+  if (isProduction) {
+    return {
+      monthly: "price_1SSD0wRxVFqrremh8GocLXsZ",
+      yearly: "price_1SSD1hRxVFqrremh6nN2Efli",
+    };
+  }
+  
+  return {
+    monthly: "price_1SSMc2RucjQoYr9Aq0Ga4SvT",
+    yearly: "price_1SSMcGRucjQoYr9AGbAuLfxq",
+  };
 };
 
 export const pay = action({
@@ -25,6 +36,7 @@ export const pay = action({
     const paymentId: any = await ctx.runMutation(internal.payments.create, {
       tier: args.tier,
     });
+    const tiers = getTiers(process.env.STRIPE_KEY!);
     const priceId = tiers[args.tier];
 
     const session: any = await stripe.checkout.sessions.create({
@@ -40,6 +52,45 @@ export const pay = action({
     await ctx.runMutation(internal.payments.markPending, {
       paymentId,
       stripeId: session.id,
+    });
+
+    return session.url;
+  },
+});
+
+export const createCustomerPortalSession = action({
+  args: {},
+  returns: v.string(),
+  handler: async (ctx): Promise<string> => {
+    const user: any = await ctx.runQuery(
+      internal.users.queries.getCurrentUserInternal,
+    );
+
+    if (!user.organizationId) {
+      throw new Error("No organization found for user");
+    }
+
+    const organization: any = await ctx.runQuery(
+      internal.organizations.queries.getOrganizationById,
+      { organizationId: user.organizationId },
+    );
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    if (!organization.stripeCustomerId) {
+      throw new Error("No Stripe customer ID found for organization");
+    }
+
+    const domain = process.env.HOSTING_URL ?? "http://localhost:3000";
+    const stripe = new Stripe(process.env.STRIPE_KEY!, {
+      apiVersion: "2025-10-29.clover",
+    });
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: organization.stripeCustomerId,
+      return_url: `${domain}/dashboard`,
     });
 
     return session.url;

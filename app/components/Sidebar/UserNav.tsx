@@ -17,13 +17,31 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { useAction } from "convex/react";
 import { ChevronsUpDown, CreditCard, LogOut, Users } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
   const { isMobile } = useSidebar();
   const isAdmin = user?.role === "admin";
+  const createPortalSession = useAction(api.stripe.createCustomerPortalSession);
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+
+  const handleBillingClick = async () => {
+    if (isLoadingPortal) return;
+
+    setIsLoadingPortal(true);
+    try {
+      const portalUrl = await createPortalSession();
+      window.location.href = portalUrl;
+    } catch (err) {
+      console.error("Failed to create portal session:", err);
+      setIsLoadingPortal(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -100,11 +118,12 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
                     Team
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/subscription">
-                    <CreditCard />
-                    Abrechnung
-                  </Link>
+                <DropdownMenuItem
+                  onClick={handleBillingClick}
+                  disabled={isLoadingPortal}
+                >
+                  <CreditCard />
+                  {isLoadingPortal ? "Laden..." : "Abrechnung"}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             )}
