@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,12 @@ import { useMutation } from "convex/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+type TaxSphere =
+  | "non-profit"
+  | "asset-management"
+  | "purpose-operations"
+  | "commercial-operations";
+
 interface CreateDonorSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,8 +41,30 @@ export function CreateDonorSheet({
 }: CreateDonorSheetProps) {
   const [name, setName] = useState("");
   const [type, setType] = useState<"donation" | "sponsoring">("donation");
+  const [allowedTaxSpheres, setAllowedTaxSpheres] = useState<Set<TaxSphere>>(
+    new Set(["non-profit"])
+  );
 
   const addDonor = useMutation(api.donors.functions.createDonor);
+
+  const taxSphereLabels: Record<TaxSphere, string> = {
+    "non-profit": "Ideeller Bereich",
+    "asset-management": "Vermögensverwaltung",
+    "purpose-operations": "Zweckbetrieb",
+    "commercial-operations": "Wirtschaftlicher Geschäftsbetrieb",
+  };
+
+  const toggleTaxSphere = (sphere: TaxSphere) => {
+    setAllowedTaxSpheres((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(sphere)) {
+        updated.delete(sphere);
+      } else {
+        updated.add(sphere);
+      }
+      return updated;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +74,21 @@ export function CreateDonorSheet({
       return;
     }
 
+    if (allowedTaxSpheres.size === 0) {
+      toast.error("Mindestens ein Steuerbereich muss ausgewählt werden");
+      return;
+    }
+
     try {
       await addDonor({
         name: name.trim(),
         type,
+        allowedTaxSpheres: Array.from(allowedTaxSpheres),
       });
       toast.success("Förderer erstellt!");
       setName("");
       setType("donation");
+      setAllowedTaxSpheres(new Set(["non-profit"]));
       onOpenChange(false);
     } catch (error) {
       toast.error("Fehler beim Erstellen");
@@ -98,6 +134,29 @@ export function CreateDonorSheet({
                   <SelectItem value="sponsoring">Sponsoring</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Erlaubte Steuerbereiche
+                {allowedTaxSpheres.size > 0 && ` (${allowedTaxSpheres.size})`}
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {(Object.keys(taxSphereLabels) as Array<TaxSphere>).map(
+                  (sphere) => (
+                    <Badge
+                      key={sphere}
+                      variant={
+                        allowedTaxSpheres.has(sphere) ? "default" : "secondary"
+                      }
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => toggleTaxSphere(sphere)}
+                    >
+                      {taxSphereLabels[sphere]}
+                    </Badge>
+                  )
+                )}
+              </div>
             </div>
           </div>
           <SheetFooter className="pt-6">
