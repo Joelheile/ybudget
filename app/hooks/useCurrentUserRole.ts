@@ -1,7 +1,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
-export type UserRole = "admin" | "editor" | "viewer";
+export type UserRole = "admin" | "finance" | "editor" | "viewer";
 
 export function useCurrentUserRole(): UserRole | undefined {
   const user = useQuery(api.users.queries.getCurrentUserProfile);
@@ -16,4 +16,9 @@ export function useCanEdit(): boolean {
 export function useIsAdmin(): boolean {
   const role = useCurrentUserRole();
   return role === "admin";
+}
+
+export function useCanViewAllTransactions(): boolean {
+  const role = useCurrentUserRole();
+  return role === "admin" || role === "finance";
 }

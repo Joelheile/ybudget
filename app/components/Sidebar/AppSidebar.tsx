@@ -1,7 +1,7 @@
 "use client";
 
 import { LayoutDashboard, SquareCheckBig, Upload, Users } from "lucide-react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import {
   Sidebar,
@@ -22,15 +22,20 @@ import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
 import { NavUser } from "./UserNav";
 
-const mainNav = [
+const baseMainNav = [
   { name: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { name: "Transaktionen", url: "/transactions", icon: SquareCheckBig },
-  { name: "Import", url: "/import", icon: Upload },
+  { name: "Import", url: "/import", icon: Upload, adminOnly: true },
   { name: "Förderer", url: "/donors", icon: Users },
 ];
 
 function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
   const user = useQuery(api.users.queries.getCurrentUserProfile);
+
+  const mainNav = useMemo(() => {
+    const isAdmin = user?.role === "admin";
+    return baseMainNav.filter((item) => !item.adminOnly || isAdmin);
+  }, [user?.role]);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" {...props}>

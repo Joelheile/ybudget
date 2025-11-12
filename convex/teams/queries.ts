@@ -62,7 +62,6 @@ export const getTeamMembers = query({
 
 export const getProjectTeams = query({
   args: { projectId: v.id("projects") },
-  returns: v.array(v.any()),
   handler: async (ctx, args) => {
     const teamProjects = await ctx.db
       .query("teamProjects")
@@ -81,7 +80,6 @@ export const getProjectTeams = query({
 
 export const getTeamProjects = query({
   args: { teamId: v.id("teams") },
-  returns: v.array(v.any()),
   handler: async (ctx, args) => {
     const teamProjects = await ctx.db
       .query("teamProjects")
@@ -139,7 +137,6 @@ export const getUserTeamMemberships = query({
 
 export const getUserAccessibleProjects = query({
   args: { userId: v.id("users") },
-  returns: v.array(v.any()),
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user?.organizationId) return [];

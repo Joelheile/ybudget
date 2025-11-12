@@ -125,7 +125,7 @@ export const fulfill = internalAction({
       if (event.type === "customer.subscription.deleted") {
         const subscription = event.data.object as any;
         await ctx.runMutation(
-          internal.subscriptions.mutations.cancelSubscription,
+          internal.subscriptions.functions.cancelSubscription,
           {
             stripeSubscriptionId: subscription.id,
           },

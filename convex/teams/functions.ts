@@ -38,7 +38,6 @@ export const renameTeam = mutation({
     teamId: v.id("teams"),
     name: v.string(),
   },
-
   handler: async (ctx, args) => {
     if (!args.name.trim()) {
       throw new Error("Team name cannot be empty");

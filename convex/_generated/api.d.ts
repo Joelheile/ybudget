@@ -26,6 +26,7 @@ import type * as subscriptions_functions from "../subscriptions/functions.js";
 import type * as subscriptions_queries from "../subscriptions/queries.js";
 import type * as teams_functions from "../teams/functions.js";
 import type * as teams_permissions from "../teams/permissions.js";
+import type * as teams_queries from "../teams/queries.js";
 import type * as transactions_functions from "../transactions/functions.js";
 import type * as transactions_queries from "../transactions/queries.js";
 import type * as users_functions from "../users/functions.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   "subscriptions/queries": typeof subscriptions_queries;
   "teams/functions": typeof teams_functions;
   "teams/permissions": typeof teams_permissions;
+  "teams/queries": typeof teams_queries;
   "transactions/functions": typeof transactions_functions;
   "transactions/queries": typeof transactions_queries;
   "users/functions": typeof users_functions;

@@ -31,7 +31,7 @@ export default function ImportTransactionsPageUI({
     <div id="tour-import-page">
       <PageHeader title="Transaktionen zuordnen" />
 
-      {totalCount === 0 ? (
+      {!current || totalCount === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-lg text-muted-foreground">
@@ -48,26 +48,24 @@ export default function ImportTransactionsPageUI({
                 onSelect={onExpectedTransactionSelect}
               />
             </div>
-            {current && (
-              <div className="mt-16 flex-shrink-0" id="tour-import-card">
-                <ImportTransactionCard
-                  title={current.counterparty || ""}
-                  description={current.description}
-                  amount={current.amount}
-                  date={new Date(current.date)}
-                  currentIndex={index + 1}
-                  totalCount={totalCount}
-                  projectId={form.projectId}
-                  categoryId={form.categoryId}
-                  donorId={form.donorId}
-                  selectedDonationIds={form.selectedDonationIds}
-                  onProjectChange={form.setProjectId}
-                  onCategoryChange={form.setCategoryId}
-                  onDonorChange={form.setDonorId}
-                  onDonationIdsChange={form.setSelectedDonationIds}
-                />
-              </div>
-            )}
+            <div className="mt-16 flex-shrink-0" id="tour-import-card">
+              <ImportTransactionCard
+                title={current.counterparty || ""}
+                description={current.description}
+                amount={current.amount}
+                date={new Date(current.date)}
+                currentIndex={index + 1}
+                totalCount={totalCount}
+                projectId={form.projectId}
+                categoryId={form.categoryId}
+                donorId={form.donorId}
+                selectedDonationIds={form.selectedDonationIds}
+                onProjectChange={form.setProjectId}
+                onCategoryChange={form.setCategoryId}
+                onDonorChange={form.setDonorId}
+                onDonationIdsChange={form.setSelectedDonationIds}
+              />
+            </div>
           </div>
           <div
             className="fixed bottom-0 left-0 right-0 pb-6 pt-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-center"

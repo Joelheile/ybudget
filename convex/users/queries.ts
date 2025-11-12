@@ -18,7 +18,6 @@ export const getUserOrganizationId = query({
 
 export const getCurrentUserProfile = query({
   args: {},
-  returns: v.any(),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
@@ -28,7 +27,6 @@ export const getCurrentUserProfile = query({
 
 export const getCurrentUserInternal = internalQuery({
   args: {},
-  returns: v.any(),
   handler: async (ctx) => {
     return await getCurrentUser(ctx);
   },
@@ -44,6 +42,7 @@ export const listOrganizationUsers = query({
       image: v.optional(v.string()),
       role: v.union(
         v.literal("admin"),
+        v.literal("finance"),
         v.literal("editor"),
         v.literal("viewer"),
       ),
@@ -65,7 +64,7 @@ export const listOrganizationUsers = query({
       name: u.name,
       email: u.email,
       image: u.image,
-      role: (u.role || "viewer") as "admin" | "editor" | "viewer",
+      role: (u.role || "viewer") as "admin" | "finance" | "editor" | "viewer",
     }));
   },
 });

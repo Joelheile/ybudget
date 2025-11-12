@@ -25,8 +25,12 @@ export default function ImportTransactionsPage() {
   const { initFromTransaction, clearForm } = form;
 
   useEffect(() => {
+    if (totalCount === 0) {
+      clearForm();
+      return;
+    }
     initFromTransaction(current);
-  }, [current, initFromTransaction]);
+  }, [current, initFromTransaction, totalCount, clearForm]);
 
   const handleNext = useCallback(() => {
     if (!transactions || index >= transactions.length - 1) return;
@@ -41,8 +45,8 @@ export default function ImportTransactionsPage() {
   }, [index, setIndex, clearForm]);
 
   const handleSave = useCallback(async () => {
-    if (!transactions || !transactions[index]) return;
-    const success = await save(transactions[index], {
+    if (!transactions || !transactions[index] || !current) return;
+    const success = await save(current, {
       projectId: form.projectId,
       categoryId: form.categoryId,
       donorId: form.donorId,
@@ -54,6 +58,7 @@ export default function ImportTransactionsPage() {
   }, [
     transactions,
     index,
+    current,
     form.projectId,
     form.categoryId,
     form.donorId,
@@ -66,14 +71,14 @@ export default function ImportTransactionsPage() {
     (expectedTransactionId: string) => {
       form.setMatchedTransactionId(expectedTransactionId);
       const expected = expectedTransactions.find(
-        (t) => t._id === expectedTransactionId,
+        (t) => t._id === expectedTransactionId
       );
       if (expected) {
         if (expected.projectId) form.setProjectId(expected.projectId);
         if (expected.categoryId) form.setCategoryId(expected.categoryId);
       }
     },
-    [expectedTransactions, form],
+    [expectedTransactions, form]
   );
 
   useImportKeyboard(handleNext, handlePrev, handleSave);

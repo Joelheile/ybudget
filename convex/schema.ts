@@ -39,7 +39,12 @@ export default defineSchema({
 
     organizationId: v.optional(v.id("organizations")),
     role: v.optional(
-      v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
+      v.union(
+        v.literal("admin"),
+        v.literal("finance"),
+        v.literal("editor"),
+        v.literal("viewer"),
+      ),
     ),
   })
     .index("email", ["email"])

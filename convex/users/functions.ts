@@ -8,7 +8,12 @@ export const addUserToOrganization = mutation({
     userId: v.id("users"),
     organizationId: v.id("organizations"),
     role: v.optional(
-      v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
+      v.union(
+        v.literal("admin"),
+        v.literal("finance"),
+        v.literal("editor"),
+        v.literal("viewer"),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -23,7 +28,12 @@ export const addUserToOrganization = mutation({
 export const updateUserRole = mutation({
   args: {
     userId: v.id("users"),
-    role: v.union(v.literal("admin"), v.literal("editor"), v.literal("viewer")),
+    role: v.union(
+      v.literal("admin"),
+      v.literal("finance"),
+      v.literal("editor"),
+      v.literal("viewer"),
+    ),
   },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");

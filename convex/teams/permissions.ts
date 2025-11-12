@@ -10,12 +10,20 @@ async function isOrgAdmin(ctx: QueryCtx | MutationCtx, userId: Id<"users">) {
   return user?.role === "admin";
 }
 
+async function isOrgAdminOrFinance(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<"users">,
+) {
+  const user = await ctx.db.get(userId);
+  return user?.role === "admin" || user?.role === "finance";
+}
+
 export async function getUserAccessibleProjectIds(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">,
   organizationId: Id<"organizations">,
 ): Promise<Id<"projects">[]> {
-  if (await isOrgAdmin(ctx, userId)) {
+  if (await isOrgAdminOrFinance(ctx, userId)) {
     const projects = await ctx.db
       .query("projects")
       .withIndex("by_organization", (q) =>
@@ -48,7 +56,7 @@ export async function canAccessProject(
   projectId: Id<"projects">,
   requiredRole: TeamRole = "viewer",
 ): Promise<boolean> {
-  if (await isOrgAdmin(ctx, userId)) return true;
+  if (await isOrgAdminOrFinance(ctx, userId)) return true;
 
   const userTeams = await ctx.db
     .query("teamMemberships")

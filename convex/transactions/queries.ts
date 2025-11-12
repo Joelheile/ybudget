@@ -56,6 +56,10 @@ export const getUnassignedProcessedTransactions = query({
 
     const user = await getCurrentUser(ctx);
 
+    if (user.role !== "admin") {
+      return [];
+    }
+
     const allTransactions = await ctx.db
       .query("transactions")
       .withIndex("by_organization", (q) =>
@@ -63,20 +67,35 @@ export const getUnassignedProcessedTransactions = query({
       )
       .collect();
 
-    const unassigned = allTransactions.filter(
-      (t) =>
-        t.status === "processed" &&
-        (!t.projectId || !t.categoryId || !t.donorId || t.donorId === ""),
-    );
+    const unassigned = allTransactions.filter((t) => {
+      if (t.status !== "processed") {
+        return false;
+      }
+      
+      if (!t.projectId) {
+        console.log("Missing projectId:", t.counterparty);
+        return true;
+      }
+      
+      if (!t.categoryId) {
+        console.log("Missing categoryId:", t.counterparty);
+        return true;
+      }
+      
+      if (t.amount > 0) {
+        if (!t.donorId || t.donorId === "") {
+          console.log("Missing donorId for income:", t.counterparty);
+          return true;
+        }
+      }
+      
+   
+      return false;
+    });
 
-    const filtered = await filterByProjectAccess(
-      ctx,
-      user._id,
-      user.organizationId,
-      unassigned,
-    );
 
-    return filtered.sort((a, b) => b.date - a.date);
+
+    return unassigned.sort((a, b) => b.date - a.date);
   },
 });
 
