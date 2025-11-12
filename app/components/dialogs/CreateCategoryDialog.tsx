@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
@@ -43,11 +43,13 @@ export function CreateCategoryDialog({
   >("non-profit");
   const [parentId, setParentId] = useState<Id<"categories"> | undefined>();
 
-  const categories = useQuery(api.categories.queries.getAllCategories);
-  const createCategory = useMutation(api.categories.mutations.createCategory);
+  const categories = useQuery(api.categories.functions.getAllCategories);
+  const createCategory = useMutation(api.categories.functions.createCategory);
 
   // Only allow selecting parent categories (no nested subcategories)
-  const parentCategories = categories?.filter((category) => !category.parentId);
+  const parentCategories = categories?.filter(
+    (category: Doc<"categories">) => !category.parentId
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +115,7 @@ export function CreateCategoryDialog({
                     | "non-profit"
                     | "asset-management"
                     | "purpose-operations"
-                    | "commercial-operations",
+                    | "commercial-operations"
                 )
               }
             >
@@ -144,7 +146,7 @@ export function CreateCategoryDialog({
               value={parentId || "none"}
               onValueChange={(value) =>
                 setParentId(
-                  value === "none" ? undefined : (value as Id<"categories">),
+                  value === "none" ? undefined : (value as Id<"categories">)
                 )
               }
             >
