@@ -20,7 +20,7 @@ interface Tier {
 const tiers: Tier[] = [
   {
     name: "YBudget Premium",
-    price: "49,99€",
+    price: "29,99€",
     period: "/ Monat",
     description: "Volle Flexibilität mit monatlicher Zahlung",
     features: [
@@ -39,10 +39,10 @@ const tiers: Tier[] = [
   },
   {
     name: "YBudget Premium Yearly",
-    price: "499,99€",
+    price: "299,00€",
     period: "/ Jahr",
-    priceCalculation: "49,99€ × 12 = 499,99€",
-    description: "Spare über 100€ mit jährlicher Zahlung",
+    priceCalculation: "29,99€ × 12 = 299,00€",
+    description: "Spare über 50€ mit jährlicher Zahlung",
     features: [
       "Unbegrenzte Projekte",
       "Unbegrenzte Transaktionen",
