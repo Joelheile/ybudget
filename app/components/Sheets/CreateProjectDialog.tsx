@@ -49,7 +49,6 @@ export function CreateProjectDialog({
       const projectId = await addProject({
         name: name.trim(),
         description: description.trim() || undefined,
-        description: description.trim() || undefined,
         parentId: parentId ? (parentId as any) : undefined,
       });
       toast.success("Projekt erstellt!");

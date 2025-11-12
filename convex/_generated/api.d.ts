@@ -27,6 +27,7 @@ import type * as subscriptions_mutations from "../subscriptions/mutations.js";
 import type * as subscriptions_queries from "../subscriptions/queries.js";
 import type * as transactions_functions from "../transactions/functions.js";
 import type * as transactions_queries from "../transactions/queries.js";
+import type * as users_functions from "../users/functions.js";
 import type * as users_getCurrentUser from "../users/getCurrentUser.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_permissions from "../users/permissions.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   "subscriptions/queries": typeof subscriptions_queries;
   "transactions/functions": typeof transactions_functions;
   "transactions/queries": typeof transactions_queries;
+  "users/functions": typeof users_functions;
   "users/getCurrentUser": typeof users_getCurrentUser;
   "users/mutations": typeof users_mutations;
   "users/permissions": typeof users_permissions;
