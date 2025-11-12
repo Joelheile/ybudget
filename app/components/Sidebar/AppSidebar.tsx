@@ -19,7 +19,6 @@ import { useQuery } from "convex-helpers/react/cache";
 import Image from "next/image";
 import { MainNav } from "./MainNav";
 import { ProjectNav } from "./ProjectNav";
-import { SearchForm } from "./SearchForm";
 import { NavUser } from "./UserNav";
 
 const mainNav = [
@@ -54,7 +53,7 @@ function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SearchForm />
+        {/* <SearchForm /> */}
       </SidebarHeader>
       <SidebarContent>
         <MainNav mainNav={mainNav} id="tour-main-nav" />
