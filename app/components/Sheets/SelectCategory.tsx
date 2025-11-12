@@ -33,13 +33,16 @@ export const SelectCategory = forwardRef<
   const activeItems = filtered[activeGroupIdx]?.children || [];
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Tab") {
+    if (e.key === "Tab" || e.key === "Enter") {
       if (!open) {
         e.preventDefault();
         setOpen(true);
       } else {
         e.preventDefault();
-        if (onTabPressed) {
+        if (e.key === "Enter" && activeItems[activeItemIdx]) {
+          onValueChange(activeItems[activeItemIdx]._id);
+          setOpen(false);
+        } else if (e.key === "Tab" && onTabPressed) {
           setOpen(false);
           onTabPressed();
         }
@@ -67,12 +70,6 @@ export const SelectCategory = forwardRef<
       e.preventDefault();
       setActiveGroupIdx((prev) => (prev > 0 ? prev - 1 : filtered.length - 1));
       setActiveItemIdx(0);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (activeItems[activeItemIdx]) {
-        onValueChange(activeItems[activeItemIdx]._id);
-        setOpen(false);
-      }
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpen(false);

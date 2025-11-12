@@ -54,6 +54,7 @@ export function TransactionSheet({
   const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
   const projectButtonRef = useRef<HTMLButtonElement>(null);
   const categoryButtonRef = useRef<HTMLButtonElement>(null);
+  const donorButtonRef = useRef<HTMLButtonElement>(null);
 
   const addTransaction = useMutation(
     api.transactions.functions.createExpectedTransaction,
@@ -61,23 +62,18 @@ export function TransactionSheet({
 
   const dateColor = date ? "text-foreground" : "text-muted-foreground";
 
-  const handleAmountComplete = () => {
-    setTimeout(() => {
-      dateButtonRef.current?.focus();
-    }, 0);
+  const focusNext = (ref: React.RefObject<HTMLElement>) => {
+    setTimeout(() => ref.current?.focus(), 0);
   };
 
-  const handleDateSelected = () => {
-    setDateOpen(false);
-    setTimeout(() => {
-      counterpartyInputRef.current?.focus();
-    }, 0);
-  };
-
-  const handleProjectSelected = () => {
-    setTimeout(() => {
-      categoryButtonRef.current?.focus();
-    }, 0);
+  const handleKeyPress = (
+    e: React.KeyboardEvent,
+    nextRef: React.RefObject<HTMLElement>,
+  ) => {
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      focusNext(nextRef);
+    }
   };
 
   const handleSubmit = async () => {
@@ -160,7 +156,13 @@ export function TransactionSheet({
               ref={amountInputRef}
               value={amount}
               onChange={setAmount}
-              onTabPressed={handleAmountComplete}
+              onTabPressed={() => focusNext(dateButtonRef)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  focusNext(dateButtonRef);
+                }
+              }}
               autoFocus
             />
           </div>
@@ -173,6 +175,12 @@ export function TransactionSheet({
                   ref={dateButtonRef}
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab") {
+                      e.preventDefault();
+                      focusNext(counterpartyInputRef);
+                    }
+                  }}
                 >
                   <CalendarIcon className={cn("mr-2 h-4 w-4", dateColor)} />
                   <span className={cn("font-medium", dateColor)}>
@@ -186,7 +194,8 @@ export function TransactionSheet({
                   selected={date}
                   onSelect={(newDate) => {
                     setDate(newDate);
-                    handleDateSelected();
+                    setDateOpen(false);
+                    focusNext(counterpartyInputRef);
                   }}
                   initialFocus
                 />
@@ -206,12 +215,7 @@ export function TransactionSheet({
               }
               value={counterparty}
               onChange={(e) => setCounterparty(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Tab" && !e.shiftKey) {
-                  e.preventDefault();
-                  descriptionInputRef.current?.focus();
-                }
-              }}
+              onKeyDown={(e) => handleKeyPress(e, descriptionInputRef)}
             />
           </div>
 
@@ -227,12 +231,7 @@ export function TransactionSheet({
               }
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Tab" && !e.shiftKey) {
-                  e.preventDefault();
-                  projectButtonRef.current?.focus();
-                }
-              }}
+              onKeyDown={(e) => handleKeyPress(e, projectButtonRef)}
               className="min-h-[80px] resize-none"
             />
           </div>
@@ -243,9 +242,9 @@ export function TransactionSheet({
               value={project}
               onValueChange={(value) => {
                 setProject(value);
-                handleProjectSelected();
+                focusNext(categoryButtonRef);
               }}
-              onTabPressed={() => {}}
+              onTabPressed={() => focusNext(categoryButtonRef)}
             />
           </div>
 
@@ -254,14 +253,18 @@ export function TransactionSheet({
             <SelectCategory
               ref={categoryButtonRef}
               value={category as Id<"categories">}
-              onValueChange={setCategory}
-              onTabPressed={() => {}}
+              onValueChange={(value) => {
+                setCategory(value);
+                focusNext(donorButtonRef);
+              }}
+              onTabPressed={() => focusNext(donorButtonRef)}
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>Förderer</Label>
             <SelectDonor
+              ref={donorButtonRef}
               value={donor}
               onValueChange={setDonor}
               categoryId={category ? (category as Id<"categories">) : undefined}

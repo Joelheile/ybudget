@@ -20,7 +20,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex-helpers/react/cache";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { useRef, useState } from "react";
+import { forwardRef, useState } from "react";
 
 interface SelectDonorProps {
   value: string;
@@ -29,17 +29,15 @@ interface SelectDonorProps {
   categoryId?: Id<"categories">;
 }
 
-export function SelectDonor({
-  value,
-  onValueChange,
-  onTabPressed,
-  categoryId,
-}: SelectDonorProps) {
-  const [open, setOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const donors = useQuery(api.donors.queries.getAllDonors);
+export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
+  function SelectDonor(
+    { value, onValueChange, onTabPressed, categoryId },
+    buttonRef,
+  ) {
+    const [open, setOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState(0);
+    const donors = useQuery(api.donors.queries.getAllDonors);
 
   const selectedDonor = donors?.find((d) => d._id.toString() === value);
   const displayText = selectedDonor?.name || "Förderer suchen...";
@@ -60,13 +58,15 @@ export function SelectDonor({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Tab") {
+    if (e.key === "Tab" || e.key === "Enter") {
       if (!open) {
         e.preventDefault();
         setOpen(true);
       } else {
         e.preventDefault();
-        if (onTabPressed) {
+        if (e.key === "Enter" && donors && donors[highlightedIndex]) {
+          handleSelect(donors[highlightedIndex]._id.toString());
+        } else if (e.key === "Tab" && onTabPressed) {
           setOpen(false);
           onTabPressed();
         }
@@ -84,11 +84,6 @@ export function SelectDonor({
       setHighlightedIndex((prev) =>
         prev > 0 ? prev - 1 : (donors?.length ?? 0) - 1,
       );
-    } else if (e.key === "Enter" && open) {
-      e.preventDefault();
-      if (donors && donors[highlightedIndex]) {
-        handleSelect(donors[highlightedIndex]._id.toString());
-      }
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpen(false);
@@ -180,4 +175,5 @@ export function SelectDonor({
       />
     </>
   );
-}
+  },
+);
