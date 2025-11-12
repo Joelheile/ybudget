@@ -20,7 +20,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { useAction } from "convex/react";
-import { ChevronsUpDown, CreditCard, LogOut, Users } from "lucide-react";
+import {
+  ChevronsUpDown,
+  CreditCard,
+  Folder,
+  LogOut,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -115,7 +121,13 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
                 <DropdownMenuItem asChild>
                   <Link href="/settings/users">
                     <Users />
-                    Team
+                    Benutzer
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/teams">
+                    <Folder />
+                    Teams
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
