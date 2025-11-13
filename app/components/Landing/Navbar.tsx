@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -18,7 +19,7 @@ export function Navbar() {
 
   const scrollToSection = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
+    href: string
   ) => {
     e.preventDefault();
     const element = document.querySelector(href);
@@ -34,7 +35,21 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-slate-900">
-              <span className="text-primary">YBudget</span>
+              <Image
+                src="/AppIcon.png"
+                alt="YBudget"
+                width={48}
+                height={48}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  const link = document.createElement("a");
+                  link.href = "/AppIcon.png";
+                  link.download = "YBudget-Icon.png";
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              />
             </Link>
           </div>
 
