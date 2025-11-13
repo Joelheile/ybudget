@@ -70,7 +70,7 @@ We're building the next generation of software for NGOs – and we'd love your h
 **How to contribute:**
 
 1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feat/amazing-feature`)
 3. Commit your changes
 4. Open a Pull Request
 
