@@ -2,7 +2,7 @@
 
 > Open-source budget management built for NGOs, by NGOs.
 
-YBudget helps gemeinnützige Vereine in Germany manage their budgets when Excel isn't enough anymore. Built as a capstone project at [CODE University](https://code.berlin/) for the [Young Founders Network e.V.](https://youngfounders.network)
+YBudget helps german non profit associations manage their budgets when Excel isn't enough anymore. Built as a capstone project at [CODE University](https://code.berlin/) for the [Young Founders Network e.V.](https://youngfounders.network) by [Joël Heil Escobar](https://www.linkedin.com/in/joel-heil-escobar)
 
 **The problem?** Most budget tools are too expensive, too complex, or don't provide the transparency non-profits need.
 
@@ -11,9 +11,8 @@ YBudget helps gemeinnützige Vereine in Germany manage their budgets when Excel 
 ## Features
 
 - 📊 **Budget Planning** - Organize projects by donors, track expenses in real-time, get warnings when approaching limits
-- 💳 **Transaction Import** - Import CSV from all German banks (Sparkasse, Volksbank, DKB, N26) with smart matching
+- 💳 **Transaction Import** - Import CSV from all German banks (Sparkasse, Volksbank, & Moss) with smart matching
 - 🎯 **Project Organization** - Assign expenses to projects, see remaining budgets at a glance
-- 📈 **Reports** - Generate professional Verwendungsnachweise for donors in PDF format
 
 ## Tech Stack
 
@@ -65,7 +64,7 @@ npx convex deploy   # Deploy Convex functions
 
 ## Contributing
 
-We're building the next generation of software for NGOs – and we'd love your help! 🚀
+We're building the next generation of software for NGOs and we'd love your help on our mission to make budgeting as easy as possible 🙌
 
 **How to contribute:**
 
@@ -79,7 +78,7 @@ We're building the next generation of software for NGOs – and we'd love your h
 
 ## About
 
-Built by [Young Founders Network e.V.](https://youngfounders.network) – a non-profit supporting young founders through startup resources, community, and entrepreneurial education.
+Built by Joël, one of the founders of the [Young Founders Network e.V.](https://youngfounders.network) a non-profit supporting young founders through startup resources, community, and entrepreneurial education.
 
 This started as a capstone project at [CODE University](https://code.berlin/) to solve our own budget management challenges. Now we're open-sourcing it for other NGOs.
 
