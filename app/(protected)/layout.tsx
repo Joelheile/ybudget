@@ -40,7 +40,7 @@ const StableContent = memo(function StableContent({
 
   const user = useQuery(api.users.queries.getCurrentUserProfile);
   const subscription = useQuery(
-    api.subscriptions.queries.getSubscriptionStatus,
+    api.subscriptions.queries.getSubscriptionStatus
   );
 
   const shouldShowPaywall =
@@ -63,9 +63,10 @@ const StableContent = memo(function StableContent({
         >
           <SidebarProvider>
             <AppSidebar />
-            {shouldShowTrialBanner && <TrialBanner />}
-            {shouldShowPaywall && <Paywall />}
             <div className="flex flex-col w-full">
+              {shouldShowTrialBanner && <TrialBanner />}
+              {shouldShowPaywall && <Paywall />}
+
               <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
                 {children}
                 {showOnboarding && (
