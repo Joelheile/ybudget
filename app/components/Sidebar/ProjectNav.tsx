@@ -26,11 +26,13 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { useCanEdit } from "@/hooks/useCurrentUserRole";
 
 function ProjectNavComponent({ id }: { id?: string }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const pathname = usePathname();
   const projects = useQuery(api.projects.queries.getAllProjects);
+  const canEdit = useCanEdit();
 
   if (projects === undefined) {
     return (
@@ -51,7 +53,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
 
   const items = parentProjects.map((project: Doc<"projects">) => {
     const childProjects = projects.filter(
-      (p: Doc<"projects">) => p.parentId === project._id,
+      (p: Doc<"projects">) => p.parentId === project._id
     );
 
     return {
@@ -71,10 +73,12 @@ function ProjectNavComponent({ id }: { id?: string }) {
   return (
     <SidebarGroup id={id}>
       <SidebarGroupLabel>Projekte</SidebarGroupLabel>
-      <SidebarGroupAction onClick={() => setDialogOpen(true)}>
-        <Plus />
-        <span className="sr-only">Projekt hinzufügen</span>
-      </SidebarGroupAction>
+      {canEdit && (
+        <SidebarGroupAction onClick={() => setDialogOpen(true)}>
+          <Plus />
+          <span className="sr-only">Projekt hinzufügen</span>
+        </SidebarGroupAction>
+      )}
       <SidebarMenu>
         {items.map(
           (item: {
@@ -119,7 +123,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
-                          ),
+                          )
                         )}
                       </SidebarMenuSub>
                     </CollapsibleContent>
@@ -127,10 +131,12 @@ function ProjectNavComponent({ id }: { id?: string }) {
                 ) : null}
               </SidebarMenuItem>
             </Collapsible>
-          ),
+          )
         )}
       </SidebarMenu>
-      <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      {canEdit && (
+        <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      )}
     </SidebarGroup>
   );
 }
