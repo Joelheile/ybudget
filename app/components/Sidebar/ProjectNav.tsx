@@ -53,7 +53,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
 
   const items = parentProjects.map((project: Doc<"projects">) => {
     const childProjects = projects.filter(
-      (p: Doc<"projects">) => p.parentId === project._id
+      (p: Doc<"projects">) => p.parentId === project._id,
     );
 
     return {
@@ -123,7 +123,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
-                          )
+                          ),
                         )}
                       </SidebarMenuSub>
                     </CollapsibleContent>
@@ -131,7 +131,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
                 ) : null}
               </SidebarMenuItem>
             </Collapsible>
-          )
+          ),
         )}
       </SidebarMenu>
       {canEdit && (

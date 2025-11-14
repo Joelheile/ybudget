@@ -9,7 +9,7 @@ interface TrialBannerProps {
 
 export function TrialBanner({ onUpgradeClick }: TrialBannerProps) {
   const subscription = useQuery(
-    api.subscriptions.queries.getSubscriptionStatus
+    api.subscriptions.queries.getSubscriptionStatus,
   );
   const userRole = useCurrentUserRole();
 
