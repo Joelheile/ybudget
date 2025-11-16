@@ -149,7 +149,7 @@ function ProjectNavComponent({ id }: { id?: string }) {
                           )
                         )}
                       </SidebarMenuSub>
-                    </CollapsibleContent>
+                     </CollapsibleContent>
                   </>
                 ) : null}
               </SidebarMenuItem>
