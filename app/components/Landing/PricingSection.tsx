@@ -19,6 +19,21 @@ interface Tier {
 
 const tiers: Tier[] = [
   {
+    name: "YBudget Free",
+    price: "0€",
+    period: "/ für immer",
+    description: "Perfekt für kleine Vereine zum Ausprobieren",
+    features: [
+      "Bis zu 3 Projekte",
+      "Unbegrenzte Transaktionen",
+      "CSV-Import",
+      "Basis-Kategorisierung",
+    ],
+    cta: "Kostenlos starten",
+    href: "/login",
+    popular: false,
+  },
+  {
     name: "YBudget Premium",
     price: "29,99€",
     period: "/ Monat",
@@ -28,12 +43,9 @@ const tiers: Tier[] = [
       "Unbegrenzte Transaktionen",
       "CSV-Import",
       "Erweiterte Kategorisierung",
-      "Steuerliche Zuordnung",
-      "PDF-Export mit Branding",
-      "Prioritäts-Support",
       "Multi-User",
     ],
-    cta: "2 Wochen kostenlos testen",
+    cta: "Jetzt upgraden",
     href: "/login",
     popular: false,
   },
@@ -41,19 +53,16 @@ const tiers: Tier[] = [
     name: "YBudget Premium Yearly",
     price: "299,00€",
     period: "/ Jahr",
-    priceCalculation: "29,99€ × 12 = 299,00€",
-    description: "Spare über 50€ mit jährlicher Zahlung",
+    priceCalculation: "29,99€ × 12 = 359,88€",
+    description: "Spare über 60€ mit jährlicher Zahlung",
     features: [
       "Unbegrenzte Projekte",
       "Unbegrenzte Transaktionen",
       "CSV-Import",
       "Erweiterte Kategorisierung",
-      "Steuerliche Zuordnung",
-      "PDF-Export mit Branding",
-      "Prioritäts-Support",
       "Multi-User",
     ],
-    cta: "2 Wochen kostenlos testen",
+    cta: "Beste Wahl - Jetzt upgraden",
     href: "/login",
     popular: true,
   },
@@ -76,12 +85,12 @@ export function PricingSection() {
             Ohne versteckte Kosten.
           </h2>
           <p className="mx-auto mt-6 max-w-3xl text-lg text-slate-600">
-            YBudget ist kostenlos für kleine Vereine. Größere Organisationen
-            zahlen nur für das, was sie nutzen.
+            Starte kostenlos mit bis zu 3 Projekten. Braucht dein Verein mehr?
+            Upgrade jederzeit auf Premium.
           </p>
         </motion.div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-2 max-w-4xl mx-auto">
+        <div className="mt-16 grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
           {tiers.map((tier, index) => (
             <motion.div
               key={tier.name}

@@ -1,9 +1,7 @@
-// convex/payments.ts
-
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
-import { internalMutation } from "./_generated/server";
-import { getCurrentUser } from "./users/getCurrentUser";
+import type { Id } from "../_generated/dataModel";
+import { internalMutation } from "../_generated/server";
+import { getCurrentUser } from "../users/getCurrentUser";
 
 export const create = internalMutation({
   args: { tier: v.union(v.literal("monthly"), v.literal("yearly")) },
@@ -59,13 +57,7 @@ export const fulfill = internalMutation({
       paidAt: Date.now(),
     });
 
-    await db.patch(payment.organizationId, {
-      subscriptionStatus: "active" as const,
-      subscriptionTier: payment.tier,
-      stripeCustomerId,
-      stripeSubscriptionId,
-    });
-
     return null;
   },
 });
+
