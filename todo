@@ -1,16 +1,15 @@
-
-- [ ] add analytics (posthog)
 - [ ] check how to show expected transactions in table (also if they are already matched)
 - [ ] refactor every component into UX and UI component
 
 archive (latest on top):
 
+- [x] add analytics (posthog)
 - [x] csv export for donors
 - [x] add user groups and view permissions on group/project level & user level
 - [x] add more categories
 - [x] add income to categories
 - [x] add simple user roles (person creating org is admin), all new ones are editors (can edit table, match and add transactions), then you have viewers who can only see transaction overview, donors, dashboard (not matching or sheets)
-- [x] add donor expense restrictions (only show donor if restriction is met) 
+- [x] add donor expense restrictions (only show donor if restriction is met)
 - [x] load categories from database (maybe style nicer) and double-check with chatgpt again
 - [x] UX improvements for creating transaction (easier key handling)
 - [x] save if user needs onboarding in locally in browser, so that it doesnt have to do it every time
