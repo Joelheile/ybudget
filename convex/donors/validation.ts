@@ -5,6 +5,7 @@ export async function validateDonorForCategory(
   ctx: QueryCtx | MutationCtx,
   donorId: Id<"donors"> | undefined,
   categoryId: Id<"categories"> | undefined,
+  organizationId?: Id<"organizations">,
 ): Promise<void> {
   if (!donorId) {
     return;
@@ -17,6 +18,10 @@ export async function validateDonorForCategory(
   const donor = await ctx.db.get(donorId);
   if (!donor) {
     throw new Error("Donor not found");
+  }
+
+  if (organizationId && donor.organizationId !== organizationId) {
+    throw new Error("Access denied");
   }
 
   const category = await ctx.db.get(categoryId);

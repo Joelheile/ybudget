@@ -41,6 +41,9 @@ export const updateUserRole = mutation({
 
     const targetUser = await ctx.db.get(args.userId);
     if (!targetUser) throw new Error("User not found");
+    if (targetUser.organizationId !== currentUser.organizationId) {
+      throw new Error("Access denied");
+    }
 
     if (targetUser.role === "admin" && args.role !== "admin") {
       const allUsers = await ctx.db

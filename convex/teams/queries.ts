@@ -43,6 +43,12 @@ export const getTeamMembers = query({
     }),
   ),
   handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx);
+    const team = await ctx.db.get(args.teamId);
+    if (team && team.organizationId !== currentUser.organizationId) {
+      throw new Error("Access denied");
+    }
+
     const memberships = await ctx.db
       .query("teamMemberships")
       .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
@@ -67,6 +73,12 @@ export const getTeamMembers = query({
 export const getProjectTeams = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx);
+    const project = await ctx.db.get(args.projectId);
+    if (project && project.organizationId !== currentUser.organizationId) {
+      throw new Error("Access denied");
+    }
+
     const teamProjects = await ctx.db
       .query("teamProjects")
       .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
@@ -85,6 +97,12 @@ export const getProjectTeams = query({
 export const getTeamProjects = query({
   args: { teamId: v.id("teams") },
   handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx);
+    const team = await ctx.db.get(args.teamId);
+    if (team && team.organizationId !== currentUser.organizationId) {
+      throw new Error("Access denied");
+    }
+
     const teamProjects = await ctx.db
       .query("teamProjects")
       .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
@@ -146,8 +164,12 @@ export const getUserTeamMemberships = query({
 export const getUserAccessibleProjects = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx);
     const user = await ctx.db.get(args.userId);
     if (!user?.organizationId) return [];
+    if (user.organizationId !== currentUser.organizationId) {
+      throw new Error("Access denied");
+    }
 
     const memberships = await ctx.db
       .query("teamMemberships")
