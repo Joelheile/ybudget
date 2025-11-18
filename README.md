@@ -80,6 +80,8 @@ We're building the next generation of software for NGOs and we'd love your help 
 
 We take security seriously at YBudget. Here's how we protect your financial data and keep operations safe for NGOs.
 
+**📋 Threat Model:** For a comprehensive threat analysis including risk assessment and security controls, see [Threatmodel](security/Threatmodel.md)
+
 #### Authentication & Authorization
 
 **1. OAuth instead of Password**
