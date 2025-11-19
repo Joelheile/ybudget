@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 export type UserRole = "admin" | "finance" | "editor" | "viewer";
 
 export function useCurrentUserRole(): UserRole | undefined {
-  const user = useQuery(api.users.queries.getCurrentUserProfile);
+  const user = useQuery(api.users.queries.getUser);
   return user?.role || "viewer";
 }
 

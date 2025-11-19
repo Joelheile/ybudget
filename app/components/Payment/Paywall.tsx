@@ -31,7 +31,7 @@ export function Paywall({ open, onOpenChange }: PaywallProps) {
     setIsLoading(false);
   }
 
-  const user = useQuery(api.users.queries.getCurrentUserProfile);
+  const user = useQuery(api.users.queries.getUser);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

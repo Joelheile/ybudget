@@ -22,7 +22,7 @@ export default function ProtectedLayout({
   const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
   const organizationId = useQuery(api.users.queries.getUserOrganizationId, {});
-  const userProfile = useQuery(api.users.queries.getCurrentUserProfile);
+  const userProfile = useQuery(api.users.queries.getUser);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

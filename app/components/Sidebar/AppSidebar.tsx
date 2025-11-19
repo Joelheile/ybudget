@@ -30,7 +30,7 @@ const baseMainNav = [
 ];
 
 function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
-  const user = useQuery(api.users.queries.getCurrentUserProfile);
+  const user = useQuery(api.users.queries.getUser);
 
   const mainNav = useMemo(() => {
     const isAdmin = user?.role === "admin";
