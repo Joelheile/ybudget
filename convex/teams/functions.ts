@@ -49,6 +49,9 @@ export const renameTeam = mutation({
     if (!team) {
       throw new Error("Team not found");
     }
+    if (team.organizationId !== user.organizationId) {
+      throw new Error("Access denied");
+    }
 
     const isOrgAdmin = user.role === "admin";
     const isTeamAdminUser = await isTeamAdmin(ctx, user._id, args.teamId);
@@ -99,6 +102,11 @@ export const removeTeamMember = mutation({
 
     if (!membership) throw new Error("Membership not found");
 
+    const team = await ctx.db.get(membership.teamId);
+    if (team && team.organizationId !== user.organizationId) {
+      throw new Error("Access denied");
+    }
+
     await requireTeamAdmin(ctx, user._id, membership.teamId);
     await ctx.db.delete(args.membershipId);
   },
@@ -114,6 +122,11 @@ export const updateTeamMemberRole = mutation({
     const membership = await ctx.db.get(args.membershipId);
 
     if (!membership) throw new Error("Membership not found");
+
+    const team = await ctx.db.get(membership.teamId);
+    if (team && team.organizationId !== user.organizationId) {
+      throw new Error("Access denied");
+    }
 
     await requireTeamAdmin(ctx, user._id, membership.teamId);
     await ctx.db.patch(args.membershipId, { role: args.role });

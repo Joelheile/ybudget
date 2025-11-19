@@ -25,7 +25,7 @@ export const createExpectedTransaction = mutation({
       throw new Error("No access to this project");
     }
 
-    await validateDonorForCategory(ctx, args.donorId, args.categoryId);
+    await validateDonorForCategory(ctx, args.donorId, args.categoryId, user.organizationId);
 
     return await ctx.db.insert("transactions", {
       projectId: args.projectId,
@@ -111,6 +111,9 @@ export const updateTransaction = mutation({
 
     const transaction = await ctx.db.get(transactionId);
     if (!transaction) throw new Error("Transaction not found");
+    if (transaction.organizationId !== user.organizationId) {
+      throw new Error("Access denied");
+    }
 
     if (
       transaction.projectId &&
@@ -129,7 +132,7 @@ export const updateTransaction = mutation({
     const finalDonorId = updates.donorId ?? transaction.donorId;
     const finalCategoryId = updates.categoryId ?? transaction.categoryId;
 
-    await validateDonorForCategory(ctx, finalDonorId, finalCategoryId);
+    await validateDonorForCategory(ctx, finalDonorId, finalCategoryId, user.organizationId);
 
     const validUpdates = Object.fromEntries(
       Object.entries(updates).filter(([_, value]) => value !== undefined),
