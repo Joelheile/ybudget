@@ -39,7 +39,7 @@ export default function UsersPage() {
     } catch (error) {
       posthog.captureException(error as Error);
       toast.error(
-        "Fehler beim Aktualisieren der Rolle. Mindestens ein Admin ist erforderlich.",
+        "Fehler beim Aktualisieren der Rolle. Mindestens ein Admin ist erforderlich."
       );
     }
   };
@@ -94,7 +94,10 @@ export default function UsersPage() {
                 {users.map((user) => (
                   <UserRow
                     key={user._id}
-                    user={user}
+                    user={{
+                      ...user,
+                      role: user.role || "viewer",
+                    }}
                     onRoleChange={handleRoleChange}
                     isAdmin={isAdmin}
                   />
