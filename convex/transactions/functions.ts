@@ -1,9 +1,10 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
-import { validateDonorForCategory } from "../donors/validation";
+import { type Id } from "../_generated/dataModel";
+import { type MutationCtx, mutation } from "../_generated/server";
 import { canAccessProject } from "../teams/permissions";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
+import { validateDonorCategory } from "./validateDonorCategory";
 
 export const createExpectedTransaction = mutation({
   args: {
@@ -16,7 +17,6 @@ export const createExpectedTransaction = mutation({
     status: v.literal("expected"),
     donorId: v.optional(v.id("donors")),
   },
-
   handler: async (ctx, args) => {
     await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
@@ -25,18 +25,16 @@ export const createExpectedTransaction = mutation({
       throw new Error("No access to this project");
     }
 
-    await validateDonorForCategory(ctx, args.donorId, args.categoryId, user.organizationId);
+    await validateDonorCategory(
+      ctx,
+      args.donorId,
+      args.categoryId,
+      user.organizationId,
+    );
 
-    return await ctx.db.insert("transactions", {
-      projectId: args.projectId,
-      date: args.date,
-      amount: args.amount,
-      description: args.description,
-      counterparty: args.counterparty,
-      categoryId: args.categoryId,
-      donorId: args.donorId,
+    return ctx.db.insert("transactions", {
+      ...args,
       importedBy: user._id,
-      status: args.status,
       organizationId: user.organizationId,
     });
   },
@@ -56,7 +54,6 @@ export const createImportedTransaction = mutation({
     counterparty: v.string(),
     accountName: v.optional(v.string()),
   },
-
   handler: async (ctx, args) => {
     await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
@@ -73,19 +70,13 @@ export const createImportedTransaction = mutation({
     if (existing) return { skipped: true };
 
     await ctx.db.insert("transactions", {
+      ...args,
       organizationId: user.organizationId,
       importedBy: user._id,
-      date: args.date,
-      amount: args.amount,
-      description: args.description,
-      counterparty: args.counterparty,
-      importedTransactionId: args.importedTransactionId,
-      importSource: args.importSource,
       status: "processed",
       projectId: undefined,
       categoryId: undefined,
       donorId: undefined,
-      accountName: args.accountName,
     });
 
     return { inserted: true };
@@ -104,16 +95,14 @@ export const updateTransaction = mutation({
     matchedTransactionId: v.optional(v.string()),
     status: v.optional(v.union(v.literal("expected"), v.literal("processed"))),
   },
-
   handler: async (ctx, { transactionId, ...updates }) => {
     await requireRole(ctx, "editor");
     const user = await getCurrentUser(ctx);
 
     const transaction = await ctx.db.get(transactionId);
     if (!transaction) throw new Error("Transaction not found");
-    if (transaction.organizationId !== user.organizationId) {
+    if (transaction.organizationId !== user.organizationId)
       throw new Error("Access denied");
-    }
 
     if (
       transaction.projectId &&
@@ -129,15 +118,17 @@ export const updateTransaction = mutation({
       throw new Error("No access to the new project");
     }
 
-    const finalDonorId = updates.donorId ?? transaction.donorId;
-    const finalCategoryId = updates.categoryId ?? transaction.categoryId;
-
-    await validateDonorForCategory(ctx, finalDonorId, finalCategoryId, user.organizationId);
+    await validateDonorCategory(
+      ctx,
+      updates.donorId ?? transaction.donorId,
+      updates.categoryId ?? transaction.categoryId,
+      user.organizationId,
+    );
 
     const validUpdates = Object.fromEntries(
       Object.entries(updates).filter(([_, value]) => value !== undefined),
     );
 
-    return await ctx.db.patch(transactionId, validUpdates);
+    return ctx.db.patch(transactionId, validUpdates);
   },
 });
