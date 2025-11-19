@@ -22,7 +22,7 @@ export default function ProtectedLayout({
   const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
   const organizationId = useQuery(api.users.queries.getUserOrganizationId, {});
-  const userProfile = useQuery(api.users.queries.getCurrentUserProfile);
+  const user = useQuery(api.users.queries.getCurrentUserProfile);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -31,15 +31,15 @@ export default function ProtectedLayout({
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
-    if (userProfile?._id) {
-      posthog.identify(userProfile._id, {
-        email: userProfile.email,
-        name: userProfile.name,
-        role: userProfile.role,
-        organizationId: userProfile.organizationId,
+    if (user?._id) {
+      posthog.identify(user._id, {
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        organizationId: user.organizationId,
       });
     }
-  }, [userProfile]);
+  }, [user]);
 
   if (isLoading) {
     return (

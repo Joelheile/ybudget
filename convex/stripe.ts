@@ -2,7 +2,7 @@
 
 import { v } from "convex/values";
 import Stripe from "stripe";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { action, internalAction } from "./_generated/server";
 
 const getTiers = (stripeKey: string) => {
@@ -26,7 +26,7 @@ export const pay = action({
   returns: v.union(v.string(), v.null()),
   handler: async (ctx, args): Promise<string | null> => {
     const user: any = await ctx.runQuery(
-      internal.users.queries.getCurrentUserInternal,
+      api.users.queries.getCurrentUserProfile,
     );
     const domain = process.env.HOSTING_URL ?? "http://localhost:3000";
     const stripe = new Stripe(process.env.STRIPE_KEY!, {
@@ -66,7 +66,7 @@ export const createCustomerPortalSession = action({
   returns: v.string(),
   handler: async (ctx): Promise<string> => {
     const user: any = await ctx.runQuery(
-      internal.users.queries.getCurrentUserInternal,
+      api.users.queries.getCurrentUserProfile,
     );
 
     if (!user.organizationId) {

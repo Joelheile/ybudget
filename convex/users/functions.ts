@@ -21,7 +21,6 @@ export const addUserToOrganization = mutation({
       organizationId: args.organizationId,
       role: args.role ?? "editor",
     });
-    return null;
   },
 });
 
@@ -38,31 +37,25 @@ export const updateUserRole = mutation({
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
     const currentUser = await getCurrentUser(ctx);
-
     const targetUser = await ctx.db.get(args.userId);
+    
     if (!targetUser) throw new Error("User not found");
-    if (targetUser.organizationId !== currentUser.organizationId) {
-      throw new Error("Access denied");
-    }
+    if (targetUser.organizationId !== currentUser.organizationId) throw new Error("Access denied");
 
     if (targetUser.role === "admin" && args.role !== "admin") {
-      const allUsers = await ctx.db
+      let adminCount = 0;
+      const users = ctx.db
         .query("users")
         .withIndex("by_organization", (q) =>
           q.eq("organizationId", currentUser.organizationId),
-        )
-        .collect();
-
-      const adminCount = allUsers.filter((u) => u.role === "admin").length;
-
-      if (adminCount <= 1) {
-        throw new Error(
-          "Der letzte Admin kann nicht entfernt werden. Mindestens ein Admin ist erforderlich.",
         );
+      for await (const user of users) {
+        if (user.role === "admin") adminCount++;
+        if (adminCount > 1) break;
       }
+      if (adminCount <= 1) throw new Error("Der letzte Admin kann nicht entfernt werden. Mindestens ein Admin ist erforderlich.");
     }
 
     await ctx.db.patch(args.userId, { role: args.role });
-    return null;
   },
 });
