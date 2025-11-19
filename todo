@@ -1,10 +1,14 @@
-- [ ] refactor every component into UX and UI component
-- [ ] check all functions & mutations for unnecessary functions or doubling ones
+- [ ] implement budgeting for departments
+- [ ] call projects deparments and make clear that there are departments and subprojects -> departments are projects without parent id
+- [ ] change projects to have 10 free projects (with departments etc)
+- [ ] implement upload of expense reimbursements (Auslagenerstattungen)
 
 - [ ] check how to show expected transactions in table (also if they are already matched)
 
 archive (latest on top):
 
+- [x] check all functions & mutations for unnecessary functions or doubling ones
+- [x] refactor every component into UX and UI component
 - [x] add analytics (posthog)
 - [x] csv export for donors
 - [x] add user groups and view permissions on group/project level & user level
