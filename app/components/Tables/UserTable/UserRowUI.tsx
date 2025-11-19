@@ -10,7 +10,7 @@ import {
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Id } from "@/convex/_generated/dataModel";
 import { UserRole } from "@/convex/users/permissions";
-import { getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/getInitials";
 import { Shield } from "lucide-react";
 
 interface UserRowUIProps {
