@@ -48,7 +48,7 @@ export default defineSchema({
   transactions: defineTable({
     projectId: v.optional(v.id("projects")),
     organizationId: v.id("organizations"),
-    date: v.number(), //epoch timestamp
+ date: v.number(), //epoch timestamp
     amount: v.number(), // negative for expenses, positive for income
     description: v.string(),
     counterparty: v.string(),
@@ -66,6 +66,7 @@ export default defineSchema({
     status: v.union(v.literal("expected"), v.literal("processed")),
     matchedTransactionId: v.optional(v.string()),
     accountName: v.optional(v.string()),
+    isSplitIncome: v.optional(v.boolean()),
   })
     .index("by_organization_project", ["organizationId", "projectId"])
     .index("by_date", ["date"])

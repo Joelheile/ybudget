@@ -79,10 +79,20 @@ export const ImportTransactionCardUI = ({
     </div>
 
     <div className="space-y-6 flex-1">
-      <div className="flex flex-col gap-2">
-        <Label className="text-sm font-semibold">Projekt</Label>
-        <SelectProject value={projectId} onValueChange={onProjectChange} />
-      </div>
+      {!splitIncome && (
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-semibold">Projekt</Label>
+          <SelectProject value={projectId} onValueChange={onProjectChange} />
+        </div>
+      )}
+      {splitIncome && (
+        <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-muted">
+          <p className="text-sm text-muted-foreground">
+            💡 Projekt wird nicht zugewiesen, da Budget auf Departments
+            aufgeteilt wird
+          </p>
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <Label className="text-sm font-semibold">Kategorie</Label>
         <SelectCategory value={categoryId} onValueChange={onCategoryChange} />

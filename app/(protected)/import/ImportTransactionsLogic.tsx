@@ -91,7 +91,7 @@ export const ImportTransactionsLogic = () => {
   const handleSave = async () => {
     if (!current) return;
 
-    if (!projectId || !categoryId) {
+    if (!categoryId || (!splitIncome && !projectId)) {
       toast("Transaktion übersprungen", { icon: "⏭️" });
       handleNext();
       return;
@@ -100,12 +100,13 @@ export const ImportTransactionsLogic = () => {
     try {
       await updateTransaction({
         transactionId: current._id,
-        projectId: projectId as Id<"projects">,
+        projectId: splitIncome ? undefined : (projectId as Id<"projects">),
         categoryId: categoryId as Id<"categories">,
         donorId: donorId ? (donorId as Id<"donors">) : undefined,
         matchedTransactionId: selectedMatch
           ? (selectedMatch as Id<"transactions">)
           : undefined,
+        isSplitIncome: splitIncome || undefined,
       });
 
       if (selectedMatch) {

@@ -1,3 +1,6 @@
+- [ ] change roles to admin, editor to, and viewer to member
+- [ ] make transactions transfareable between projects, but processed ones need to be immutable 
+
 - [ ] implement upload of expense reimbursements (Auslagenerstattungen)
 - [ ] archive projects
 - [ ] check how to show expected transactions in table (also if they are already matched)
