@@ -26,9 +26,8 @@ export default defineSchema({
     role: v.optional(
       v.union(
         v.literal("admin"),
-        v.literal("finance"),
-        v.literal("editor"),
-        v.literal("viewer"),
+        v.literal("lead"),
+        v.literal("member"),
       ),
     ),
   })
@@ -157,7 +156,7 @@ export default defineSchema({
   teamMemberships: defineTable({
     userId: v.id("users"),
     teamId: v.id("teams"),
-    role: v.union(v.literal("viewer"), v.literal("editor"), v.literal("admin")),
+    role: v.union(v.literal("member"), v.literal("lead"), v.literal("admin")),
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])

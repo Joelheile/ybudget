@@ -1,13 +1,13 @@
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { getCurrentUser } from "./getCurrentUser";
 
-export type UserRole = "admin" | "finance" | "editor" | "viewer";
+export type UserRole = "admin" | "lead" | "member";
 
-const roleHierarchy = { viewer: 0, editor: 1, finance: 2, admin: 3 };
+const roleHierarchy = { member: 0, lead: 1, admin: 2 };
 
 export async function requireRole(ctx: QueryCtx | MutationCtx, minRole: UserRole) {
   const user = await getCurrentUser(ctx);
-  const userRole = user.role ?? "viewer";
+  const userRole = user.role ?? "member";
   if (roleHierarchy[userRole] < roleHierarchy[minRole]) {
     throw new Error(`Insufficient permissions. Required role: ${minRole}`);
   }

@@ -5,8 +5,8 @@ import { requireRole } from "../users/permissions";
 import { isTeamAdmin } from "./permissions";
 
 const teamRoleValidator = v.union(
-  v.literal("viewer"),
-  v.literal("editor"),
+  v.literal("member"),
+  v.literal("lead"),
   v.literal("admin"),
 );
 

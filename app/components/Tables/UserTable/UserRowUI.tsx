@@ -70,9 +70,8 @@ export default function UserRowUI({
                 Admin
               </div>
             </SelectItem>
-            <SelectItem value="finance">Finance</SelectItem>
-            <SelectItem value="editor">Editor</SelectItem>
-            <SelectItem value="viewer">Viewer</SelectItem>
+            <SelectItem value="lead">Lead</SelectItem>
+            <SelectItem value="member">Member</SelectItem>
           </SelectContent>
         </Select>
       </TableCell>

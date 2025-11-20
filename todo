@@ -1,4 +1,3 @@
-- [ ] change roles to admin, editor to, and viewer to member
 - [ ] make transactions transfareable between projects, but processed ones need to be immutable 
 
 - [ ] implement upload of expense reimbursements (Auslagenerstattungen)
@@ -8,7 +7,8 @@
 - [ ] categories that are not non-profit should be highlighted in other color
 
 archive (latest on top):
-
+    
+- [x] change roles to admin, editor to, and viewer to member
 - [x] implement budgeting for departments
 - [x] jump into /import after uploading csv
 - [x] change projects to have 10 free projects (with departments etc)

@@ -25,7 +25,7 @@ async function addUserToOrganization(
   ctx: MutationCtx,
   userId: Id<"users">,
   organizationId: Id<"organizations">,
-  role: "admin" | "editor" | "viewer",
+  role: "admin" | "lead" | "member",
 ): Promise<void> {
   await ctx.db.patch(userId, {
     organizationId,
@@ -78,7 +78,7 @@ export const setupUserOrganization = mutation({
     const existingOrgId = await getOrganizationByDomain(ctx, domain);
 
     if (existingOrgId) {
-      await addUserToOrganization(ctx, user._id, existingOrgId, "viewer");
+      await addUserToOrganization(ctx, user._id, existingOrgId, "member");
       return {
         organizationId: existingOrgId,
         isNew: false,

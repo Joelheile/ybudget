@@ -33,6 +33,7 @@ const createEditableCellHandlers = (rowId: string, table: any) => ({
     table.options.meta?.onUpdate(rowId, field, value),
   handleCancel: () => table.options.meta?.onCancelRow(rowId),
   handleEdit: () => {},
+  handleDelete: () => table.options.meta?.onDelete(rowId),
 });
 
 const renderEditableCell = (
@@ -49,6 +50,7 @@ const renderEditableCell = (
     onCancel={handlers.handleCancel}
     isEditing={true}
     onEdit={handlers.handleEdit}
+    onDelete={handlers.handleDelete}
   />
 );
 
@@ -287,6 +289,7 @@ export const editableColumns = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleEdit}>Bearbeiten</DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete}>Löschen</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

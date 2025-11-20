@@ -10,16 +10,15 @@ export const addUserToOrganization = mutation({
     role: v.optional(
       v.union(
         v.literal("admin"),
-        v.literal("finance"),
-        v.literal("editor"),
-        v.literal("viewer"),
+        v.literal("lead"),
+        v.literal("member"),
       ),
     ),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.userId, {
       organizationId: args.organizationId,
-      role: args.role ?? "editor",
+      role: args.role ?? "lead",
     });
   },
 });
@@ -29,9 +28,8 @@ export const updateUserRole = mutation({
     userId: v.id("users"),
     role: v.union(
       v.literal("admin"),
-      v.literal("finance"),
-      v.literal("editor"),
-      v.literal("viewer"),
+      v.literal("lead"),
+      v.literal("member"),
     ),
   },
   handler: async (ctx, args) => {

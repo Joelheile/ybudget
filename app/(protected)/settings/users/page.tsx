@@ -96,7 +96,7 @@ export default function UsersPage() {
                     key={user._id}
                     user={{
                       ...user,
-                      role: user.role || "viewer",
+                      role: user.role || "member",
                     }}
                     onRoleChange={handleRoleChange}
                     isAdmin={isAdmin}

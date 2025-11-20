@@ -44,10 +44,10 @@ export const createExpectedTransaction = mutation({
     donorId: v.optional(v.id("donors")),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
 
-    if (!(await canAccessProject(ctx, user._id, args.projectId, "editor"))) {
+    if (!(await canAccessProject(ctx, user._id, args.projectId, "lead"))) {
       throw new Error("No access to this project");
     }
 
@@ -81,7 +81,7 @@ export const createImportedTransaction = mutation({
     accountName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
 
     const existing = await ctx.db
@@ -122,7 +122,7 @@ export const updateTransaction = mutation({
     status: v.optional(v.union(v.literal("expected"), v.literal("processed"))),
   },
   handler: async (ctx, { transactionId, ...updates }) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
 
     const transaction = await ctx.db.get(transactionId);
@@ -132,14 +132,14 @@ export const updateTransaction = mutation({
 
     if (
       transaction.projectId &&
-      !(await canAccessProject(ctx, user._id, transaction.projectId, "editor"))
+      !(await canAccessProject(ctx, user._id, transaction.projectId, "lead"))
     ) {
       throw new Error("No access to this project");
     }
 
     if (
       updates.projectId &&
-      !(await canAccessProject(ctx, user._id, updates.projectId, "editor"))
+      !(await canAccessProject(ctx, user._id, updates.projectId, "lead"))
     ) {
       throw new Error("No access to the new project");
     }
@@ -168,7 +168,7 @@ export const splitTransaction = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
 
     const original = await ctx.db.get(args.transactionId);
@@ -185,7 +185,7 @@ export const splitTransaction = mutation({
     }
 
     for (const split of args.splits) {
-      if (!(await canAccessProject(ctx, user._id, split.projectId, "editor"))) {
+      if (!(await canAccessProject(ctx, user._id, split.projectId, "lead"))) {
         throw new Error(`No access to project ${split.projectId}`);
       }
     }

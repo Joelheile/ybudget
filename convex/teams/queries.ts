@@ -158,7 +158,7 @@ export const getUserAccessibleProjects = query({
       }
     }
 
-    const hierarchy = { viewer: 1, editor: 2, admin: 3 };
+    const hierarchy = { member: 1, lead: 2, admin: 3 };
 
     return Array.from(projectMap.values()).map(({ project, teams }) => {
       const highestRole = teams.reduce(
@@ -167,7 +167,7 @@ export const getUserAccessibleProjects = query({
           hierarchy[best as keyof typeof hierarchy]
             ? member.role
             : best,
-        "viewer",
+        "member",
       );
       return { ...project, teams, highestRole };
     });

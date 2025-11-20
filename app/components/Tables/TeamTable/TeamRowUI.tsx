@@ -13,7 +13,7 @@ interface TeamRowUIProps {
   teamMembers: {
     membershipId: Id<"teamMemberships">;
     userId: Id<"users">;
-    role: "admin" | "editor" | "viewer";
+    role: "admin" | "lead" | "member";
     name?: string;
     email?: string;
     image?: string;

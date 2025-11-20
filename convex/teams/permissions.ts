@@ -1,29 +1,23 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
-type TeamRole = "viewer" | "editor" | "admin";
+type TeamRole = "member" | "lead" | "admin";
 
-const roleHierarchy = { viewer: 1, editor: 2, admin: 3 } as const;
+const roleHierarchy = { member: 1, lead: 2, admin: 3 } as const;
 
 async function isOrgAdmin(ctx: QueryCtx | MutationCtx, userId: Id<"users">) {
   const user = await ctx.db.get(userId);
   return user?.role === "admin";
 }
 
-async function isOrgAdminOrFinance(
-  ctx: QueryCtx | MutationCtx,
-  userId: Id<"users">,
-) {
-  const user = await ctx.db.get(userId);
-  return user?.role === "admin" || user?.role === "finance";
-}
+
 
 export async function getUserAccessibleProjectIds(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">,
   organizationId: Id<"organizations">,
 ): Promise<Id<"projects">[]> {
-  if (await isOrgAdminOrFinance(ctx, userId)) {
+  if (await isOrgAdmin(ctx, userId)) {
     const projects = await ctx.db
       .query("projects")
       .withIndex("by_organization", (q) =>
@@ -54,9 +48,9 @@ export async function canAccessProject(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">,
   projectId: Id<"projects">,
-  requiredRole: TeamRole = "viewer",
+  requiredRole: TeamRole = "member",
 ): Promise<boolean> {
-  if (await isOrgAdminOrFinance(ctx, userId)) return true;
+  if (await isOrgAdmin(ctx, userId)) return true;
 
   const userTeams = await ctx.db
     .query("teamMemberships")

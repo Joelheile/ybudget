@@ -14,7 +14,7 @@ export const allocateBudget = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
     const transaction = await ctx.db.get(args.transactionId);
     

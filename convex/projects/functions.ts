@@ -12,7 +12,7 @@ export const createProject = mutation({
     parentId: v.optional(v.id("projects")),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
 
     const activePayment = await ctx.db
@@ -54,7 +54,7 @@ export const createProject = mutation({
 export const renameProject = mutation({
   args: { projectId: v.id("projects"), name: v.string() },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "editor");
+    await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
     const project = await ctx.db.get(args.projectId);
     if (!project || project.organizationId !== user.organizationId) {
