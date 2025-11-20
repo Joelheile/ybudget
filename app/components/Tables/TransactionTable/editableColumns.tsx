@@ -52,9 +52,6 @@ const renderEditableCell = (
   />
 );
 
-
-
-
 export const editableColumns = [
   {
     id: "indicator",
@@ -103,12 +100,12 @@ export const editableColumns = [
   },
   {
     accessorKey: "projectName",
-    header: "Projekt",
+    header: () => null,
     cell: ({ row, table }: any) => {
-      const { isRowEditing } = getEditingState(row, table);
+      const { isPlanned, isRowEditing } = getEditingState(row, table);
       const handlers = createEditableCellHandlers(row.original._id, table);
 
-      if (isRowEditing) {
+      if (isPlanned && isRowEditing) {
         return renderEditableCell(
           EditableProjectCell,
           handlers,
@@ -118,11 +115,7 @@ export const editableColumns = [
         );
       }
 
-      return (
-        <div className="p-1">
-          {row.original.projectName || row.original.projectId || ""}
-        </div>
-      );
+      return null;
     },
   },
   {
@@ -145,7 +138,7 @@ export const editableColumns = [
       }
 
       return (
-        <div className="max-w-64 min-w-32">
+        <div className="min-w-64 max-w-xl">
           <div className="whitespace-pre-wrap text-muted-foreground break-words text-sm">
             {description}
           </div>
@@ -170,7 +163,9 @@ export const editableColumns = [
         );
       }
 
-      return <div className="p-1">{row.original.categoryName || ""}</div>;
+      return (
+        <div className="p-1 max-w-32 ">{row.original.categoryName || ""}</div>
+      );
     },
   },
   {
