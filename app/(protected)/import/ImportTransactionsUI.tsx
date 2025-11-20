@@ -1,5 +1,6 @@
+import BudgetSplit from "@/components/ImportTransactions/BudgetSplit";
 import { ExpectedTransactionMatchesUI } from "@/components/ImportTransactions/ExpectedTransactionMatchesUI";
-import { ImportTransactionCard } from "@/components/ImportTransactions/ImportTransactionCard";
+import { ImportTransactionCardUI } from "@/components/ImportTransactions/ImportTransactionCardUI";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { Progress } from "@/components/ui/progress";
 import type { Doc } from "@/convex/_generated/dataModel";
@@ -20,6 +21,9 @@ interface ImportTransactionsUIProps {
   setDonorId: (value: string) => void;
   handleExpectedTransactionSelect: (id: string) => void;
   onSplitIncomeChange: (splitIncome: boolean) => void;
+  onBudgetAllocationsChange: (
+    allocations: Array<{ projectId: string; amount: number }>
+  ) => void;
 }
 
 export const ImportTransactionsUI = ({
@@ -38,6 +42,7 @@ export const ImportTransactionsUI = ({
   setDonorId,
   handleExpectedTransactionSelect,
   onSplitIncomeChange,
+  onBudgetAllocationsChange,
 }: ImportTransactionsUIProps) => {
   if (totalCount === 0) {
     return (
@@ -58,7 +63,7 @@ export const ImportTransactionsUI = ({
       <div className="flex mt-8 justify-center" id="tour-import-progress">
         <Progress className="w-3/4" value={((index + 1) / totalCount) * 100} />
       </div>
-      <div className="flex mt-24 gap-16 h-full">
+      <div className="flex mt-24 h-full justify-between">
         <div id="tour-expected-matches">
           <ExpectedTransactionMatchesUI
             expectedTransactions={expectedTransactions}
@@ -69,7 +74,7 @@ export const ImportTransactionsUI = ({
         </div>
         <div id="tour-import-card">
           {current && (
-            <ImportTransactionCard
+            <ImportTransactionCardUI
               title={current.counterparty || ""}
               description={current.description}
               amount={current.amount}
@@ -79,11 +84,21 @@ export const ImportTransactionsUI = ({
               projectId={projectId}
               categoryId={categoryId}
               donorId={donorId}
+              isExpense={current.amount < 0}
+              isIncome={current.amount > 0}
               splitIncome={splitIncome}
               onProjectChange={setProjectId}
               onCategoryChange={setCategoryId}
               onDonorChange={setDonorId}
               onSplitIncomeChange={onSplitIncomeChange}
+            />
+          )}
+        </div>
+        <div className="flex p-6 rounded-lg w-1/4">
+          {splitIncome && current && current.amount > 0 && (
+            <BudgetSplit
+              totalAmount={current.amount}
+              onAllocationsChange={onBudgetAllocationsChange}
             />
           )}
         </div>

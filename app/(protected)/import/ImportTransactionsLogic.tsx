@@ -15,6 +15,9 @@ export const ImportTransactionsLogic = () => {
   const [donorId, setDonorId] = useState("");
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
   const [splitIncome, setSplitIncome] = useState(false);
+  const [budgetAllocations, setBudgetAllocations] = useState<
+    Array<{ projectId: string; amount: number }>
+  >([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const transactions = useQuery(
@@ -24,6 +27,7 @@ export const ImportTransactionsLogic = () => {
   const updateTransaction = useMutation(
     api.transactions.functions.updateTransaction
   );
+  const allocateBudget = useMutation(api.budgets.functions.allocateBudget);
 
   const current = transactions?.[index] || null;
 
@@ -45,6 +49,7 @@ export const ImportTransactionsLogic = () => {
       setDonorId("");
       setSelectedMatch(null);
       setSplitIncome(false);
+      setBudgetAllocations([]);
       return;
     }
     setProjectId(current.projectId || "");
@@ -52,6 +57,7 @@ export const ImportTransactionsLogic = () => {
     setDonorId(current.donorId || "");
     setSelectedMatch(current.matchedTransactionId || null);
     setSplitIncome(false);
+    setBudgetAllocations([]);
   }, [current]);
 
   useEffect(() => {
@@ -109,6 +115,16 @@ export const ImportTransactionsLogic = () => {
         });
       }
 
+      if (splitIncome && budgetAllocations.length > 0) {
+        await allocateBudget({
+          transactionId: current._id,
+          allocations: budgetAllocations.map((a) => ({
+            projectId: a.projectId as Id<"projects">,
+            amount: a.amount,
+          })),
+        });
+      }
+
       toast.success("Transaktion gespeichert");
       handleNext();
     } catch {
@@ -148,6 +164,7 @@ export const ImportTransactionsLogic = () => {
 
   const handleSplitIncomeChange = (newSplitIncome: boolean) => {
     setSplitIncome(newSplitIncome);
+    if (!newSplitIncome) setBudgetAllocations([]);
   };
 
   if (!transactions) {
@@ -171,6 +188,7 @@ export const ImportTransactionsLogic = () => {
       setDonorId={setDonorId}
       handleExpectedTransactionSelect={handleExpectedTransactionSelect}
       onSplitIncomeChange={handleSplitIncomeChange}
+      onBudgetAllocationsChange={setBudgetAllocations}
     />
   );
 };

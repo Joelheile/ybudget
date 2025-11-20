@@ -82,12 +82,15 @@ export default defineSchema({
       "importedTransactionId",
     ]),
 
-    budgets: defineTable({
-      projectId: v.id("projects"),
-      amount: v.number(),
-      allocatedBy: v.id("users"),
-      note: v.optional(v.string()),
-    }).index("by_project", ["projectId"]),
+  budgets: defineTable({
+    projectId: v.id("projects"),
+    amount: v.number(),
+    allocatedBy: v.id("users"),
+    sourceTransactionId: v.optional(v.id("transactions")),
+    note: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_source_transaction", ["sourceTransactionId"]), 
 
 
   categories: defineTable({

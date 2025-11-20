@@ -9,6 +9,8 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as budgets_functions from "../budgets/functions.js";
+import type * as budgets_queries from "../budgets/queries.js";
 import type * as categories_functions from "../categories/functions.js";
 import type * as categories_seed from "../categories/seed.js";
 import type * as donors_functions from "../donors/functions.js";
@@ -44,6 +46,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "budgets/functions": typeof budgets_functions;
+  "budgets/queries": typeof budgets_queries;
   "categories/functions": typeof categories_functions;
   "categories/seed": typeof categories_seed;
   "donors/functions": typeof donors_functions;

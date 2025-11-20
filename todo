@@ -1,5 +1,3 @@
-- [ ] implement budgeting for departments
-- [ ] jump into /import after uploading csv
 - [ ] implement upload of expense reimbursements (Auslagenerstattungen)
 - [ ] categories that are not non-profit should be highlighted in other color
 
@@ -7,6 +5,8 @@
 
 archive (latest on top):
 
+- [x] implement budgeting for departments
+- [x] jump into /import after uploading csv
 - [x] change projects to have 10 free projects (with departments etc)
 - [x] call projects deparments and make clear that there are departments and subprojects -> departments are projects without parent id
 - [x] check all functions & mutations for unnecessary functions or doubling ones
