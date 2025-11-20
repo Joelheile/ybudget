@@ -12,12 +12,14 @@ interface ImportTransactionsUIProps {
   categoryId: string;
   donorId: string;
   selectedMatch: string | null;
+  splitIncome: boolean;
   expectedTransactions: Doc<"transactions">[];
   containerRef: React.RefObject<HTMLDivElement | null>;
   setProjectId: (value: string) => void;
   setCategoryId: (value: string) => void;
   setDonorId: (value: string) => void;
   handleExpectedTransactionSelect: (id: string) => void;
+  onSplitIncomeChange: (splitIncome: boolean) => void;
 }
 
 export const ImportTransactionsUI = ({
@@ -28,12 +30,14 @@ export const ImportTransactionsUI = ({
   categoryId,
   donorId,
   selectedMatch,
+  splitIncome,
   expectedTransactions,
   containerRef,
   setProjectId,
   setCategoryId,
   setDonorId,
   handleExpectedTransactionSelect,
+  onSplitIncomeChange,
 }: ImportTransactionsUIProps) => {
   if (totalCount === 0) {
     return (
@@ -75,9 +79,11 @@ export const ImportTransactionsUI = ({
               projectId={projectId}
               categoryId={categoryId}
               donorId={donorId}
+              splitIncome={splitIncome}
               onProjectChange={setProjectId}
               onCategoryChange={setCategoryId}
               onDonorChange={setDonorId}
+              onSplitIncomeChange={onSplitIncomeChange}
             />
           )}
         </div>

@@ -14,6 +14,7 @@ export const ImportTransactionsLogic = () => {
   const [categoryId, setCategoryId] = useState("");
   const [donorId, setDonorId] = useState("");
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
+  const [splitIncome, setSplitIncome] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const transactions = useQuery(
@@ -43,12 +44,14 @@ export const ImportTransactionsLogic = () => {
       setCategoryId("");
       setDonorId("");
       setSelectedMatch(null);
+      setSplitIncome(false);
       return;
     }
     setProjectId(current.projectId || "");
     setCategoryId(current.categoryId || "");
     setDonorId(current.donorId || "");
     setSelectedMatch(current.matchedTransactionId || null);
+    setSplitIncome(false);
   }, [current]);
 
   useEffect(() => {
@@ -143,6 +146,10 @@ export const ImportTransactionsLogic = () => {
     return () => window.removeEventListener("keydown", handler);
   });
 
+  const handleSplitIncomeChange = (newSplitIncome: boolean) => {
+    setSplitIncome(newSplitIncome);
+  };
+
   if (!transactions) {
     return <ImportTransactionsSkeleton />;
   }
@@ -156,12 +163,14 @@ export const ImportTransactionsLogic = () => {
       categoryId={categoryId}
       donorId={donorId}
       selectedMatch={selectedMatch}
+      splitIncome={splitIncome}
       expectedTransactions={expectedTransactions}
       containerRef={containerRef}
       setProjectId={setProjectId}
       setCategoryId={setCategoryId}
       setDonorId={setDonorId}
       handleExpectedTransactionSelect={handleExpectedTransactionSelect}
+      onSplitIncomeChange={handleSplitIncomeChange}
     />
   );
 };

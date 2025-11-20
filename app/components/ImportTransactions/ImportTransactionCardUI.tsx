@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import type { Id } from "@/convex/_generated/dataModel";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { Checkbox } from "../ui/checkbox";
 
 interface ImportTransactionCardUIProps {
   title: string;
@@ -18,10 +19,11 @@ interface ImportTransactionCardUIProps {
   donorId: string;
   isExpense: boolean;
   isIncome: boolean;
-
+  splitIncome: boolean;
   onProjectChange: (projectId: string) => void;
   onCategoryChange: (categoryId: string) => void;
   onDonorChange: (donorId: string) => void;
+  onSplitIncomeChange: (splitIncome: boolean) => void;
 }
 
 export const ImportTransactionCardUI = ({
@@ -36,10 +38,11 @@ export const ImportTransactionCardUI = ({
   donorId,
   isExpense,
   isIncome,
-
+  splitIncome,
   onProjectChange,
   onCategoryChange,
   onDonorChange,
+  onSplitIncomeChange,
 }: ImportTransactionCardUIProps) => (
   <Card className="w-[600px] h-auto p-8 border shadow-sm flex flex-col ">
     <div className="mb-8">
@@ -117,6 +120,14 @@ export const ImportTransactionCardUI = ({
           />
         </div>
       )}
+    </div>
+    <div className="flex items-center gap-3">
+      <Checkbox
+        id="splitIncome"
+        checked={splitIncome}
+        onCheckedChange={(checked) => onSplitIncomeChange(checked === true)}
+      />
+      <Label htmlFor="splitIncome">Einnahme auf Departments aufteilen</Label>
     </div>
 
     <div className="flex justify-center gap-3 mt-auto pt-6 text-xs text-muted-foreground">

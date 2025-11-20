@@ -13,9 +13,11 @@ interface ImportTransactionCardProps {
   projectId: string;
   categoryId: string;
   donorId: string;
+  splitIncome: boolean;
   onProjectChange: (projectId: string) => void;
   onCategoryChange: (categoryId: string) => void;
   onDonorChange: (donorId: string) => void;
+  onSplitIncomeChange: (splitIncome: boolean) => void;
 }
 
 export const ImportTransactionCard = ({
@@ -28,9 +30,11 @@ export const ImportTransactionCard = ({
   projectId,
   categoryId,
   donorId,
+  splitIncome,
   onProjectChange,
   onCategoryChange,
   onDonorChange,
+  onSplitIncomeChange,
 }: ImportTransactionCardProps) => {
   const isExpense = useMemo(() => amount < 0, [amount]);
   const isIncome = useMemo(() => amount > 0, [amount]);
@@ -48,9 +52,11 @@ export const ImportTransactionCard = ({
       donorId={donorId}
       isExpense={isExpense}
       isIncome={isIncome}
+      splitIncome={splitIncome}
       onProjectChange={onProjectChange}
       onCategoryChange={onCategoryChange}
       onDonorChange={onDonorChange}
+      onSplitIncomeChange={onSplitIncomeChange}
     />
   );
 };
