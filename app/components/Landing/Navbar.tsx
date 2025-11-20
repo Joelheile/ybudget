@@ -19,7 +19,7 @@ export function Navbar() {
 
   const scrollToSection = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
+    href: string
   ) => {
     e.preventDefault();
     const element = document.querySelector(href);
@@ -104,7 +104,7 @@ export function Navbar() {
             ))}
             <div className="pt-2">
               <Button asChild className="w-full" size="sm">
-                <Link href="/login">Jetzt starten</Link>
+                <Link href="/login">Anmelden</Link>
               </Button>
             </div>
           </div>
