@@ -266,3 +266,43 @@ export const deleteExpectedTransaction = mutation({
     await ctx.db.delete(args.transactionId);
   },
 });
+
+
+export const transferMoney = mutation({
+  args: {
+    amount: v.number(),
+    sendingProjectId: v.id("projects"),
+    receivingProjectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "lead");
+    const user = await getCurrentUser(ctx);
+    
+    const sendingProject = await ctx.db.get(args.sendingProjectId);
+    const receivingProject = await ctx.db.get(args.receivingProjectId);
+
+    const description = `Budgetübertrag von ${sendingProject?.name} zu ${receivingProject?.name}`;
+
+    await ctx.db.insert("transactions", {
+      date: Date.now(),
+      importedBy: user._id,
+      organizationId: user.organizationId,
+      description,
+      counterparty: "Internal Transfer",
+      status: "processed",
+      amount: -args.amount,
+      projectId: args.sendingProjectId,
+    });
+
+    await ctx.db.insert("transactions", {
+      date: Date.now(),
+      importedBy: user._id,
+      organizationId: user.organizationId,
+      description,
+      counterparty: "Internal Transfer",
+      status: "processed",
+      amount: args.amount,
+      projectId: args.receivingProjectId,
+    });
+  },
+});

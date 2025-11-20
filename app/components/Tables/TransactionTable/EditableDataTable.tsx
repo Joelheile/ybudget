@@ -126,7 +126,6 @@ export function EditableDataTable<T extends { _id: string }>({
       });
       toast.success("Transaktion erfolgreich gelöscht");
     } catch (error) {
-
       toast.error("Fehler beim Löschen der Transaktion");
     } finally {
       setIsUpdating(false);

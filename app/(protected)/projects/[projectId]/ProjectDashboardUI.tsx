@@ -2,6 +2,7 @@ import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { EditableDataTable } from "@/components/Tables/TransactionTable/EditableDataTable";
 import { editableColumns } from "@/components/Tables/TransactionTable/editableColumns";
+import { Button } from "@/components/ui/button";
 import type { Doc } from "@/convex/_generated/dataModel";
 import type { PaginationStatus } from "convex/react";
 
@@ -18,6 +19,7 @@ interface ProjectDashboardUIProps {
   loadMore: (numItems: number) => void;
   onUpdate: (transactionId: string, field: string, value: any) => Promise<void>;
   onDelete: (transactionId: string) => Promise<void>;
+  openTransfer: () => void;
 }
 
 export default function ProjectDashboardUI({
@@ -28,6 +30,7 @@ export default function ProjectDashboardUI({
   loadMore,
   onUpdate,
   onDelete,
+  openTransfer
 }: ProjectDashboardUIProps) {
   return (
     <div>
@@ -57,7 +60,10 @@ export default function ProjectDashboardUI({
       </div>
 
       <div className="mt-4 lg:mt-6">
-        <h2 className="text-xl font-semibold mb-4">Transaktionen</h2>
+        <div className="flex flex-row justify-between my-4">
+          <h2 className="text-xl font-semibold ">Transaktionen</h2>
+          <Button variant="outline" onClick={openTransfer}>Geld übertragen</Button>
+        </div>
         <EditableDataTable
           columns={editableColumns}
           data={transactions}

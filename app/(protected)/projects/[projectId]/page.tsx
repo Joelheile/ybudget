@@ -2,6 +2,7 @@
 
 import ProjectDashboardSkeleton from "@/(protected)/projects/[projectId]/ProjectDashboardSkeleton";
 import ProjectDashboardUI from "@/(protected)/projects/[projectId]/ProjectDashboardUI";
+import TransferDialog from "@/components/Dialogs/TransferDialog";
 import { useDateRange } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -11,12 +12,13 @@ import { useQuery } from "convex-helpers/react/cache";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import posthog from "posthog-js";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ProjectDetail() {
   const projectId = useParams().projectId as string;
   const { selectedDateRange } = useDateRange();
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const project = useQuery(api.projects.queries.getProjectById, {
     projectId,
@@ -84,19 +86,27 @@ export default function ProjectDetail() {
     }
   };
 
+  const handleOpenTransfer = () => {
+    setIsTransferOpen(true);
+  };
+
   if (!project) {
     return <ProjectDashboardSkeleton />;
   }
 
   return (
-    <ProjectDashboardUI
-      project={project}
-      transactions={filteredTransactions ?? []}
-      budgets={budgets}
-      status={status}
-      loadMore={loadMore}
-      onUpdate={handleUpdateTransaction}
-      onDelete={handleDeleteTransaction}
-    />
+    <>
+      <ProjectDashboardUI
+        project={project}
+        transactions={filteredTransactions ?? []}
+        budgets={budgets}
+        status={status}
+        loadMore={loadMore}
+        onUpdate={handleUpdateTransaction}
+        onDelete={handleDeleteTransaction}
+        openTransfer={handleOpenTransfer}
+      />
+      <TransferDialog open={isTransferOpen} onOpenChange={setIsTransferOpen} />
+    </>
   );
 }
