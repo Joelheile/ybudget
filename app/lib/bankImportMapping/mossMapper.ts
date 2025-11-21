@@ -1,10 +1,10 @@
 import { TransactionData } from "./csvMappers";
-import { parseDate } from "./parseDate";
+import { parseMossDate } from "./parseDate";
 
 export function mapMossCSV(row: Record<string, string>): TransactionData {
   const dateValue =
     row["Payment Date"] || row["Payment date"] || row.date || row.Date || "";
-  const parsedDate = dateValue ? parseDate(dateValue) : Date.now();
+  const parsedDate = dateValue ? parseMossDate(dateValue) : Date.now();
 
   return {
     date: parsedDate,
