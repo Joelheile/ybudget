@@ -6,22 +6,7 @@ import { getCurrentUser } from "../users/getCurrentUser";
 
 export const resend: Resend = new Resend(components.resend, {});
 
-export const createInvitation = mutation({
-  args: {
-    email: v.string(),
-    name: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
 
-    await ctx.db.insert("invitations", {
-      email: args.email,
-      name: args.name,
-      organizationId: user.organizationId,
-      createdBy: user._id,
-    });
-  },
-});
 
 export const sendInvitation = mutation({
   args: {

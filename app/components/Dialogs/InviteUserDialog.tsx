@@ -26,14 +26,10 @@ export function InviteUserDialog({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
-  const createInvitation = useMutation(
-    api.invitations.functions.createInvitation,
-  );
   const sendInvitation = useMutation(api.invitations.functions.sendInvitation);
 
   const handleInvite = async () => {
     try {
-      await createInvitation({ email, name });
       await sendInvitation({ email, name });
 
       toast.success("Einladung erfolgreich gesendet!");

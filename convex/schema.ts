@@ -31,12 +31,7 @@ export default defineSchema({
     .index("phone", ["phone"])
     .index("by_organization", ["organizationId"]),
 
-  invitations: defineTable({
-    email: v.string(),
-    name: v.string(),
-    organizationId: v.id("organizations"),
-    createdBy: v.id("users"),
-  }).index("by_organization", ["organizationId"]),
+ 
 
   projects: defineTable({
     name: v.string(),
