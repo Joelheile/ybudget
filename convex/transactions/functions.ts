@@ -14,23 +14,19 @@ async function ensureReservesDepartment(
     .query("projects")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
     .filter((q) =>
-      q.and(
-        q.eq(q.field("name"), "Reserves"),
-        q.eq(q.field("parentId"), undefined),
-      ),
+      q.and(q.eq(q.field("name"), "Reserves"), q.eq(q.field("parentId"), undefined)),
     )
     .first();
 
   if (existing) return existing._id;
 
-  const currentUser = await getCurrentUser(ctx);
-
+  const user = await getCurrentUser(ctx);
   return await ctx.db.insert("projects", {
     name: "Reserves",
     parentId: undefined,
     organizationId,
     isArchived: false,
-    createdBy: currentUser._id,
+    createdBy: user._id,
   });
 }
 
@@ -50,7 +46,7 @@ export const createExpectedTransaction = mutation({
     const user = await getCurrentUser(ctx);
 
     if (!(await canAccessProject(ctx, user._id, args.projectId))) {
-      throw new Error("No access to this project");
+      throw new Error("Access denied");
     }
 
     await validateDonorCategory(
@@ -128,22 +124,22 @@ export const updateTransaction = mutation({
     const user = await getCurrentUser(ctx);
 
     const transaction = await ctx.db.get(transactionId);
-    if (!transaction) throw new Error("Transaction not found");
-    if (transaction.organizationId !== user.organizationId)
+    if (!transaction || transaction.organizationId !== user.organizationId) {
       throw new Error("Access denied");
+    }
 
     if (
       transaction.projectId &&
       !(await canAccessProject(ctx, user._id, transaction.projectId))
     ) {
-      throw new Error("No access to this project");
+      throw new Error("Access denied");
     }
 
     if (
       updates.projectId &&
       !(await canAccessProject(ctx, user._id, updates.projectId))
     ) {
-      throw new Error("No access to the new project");
+      throw new Error("Access denied");
     }
 
     await validateDonorCategory(
@@ -176,27 +172,27 @@ export const splitTransaction = mutation({
     const user = await getCurrentUser(ctx);
 
     const original = await ctx.db.get(args.transactionId);
-    if (!original) throw new Error("Transaction not found");
-    if (original.organizationId !== user.organizationId)
+    if (
+      !original ||
+      original.organizationId !== user.organizationId ||
+      original.status !== "processed" ||
+      original.isArchived
+    ) {
       throw new Error("Access denied");
-    if (original.status !== "processed")
-      throw new Error("Can only split processed transactions");
-    if (original.isArchived) throw new Error("Transaction is already split");
-    if (args.splits.length === 0)
-      throw new Error("Must provide at least one split");
-    if (args.splits.some((s) => s.amount <= 0))
-      throw new Error("All split amounts must be positive");
+    }
 
     const total = args.splits.reduce((sum, split) => sum + split.amount, 0);
-    if (total > original.amount) {
-      throw new Error(
-        `Cannot split more than available. Available: ${original.amount}, Requested: ${total}`,
-      );
+    if (
+      args.splits.length === 0 ||
+      args.splits.some((s) => s.amount <= 0) ||
+      total > original.amount
+    ) {
+      throw new Error("Invalid split amounts");
     }
 
     for (const split of args.splits) {
       if (!(await canAccessProject(ctx, user._id, split.projectId))) {
-        throw new Error(`No access to project ${split.projectId}`);
+        throw new Error("Access denied");
       }
     }
 
@@ -209,45 +205,38 @@ export const splitTransaction = mutation({
     await ctx.db.patch(args.transactionId, { isArchived: true });
 
     const createdIds: Id<"transactions">[] = [];
+    
+    const baseTransaction = {
+      organizationId: original.organizationId,
+      date: original.date,
+      counterparty: original.counterparty,
+      status: "processed" as const,
+      importedBy: original.importedBy,
+      categoryId: original.categoryId,
+      donorId: original.donorId,
+      accountName: original.accountName,
+      importedTransactionId: original.importedTransactionId,
+      importSource: original.importSource,
+      splitFromTransactionId: args.transactionId,
+      isArchived: false,
+    };
 
     for (const split of args.splits) {
       const newId = await ctx.db.insert("transactions", {
-        organizationId: original.organizationId,
-        date: original.date,
+        ...baseTransaction,
         description: `${original.description} (Split)`,
-        counterparty: original.counterparty,
-        status: "processed" as const,
-        importedBy: original.importedBy,
-        categoryId: original.categoryId,
-        donorId: original.donorId,
-        accountName: original.accountName,
-        importedTransactionId: original.importedTransactionId,
-        importSource: original.importSource,
         amount: split.amount,
         projectId: split.projectId,
-        splitFromTransactionId: args.transactionId,
-        isArchived: false,
       });
       createdIds.push(newId);
     }
 
     if (remainder > 0) {
       const reservesTransactionId = await ctx.db.insert("transactions", {
-        organizationId: original.organizationId,
-        date: original.date,
-        description: `${original.description} (Remainder → Reserves)`,
-        counterparty: original.counterparty,
-        status: "processed" as const,
-        importedBy: original.importedBy,
-        categoryId: original.categoryId,
-        donorId: original.donorId,
-        accountName: original.accountName,
-        importedTransactionId: original.importedTransactionId,
-        importSource: original.importSource,
+        ...baseTransaction,
+        description: `${original.description} (Rest → Rücklagen)`,
         amount: remainder,
         projectId: reservesId,
-        splitFromTransactionId: args.transactionId,
-        isArchived: false,
       });
       createdIds.push(reservesTransactionId);
     }
@@ -271,10 +260,12 @@ export const deleteExpectedTransaction = mutation({
     const user = await getCurrentUser(ctx);
 
     const transaction = await ctx.db.get(args.transactionId);
-    if (!transaction || transaction.organizationId !== user.organizationId)
-      throw new Error("Transaction not found or access denied");
-    if (transaction.status !== "expected") {
-      throw new Error("Can only delete expected transactions");
+    if (
+      !transaction ||
+      transaction.organizationId !== user.organizationId ||
+      transaction.status !== "expected"
+    ) {
+      throw new Error("Access denied");
     }
 
     await ctx.db.delete(args.transactionId);
