@@ -14,7 +14,10 @@ async function ensureReservesDepartment(
     .query("projects")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
     .filter((q) =>
-      q.and(q.eq(q.field("name"), "Reserves"), q.eq(q.field("parentId"), undefined)),
+      q.and(
+        q.eq(q.field("name"), "Reserves"),
+        q.eq(q.field("parentId"), undefined),
+      ),
     )
     .first();
 
@@ -193,7 +196,10 @@ export const splitTransaction = mutation({
     }
 
     const remainder = original.amount - total;
-    const reservesId = await ensureReservesDepartment(ctx, original.organizationId);
+    const reservesId = await ensureReservesDepartment(
+      ctx,
+      original.organizationId,
+    );
 
     await ctx.db.patch(args.transactionId, { isArchived: true });
 

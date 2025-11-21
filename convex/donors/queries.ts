@@ -33,11 +33,11 @@ export const getDonorsByProject = query({
       .collect();
 
     const uniqueDonorIds = Array.from(
-      new Set(transactionsWithDonors.map((t) => t.donorId).filter(Boolean))
+      new Set(transactionsWithDonors.map((t) => t.donorId).filter(Boolean)),
     );
 
     const donors = await Promise.all(
-      uniqueDonorIds.map((donorId) => ctx.db.get(donorId!))
+      uniqueDonorIds.map((donorId) => ctx.db.get(donorId!)),
     );
 
     return donors.filter((donor) => donor !== null);

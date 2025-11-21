@@ -130,7 +130,8 @@ export const getPaginatedTransactions = query({
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    const hasDateRange = args.startDate !== undefined && args.endDate !== undefined;
+    const hasDateRange =
+      args.startDate !== undefined && args.endDate !== undefined;
 
     let query;
     if (hasDateRange) {

@@ -29,7 +29,9 @@ export function generateCashflowData(
     return transactionDate >= rangeStart && transactionDate <= rangeEnd;
   });
 
-  const sortedTransactions = filteredTransactions.sort((a, b) => a.date - b.date);
+  const sortedTransactions = filteredTransactions.sort(
+    (a, b) => a.date - b.date,
+  );
   const periods = determinePeriods(rangeStart, rangeEnd);
 
   return periods.map((period) => {
@@ -37,11 +39,15 @@ export function generateCashflowData(
     const periodEndTime = period.end.getTime();
 
     const periodTransactions = sortedTransactions.filter(
-      (t) => t.date >= periodStartTime && t.date < periodEndTime
+      (t) => t.date >= periodStartTime && t.date < periodEndTime,
     );
 
     const aggregation = aggregateTransactionsForPeriod(periodTransactions);
-    const periodBalance = calculatePeriodBalance(sortedTransactions, startBalance, periodEndTime);
+    const periodBalance = calculatePeriodBalance(
+      sortedTransactions,
+      startBalance,
+      periodEndTime,
+    );
 
     return {
       date: period.label,
@@ -86,7 +92,10 @@ export function calculateAxisConfig(
 
   const maxBarValue = findMaxBarValue(dataPoints);
   const balanceRange = findBalanceRange(dataPoints);
-  const maxAbsBalance = Math.max(Math.abs(balanceRange.min), Math.abs(balanceRange.max));
+  const maxAbsBalance = Math.max(
+    Math.abs(balanceRange.min),
+    Math.abs(balanceRange.max),
+  );
   const maxAbsValue = Math.max(maxBarValue, maxAbsBalance);
 
   const tickInterval = getTickInterval(maxAbsValue);

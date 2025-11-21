@@ -38,7 +38,7 @@ const RangeCalendar = ({
   const [month, setMonth] = useState(today);
   const oldestDate = useQuery(
     api.transactions.queries.getOldestTransactionDate,
-    {}
+    {},
   );
 
   const presetRanges: Record<string, DateRange> = {

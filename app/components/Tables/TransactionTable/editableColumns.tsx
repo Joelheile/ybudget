@@ -41,7 +41,7 @@ const renderEditableCell = (
   handlers: any,
   value: any,
   displayValue: any,
-  fieldId: string
+  fieldId: string,
 ) => (
   <CellComponent
     value={value}
@@ -91,7 +91,7 @@ const baseColumns = [
               handlers,
               row.getValue("date"),
               undefined,
-              "date"
+              "date",
             )}
           </div>
         );
@@ -113,7 +113,7 @@ const baseColumns = [
           handlers,
           row.original.projectId,
           row.original.projectName,
-          "projectId"
+          "projectId",
         );
       }
 
@@ -137,7 +137,7 @@ const baseColumns = [
           handlers,
           description,
           undefined,
-          "description"
+          "description",
         );
       }
 
@@ -163,7 +163,7 @@ const baseColumns = [
           handlers,
           row.original.categoryId,
           row.original.categoryName,
-          "categoryId"
+          "categoryId",
         );
       }
 
@@ -197,7 +197,7 @@ const baseColumns = [
               handlers,
               amount,
               undefined,
-              "amount"
+              "amount",
             )}
           </div>
         );
@@ -314,5 +314,5 @@ const baseColumns = [
 export const editableColumns = baseColumns;
 
 export const editableColumnsWithoutProject = baseColumns.filter(
-  (col) => col.accessorKey !== "projectName"
+  (col) => col.accessorKey !== "projectName",
 );

@@ -29,7 +29,7 @@ export async function getUserAccessibleProjectIds(
   const projectIds = teams
     .filter((team) => team.memberIds.includes(userId))
     .flatMap((team) => team.projectIds);
-  
+
   return Array.from(new Set(projectIds));
 }
 

@@ -67,7 +67,7 @@ function BaseEditableCell({
   const [editValue, setEditValue] = useState(
     getInitialValue
       ? getInitialValue(currentValue, pendingValue)
-      : currentValue || ""
+      : currentValue || "",
   );
 
   useEffect(() => {
@@ -169,7 +169,7 @@ export function EditableAmountCell({
 }: EditableCellProps) {
   const currentValue = pendingValue !== undefined ? pendingValue : value;
   const [editValue, setEditValue] = useState(
-    Math.abs(currentValue || 0).toString()
+    Math.abs(currentValue || 0).toString(),
   );
 
   useEffect(() => {
@@ -226,7 +226,7 @@ export function EditableDateCell({
 }: EditableCellProps) {
   const dateValue = convertToDate(value);
   const [editValue, setEditValue] = useState(
-    dateValue ? format(dateValue, "yyyy-MM-dd") : ""
+    dateValue ? format(dateValue, "yyyy-MM-dd") : "",
   );
 
   useEffect(() => {
