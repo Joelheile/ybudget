@@ -70,15 +70,6 @@ export default function DonorCard({ donorId, name, type }: DonorCardProps) {
               </div>
             </div>
           </div>
-
-          {donor.totalExpenses > 0 && (
-            <div className="pt-2 border-t flex justify-between text-xs">
-              <span className="text-muted-foreground">Ausgaben:</span>
-              <span className="font-medium text-red-600">
-                -{formatCurrency(donor.totalExpenses)}
-              </span>
-            </div>
-          )}
         </div>
       </Link>
     </Card>
