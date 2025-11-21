@@ -6,7 +6,6 @@ import { requireRole } from "./permissions";
 export const getUserOrganizationId = query({
   args: {},
   handler: async (ctx) => {
-
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
     const user = await ctx.db.get(userId);
@@ -26,12 +25,8 @@ export const getCurrentUserProfile = query({
   },
 });
 
-
-
-
 export const listOrganizationUsers = query({
   args: {},
-
 
   handler: async (ctx) => {
     await requireRole(ctx, "admin");

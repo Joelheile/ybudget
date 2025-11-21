@@ -5,7 +5,10 @@ export type UserRole = "admin" | "lead" | "member";
 
 const roleHierarchy = { member: 0, lead: 1, admin: 2 };
 
-export async function requireRole(ctx: QueryCtx | MutationCtx, minRole: UserRole) {
+export async function requireRole(
+  ctx: QueryCtx | MutationCtx,
+  minRole: UserRole,
+) {
   const user = await getCurrentUser(ctx);
   const userRole = user.role ?? "member";
   if (roleHierarchy[userRole] < roleHierarchy[minRole]) {

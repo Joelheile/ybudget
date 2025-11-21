@@ -9,7 +9,7 @@ export const CATEGORY_GROUPS = [
         description: "Finanzielle Zuwendungen ohne Gegenleistung",
         taxsphere: "non-profit" as const,
       },
-       {
+      {
         value: "sponsorship-cash",
         label: "Sponsoring (Geldleistung)",
         description: "Finanzielle Unterstützung durch Sponsoren",
@@ -21,7 +21,7 @@ export const CATEGORY_GROUPS = [
         description: "Regelmäßige Beiträge der Vereinsmitglieder",
         taxsphere: "non-profit" as const,
       },
-    
+
       {
         value: "ticket-sales",
         label: "Ticketverkäufe/Eintrittsgelder",
@@ -46,10 +46,6 @@ export const CATEGORY_GROUPS = [
         description: "Verkauf von Fanartikeln und Merchandise",
         taxsphere: "commercial-operations" as const,
       },
-     
-   
-    
-      
     ],
   },
   {
@@ -123,7 +119,7 @@ export const CATEGORY_GROUPS = [
         description: "Internet und IT-Infrastruktur",
         taxsphere: "purpose-operations" as const,
       },
-     
+
       {
         value: "decoration",
         label: "Dekoration",
@@ -172,7 +168,7 @@ export const CATEGORY_GROUPS = [
         description: "Künstlersozialkasse-Abgaben",
         taxsphere: "purpose-operations" as const,
       },
-       {
+      {
         value: "gema-fees",
         label: "GEMA-Gebühren",
         description: "Gebühren für Musikrechte",

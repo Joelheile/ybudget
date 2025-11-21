@@ -11,7 +11,6 @@ import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
 import { useQuery } from "convex-helpers/react/cache";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import { useParams } from "next/navigation";
-import posthog from "posthog-js";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -31,24 +30,24 @@ export default function ProjectDetail() {
   } = usePaginatedQuery(
     api.transactions.queries.getPaginatedTransactions,
     { projectId: projectId as Id<"projects"> },
-    { initialNumItems: 50 }
+    { initialNumItems: 50 },
   );
 
   const filteredTransactions = useMemo(
     () => filterTransactionsByDateRange(allTransactions, selectedDateRange),
-    [allTransactions, selectedDateRange]
+    [allTransactions, selectedDateRange],
   );
 
   const budgets = useMemo(
     () => calculateBudget(allTransactions ?? []),
-    [allTransactions]
+    [allTransactions],
   );
 
   const updateTransaction = useMutation(
-    api.transactions.functions.updateTransaction
+    api.transactions.functions.updateTransaction,
   );
   const deleteTransaction = useMutation(
-    api.transactions.functions.deleteExpectedTransaction
+    api.transactions.functions.deleteExpectedTransaction,
   );
 
   const archiveProject = useMutation(api.projects.functions.archiveProject);
@@ -56,7 +55,7 @@ export default function ProjectDetail() {
   const handleUpdateTransaction = async (
     transactionId: string,
     field: string,
-    value: any
+    value: any,
   ) => {
     try {
       await updateTransaction({
@@ -64,15 +63,8 @@ export default function ProjectDetail() {
         [field]: value,
       });
 
-      posthog.capture("transaction_updated", {
-        field_updated: field,
-        project_id: projectId,
-        timestamp: new Date().toISOString(),
-      });
-
       toast.success("Transaktion aktualisiert");
     } catch (error) {
-      posthog.captureException(error as Error);
       toast.error("Fehler beim Aktualisieren");
       throw error;
     }

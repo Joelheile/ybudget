@@ -10,14 +10,14 @@ export const allocateBudget = mutation({
       v.object({
         projectId: v.id("projects"),
         amount: v.number(),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {
     await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
     const transaction = await ctx.db.get(args.transactionId);
-    
+
     if (!transaction) throw new Error("Transaction not found");
     if (transaction.organizationId !== user.organizationId) {
       throw new Error("Access denied");
@@ -26,7 +26,10 @@ export const allocateBudget = mutation({
       throw new Error("Can only allocate budget from income");
     }
 
-    const totalAllocated = args.allocations.reduce((sum, a) => sum + a.amount, 0);
+    const totalAllocated = args.allocations.reduce(
+      (sum, a) => sum + a.amount,
+      0,
+    );
     if (totalAllocated > transaction.amount) {
       throw new Error("Total exceeds transaction amount");
     }
@@ -34,7 +37,7 @@ export const allocateBudget = mutation({
     const existing = await ctx.db
       .query("budgets")
       .withIndex("by_source_transaction", (q) =>
-        q.eq("sourceTransactionId", args.transactionId)
+        q.eq("sourceTransactionId", args.transactionId),
       )
       .collect();
 

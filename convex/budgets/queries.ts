@@ -28,7 +28,7 @@ export const getBudgetsBySourceTransaction = query({
     return ctx.db
       .query("budgets")
       .withIndex("by_source_transaction", (q) =>
-        q.eq("sourceTransactionId", args.transactionId)
+        q.eq("sourceTransactionId", args.transactionId),
       )
       .collect();
   },
@@ -40,7 +40,7 @@ export const getDepartmentProjects = query({
     return ctx.db
       .query("projects")
       .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId)
+        q.eq("organizationId", user.organizationId),
       )
       .filter((q) => q.eq(q.field("parentId"), undefined))
       .collect();

@@ -5,7 +5,11 @@ type Category = {
   name: string;
   description: string;
   parentId?: Id<"categories">;
-  taxsphere: "non-profit" | "asset-management" | "purpose-operations" | "commercial-operations";
+  taxsphere:
+    | "non-profit"
+    | "asset-management"
+    | "purpose-operations"
+    | "commercial-operations";
 };
 
 type CategoryGroup = {

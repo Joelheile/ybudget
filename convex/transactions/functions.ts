@@ -8,21 +8,23 @@ import { validateDonorCategory } from "./validateDonorCategory";
 
 async function ensureReservesDepartment(
   ctx: MutationCtx,
-  organizationId: Id<"organizations">
+  organizationId: Id<"organizations">,
 ) {
   const existing = await ctx.db
     .query("projects")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
-    .filter((q) => q.and(
-      q.eq(q.field("name"), "Reserves"),
-      q.eq(q.field("parentId"), undefined)
-    ))
+    .filter((q) =>
+      q.and(
+        q.eq(q.field("name"), "Reserves"),
+        q.eq(q.field("parentId"), undefined),
+      ),
+    )
     .first();
 
   if (existing) return existing._id;
 
   const currentUser = await getCurrentUser(ctx);
-  
+
   return await ctx.db.insert("projects", {
     name: "Reserves",
     parentId: undefined,
@@ -162,10 +164,12 @@ export const updateTransaction = mutation({
 export const splitTransaction = mutation({
   args: {
     transactionId: v.id("transactions"),
-    splits: v.array(v.object({
-      projectId: v.id("projects"),
-      amount: v.number(),
-    })),
+    splits: v.array(
+      v.object({
+        projectId: v.id("projects"),
+        amount: v.number(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     await requireRole(ctx, "lead");
@@ -173,15 +177,21 @@ export const splitTransaction = mutation({
 
     const original = await ctx.db.get(args.transactionId);
     if (!original) throw new Error("Transaction not found");
-    if (original.organizationId !== user.organizationId) throw new Error("Access denied");
-    if (original.status !== "processed") throw new Error("Can only split processed transactions");
+    if (original.organizationId !== user.organizationId)
+      throw new Error("Access denied");
+    if (original.status !== "processed")
+      throw new Error("Can only split processed transactions");
     if (original.isArchived) throw new Error("Transaction is already split");
-    if (args.splits.length === 0) throw new Error("Must provide at least one split");
-    if (args.splits.some(s => s.amount <= 0)) throw new Error("All split amounts must be positive");
+    if (args.splits.length === 0)
+      throw new Error("Must provide at least one split");
+    if (args.splits.some((s) => s.amount <= 0))
+      throw new Error("All split amounts must be positive");
 
     const total = args.splits.reduce((sum, split) => sum + split.amount, 0);
     if (total > original.amount) {
-      throw new Error(`Cannot split more than available. Available: ${original.amount}, Requested: ${total}`);
+      throw new Error(
+        `Cannot split more than available. Available: ${original.amount}, Requested: ${total}`,
+      );
     }
 
     for (const split of args.splits) {
@@ -191,7 +201,10 @@ export const splitTransaction = mutation({
     }
 
     const remainder = original.amount - total;
-    const reservesId = await ensureReservesDepartment(ctx, original.organizationId);
+    const reservesId = await ensureReservesDepartment(
+      ctx,
+      original.organizationId,
+    );
 
     await ctx.db.patch(args.transactionId, { isArchived: true });
 
@@ -246,7 +259,7 @@ export const splitTransaction = mutation({
       totalSplits: args.splits.length,
       hasRemainder: remainder > 0,
     };
-  }
+  },
 });
 
 export const deleteExpectedTransaction = mutation({
@@ -258,7 +271,8 @@ export const deleteExpectedTransaction = mutation({
     const user = await getCurrentUser(ctx);
 
     const transaction = await ctx.db.get(args.transactionId);
-    if (!transaction || transaction.organizationId !== user.organizationId) throw new Error("Transaction not found or access denied");
+    if (!transaction || transaction.organizationId !== user.organizationId)
+      throw new Error("Transaction not found or access denied");
     if (transaction.status !== "expected") {
       throw new Error("Can only delete expected transactions");
     }
@@ -266,7 +280,6 @@ export const deleteExpectedTransaction = mutation({
     await ctx.db.delete(args.transactionId);
   },
 });
-
 
 export const transferMoney = mutation({
   args: {
@@ -277,7 +290,7 @@ export const transferMoney = mutation({
   handler: async (ctx, args) => {
     await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
-    
+
     const sendingProject = await ctx.db.get(args.sendingProjectId);
     const receivingProject = await ctx.db.get(args.receivingProjectId);
 

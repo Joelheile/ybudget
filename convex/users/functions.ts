@@ -8,11 +8,7 @@ export const addUserToOrganization = mutation({
     userId: v.id("users"),
     organizationId: v.id("organizations"),
     role: v.optional(
-      v.union(
-        v.literal("admin"),
-        v.literal("lead"),
-        v.literal("member"),
-      ),
+      v.union(v.literal("admin"), v.literal("lead"), v.literal("member")),
     ),
   },
   handler: async (ctx, args) => {
@@ -26,19 +22,16 @@ export const addUserToOrganization = mutation({
 export const updateUserRole = mutation({
   args: {
     userId: v.id("users"),
-    role: v.union(
-      v.literal("admin"),
-      v.literal("lead"),
-      v.literal("member"),
-    ),
+    role: v.union(v.literal("admin"), v.literal("lead"), v.literal("member")),
   },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
     const currentUser = await getCurrentUser(ctx);
     const targetUser = await ctx.db.get(args.userId);
-    
+
     if (!targetUser) throw new Error("User not found");
-    if (targetUser.organizationId !== currentUser.organizationId) throw new Error("Access denied");
+    if (targetUser.organizationId !== currentUser.organizationId)
+      throw new Error("Access denied");
 
     if (targetUser.role === "admin" && args.role !== "admin") {
       let adminCount = 0;
@@ -51,7 +44,10 @@ export const updateUserRole = mutation({
         if (user.role === "admin") adminCount++;
         if (adminCount > 1) break;
       }
-      if (adminCount <= 1) throw new Error("Der letzte Admin kann nicht entfernt werden. Mindestens ein Admin ist erforderlich.");
+      if (adminCount <= 1)
+        throw new Error(
+          "Der letzte Admin kann nicht entfernt werden. Mindestens ein Admin ist erforderlich.",
+        );
     }
 
     await ctx.db.patch(args.userId, { role: args.role });

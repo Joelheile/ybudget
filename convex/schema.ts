@@ -24,11 +24,7 @@ export default defineSchema({
 
     organizationId: v.optional(v.id("organizations")),
     role: v.optional(
-      v.union(
-        v.literal("admin"),
-        v.literal("lead"),
-        v.literal("member"),
-      ),
+      v.union(v.literal("admin"), v.literal("lead"), v.literal("member")),
     ),
   })
     .index("email", ["email"])
@@ -47,7 +43,7 @@ export default defineSchema({
   transactions: defineTable({
     projectId: v.optional(v.id("projects")),
     organizationId: v.id("organizations"),
- date: v.number(), //epoch timestamp
+    date: v.number(), //epoch timestamp
     amount: v.number(), // negative for expenses, positive for income
     description: v.string(),
     counterparty: v.string(),
@@ -95,8 +91,7 @@ export default defineSchema({
     note: v.optional(v.string()),
   })
     .index("by_project", ["projectId"])
-    .index("by_source_transaction", ["sourceTransactionId"]), 
-
+    .index("by_source_transaction", ["sourceTransactionId"]),
 
   categories: defineTable({
     name: v.string(),

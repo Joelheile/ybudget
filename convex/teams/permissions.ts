@@ -47,14 +47,16 @@ export async function canAccessProject(
 
   const teams = await ctx.db
     .query("teams")
-    .withIndex("by_organization", (q) => q.eq("organizationId", project.organizationId))
+    .withIndex("by_organization", (q) =>
+      q.eq("organizationId", project.organizationId),
+    )
     .collect();
 
-  return teams.some((team) => 
-    team.memberIds.includes(userId) && team.projectIds.includes(projectId)
+  return teams.some(
+    (team) =>
+      team.memberIds.includes(userId) && team.projectIds.includes(projectId),
   );
 }
-
 
 export async function filterByProjectAccess<
   T extends { projectId?: Id<"projects"> },
@@ -64,6 +66,12 @@ export async function filterByProjectAccess<
   organizationId: Id<"organizations">,
   items: T[],
 ): Promise<T[]> {
-  const accessibleIds = await getUserAccessibleProjectIds(ctx, userId, organizationId);
-  return items.filter((item) => item.projectId && accessibleIds.includes(item.projectId));
+  const accessibleIds = await getUserAccessibleProjectIds(
+    ctx,
+    userId,
+    organizationId,
+  );
+  return items.filter(
+    (item) => item.projectId && accessibleIds.includes(item.projectId),
+  );
 }

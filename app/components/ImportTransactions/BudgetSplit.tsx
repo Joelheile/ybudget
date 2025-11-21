@@ -8,7 +8,7 @@ import { Label } from "../ui/label";
 interface BudgetSplitProps {
   totalAmount: number;
   onAllocationsChange: (
-    allocations: Array<{ projectId: string; amount: number }>
+    allocations: Array<{ projectId: string; amount: number }>,
   ) => void;
 }
 
@@ -17,13 +17,13 @@ export default function BudgetSplit({
   onAllocationsChange,
 }: BudgetSplitProps) {
   const [allocations, setAllocations] = useState<Map<string, string>>(
-    new Map()
+    new Map(),
   );
   const departments = useQuery(api.budgets.queries.getDepartmentProjects);
 
   const total = Array.from(allocations.values()).reduce(
     (sum, value) => sum + (parseFloat(value) || 0),
-    0
+    0,
   );
   const remaining = totalAmount - total;
   const isValid = total > 0 && remaining >= 0;
@@ -40,7 +40,7 @@ export default function BudgetSplit({
       Array.from(newAllocations.entries()).map(([id, amount]) => ({
         projectId: id,
         amount: parseFloat(amount) || 0,
-      }))
+      })),
     );
   };
 

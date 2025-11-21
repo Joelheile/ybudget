@@ -7,7 +7,9 @@ export const getAllTeams = query({
     const user = await getCurrentUser(ctx);
     return ctx.db
       .query("teams")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .collect();
   },
 });
@@ -25,7 +27,9 @@ export const getUserTeams = query({
     const user = await getCurrentUser(ctx);
     const teams = await ctx.db
       .query("teams")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .collect();
 
     return teams

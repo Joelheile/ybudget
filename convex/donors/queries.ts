@@ -5,7 +5,7 @@ import { getCurrentUser } from "../users/getCurrentUser";
 
 export const getAllDonors = query({
   args: {},
- 
+
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
     return ctx.db
@@ -26,13 +26,18 @@ export const getDonorsByProject = query({
     const transactionsWithDonors = await ctx.db
       .query("transactions")
       .withIndex("by_organization_project_donor", (q) =>
-        q.eq("organizationId", user.organizationId).eq("projectId", args.projectId),
+        q
+          .eq("organizationId", user.organizationId)
+          .eq("projectId", args.projectId),
       )
       .filter((q) => q.neq(q.field("donorId"), undefined))
       .collect();
 
     const uniqueDonorIds = new Set<Id<"donors">>();
-    const donorMap = new Map<Id<"donors">, typeof transactionsWithDonors[0]>();
+    const donorMap = new Map<
+      Id<"donors">,
+      (typeof transactionsWithDonors)[0]
+    >();
 
     for (const transaction of transactionsWithDonors) {
       if (transaction.donorId && !uniqueDonorIds.has(transaction.donorId)) {
@@ -45,7 +50,9 @@ export const getDonorsByProject = query({
       Array.from(uniqueDonorIds).map((donorId) => ctx.db.get(donorId)),
     );
 
-    return donors.filter((donor): donor is NonNullable<typeof donor> => donor !== null);
+    return donors.filter(
+      (donor): donor is NonNullable<typeof donor> => donor !== null,
+    );
   },
 });
 

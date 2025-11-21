@@ -6,7 +6,7 @@ import { getCurrentUser } from "../users/getCurrentUser";
 import { addProjectAndCategoryNames } from "../utils/addProjectNames";
 
 export const getAllTransactions = query({
-  args: { 
+  args: {
     projectId: v.optional(v.id("projects")),
     includeArchived: v.optional(v.boolean()),
   },
@@ -25,13 +25,18 @@ export const getAllTransactions = query({
       : ctx.db
           .query("transactions")
           .withIndex("by_organization", (q) =>
-            q.eq("organizationId", user.organizationId)
+            q.eq("organizationId", user.organizationId),
           );
     let transactions = await query.collect();
     if (!args.includeArchived) {
-      transactions = transactions.filter(t => !t.isArchived);
+      transactions = transactions.filter((t) => !t.isArchived);
     }
-    const filtered = await filterByProjectAccess(ctx, user._id, user.organizationId, transactions);
+    const filtered = await filterByProjectAccess(
+      ctx,
+      user._id,
+      user.organizationId,
+      transactions,
+    );
     return addProjectAndCategoryNames(ctx, filtered);
   },
 });
@@ -135,13 +140,20 @@ export const getPaginatedTransactions = query({
         ? query.filter((q) => q.eq(q.field("donorId"), args.donorId))
         : query;
 
-    const result = await filteredQuery.order("desc").paginate(args.paginationOpts);
+    const result = await filteredQuery
+      .order("desc")
+      .paginate(args.paginationOpts);
 
     let pageTransactions = result.page;
     if (!args.includeArchived) {
-      pageTransactions = pageTransactions.filter(t => !t.isArchived);
+      pageTransactions = pageTransactions.filter((t) => !t.isArchived);
     }
-    const filtered = await filterByProjectAccess(ctx, user._id, user.organizationId, pageTransactions);
+    const filtered = await filterByProjectAccess(
+      ctx,
+      user._id,
+      user.organizationId,
+      pageTransactions,
+    );
     const page = await addProjectAndCategoryNames(ctx, filtered);
 
     return {
@@ -153,14 +165,14 @@ export const getPaginatedTransactions = query({
 });
 
 export const getTransactionWithSplits = query({
-  args: { 
-    transactionId: v.id("transactions") 
+  args: {
+    transactionId: v.id("transactions"),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    
+
     const transaction = await ctx.db.get(args.transactionId);
-    
+
     if (!transaction) {
       return null;
     }
@@ -168,22 +180,24 @@ export const getTransactionWithSplits = query({
     if (transaction.organizationId !== user.organizationId) {
       throw new Error("Access denied");
     }
-    
+
     let splitTransactions = null;
     if (transaction.isArchived) {
       splitTransactions = await ctx.db
         .query("transactions")
-        .withIndex("by_splitFrom", (q) => 
-          q.eq("splitFromTransactionId", args.transactionId)
+        .withIndex("by_splitFrom", (q) =>
+          q.eq("splitFromTransactionId", args.transactionId),
         )
         .collect();
     }
-    
+
     let originalTransaction = null;
     if (transaction.splitFromTransactionId) {
-      originalTransaction = await ctx.db.get(transaction.splitFromTransactionId);
+      originalTransaction = await ctx.db.get(
+        transaction.splitFromTransactionId,
+      );
     }
-    
+
     return {
       transaction,
       splitTransactions,
@@ -191,5 +205,5 @@ export const getTransactionWithSplits = query({
       isSplit: transaction.isArchived === true,
       isPartOfSplit: !!transaction.splitFromTransactionId,
     };
-  }
+  },
 });

@@ -155,8 +155,6 @@ export function generateCashflowData(
   return result;
 }
 
-
-
 export function calculateStartBalance(
   transactions: Doc<"transactions">[] | undefined,
 ): number {
