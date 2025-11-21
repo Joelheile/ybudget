@@ -32,6 +32,34 @@ export const SelectCategory = forwardRef<
   const filtered = filterGroups(grouped, search);
   const activeItems = filtered[activeGroupIdx]?.children || [];
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearch("");
+    } else {
+      const groupIdx = findGroupIndex(
+        grouped,
+        value as Id<"categories"> | undefined
+      );
+      setActiveGroupIdx(groupIdx >= 0 ? groupIdx : 0);
+      if (groupIdx >= 0) {
+        setActiveItemIdx(
+          findItemIndex(
+            grouped[groupIdx],
+            value as Id<"categories"> | undefined
+          )
+        );
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (search && filtered.length > 0) {
+      setActiveGroupIdx(0);
+      setActiveItemIdx(0);
+    }
+  }, [search, filtered.length]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Tab" || e.key === "Enter") {
       if (!open) {
@@ -75,34 +103,6 @@ export const SelectCategory = forwardRef<
       setOpen(false);
     }
   };
-
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    if (!newOpen) {
-      setSearch("");
-    } else {
-      const groupIdx = findGroupIndex(
-        grouped,
-        value as Id<"categories"> | undefined
-      );
-      setActiveGroupIdx(groupIdx >= 0 ? groupIdx : 0);
-      if (groupIdx >= 0) {
-        setActiveItemIdx(
-          findItemIndex(
-            grouped[groupIdx],
-            value as Id<"categories"> | undefined
-          )
-        );
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (search && filtered.length > 0) {
-      setActiveGroupIdx(0);
-      setActiveItemIdx(0);
-    }
-  }, [search, filtered.length]);
 
   return (
     <SelectCategoryUI

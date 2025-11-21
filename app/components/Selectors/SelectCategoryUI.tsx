@@ -14,6 +14,11 @@ type Category = {
   name: string;
   description: string;
   parentId?: Id<"categories">;
+  taxsphere:
+    | "non-profit"
+    | "asset-management"
+    | "purpose-operations"
+    | "commercial-operations";
 };
 
 type CategoryGroup = {
@@ -68,7 +73,7 @@ export function SelectCategoryUI({
             <span
               className={cn(
                 "font-medium text-sm",
-                value ? "text-foreground" : "text-muted-foreground",
+                value ? "text-foreground" : "text-muted-foreground"
               )}
             >
               {value ? selectedItem?.name : "Kategorie wählen..."}
@@ -113,7 +118,7 @@ export function SelectCategoryUI({
             )}
           </div>
         </div>
-        <div className="flex max-h-[440px]">
+        <div className="flex h-[440px]">
           {filteredGroups.length === 0 ? (
             <div className="flex-1 py-12 text-center">
               <div className="flex flex-col items-center gap-2">
@@ -128,13 +133,13 @@ export function SelectCategoryUI({
             </div>
           ) : (
             <>
-              <div className="w-64 border-r bg-muted/30 overflow-y-auto">
+              <div className="w-64 border-r bg-muted/30 overflow-y-auto ">
                 {filteredGroups.map((group, idx) => (
                   <button
                     key={group.parent._id}
                     className={cn(
                       "w-full text-left px-4 py-3 text-sm font-semibold hover:bg-accent/50 transition-colors",
-                      idx === activeGroupIdx && "bg-accent",
+                      idx === activeGroupIdx && "bg-accent"
                     )}
                     onMouseEnter={() => {
                       onActiveGroupChange(idx);
@@ -148,22 +153,25 @@ export function SelectCategoryUI({
                   </button>
                 ))}
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-w-0">
                 {activeItems.map((item, itemIdx) => (
                   <button
                     key={item._id}
                     className={cn(
-                      "w-full text-left px-2 py-1 hover:bg-accent transition-all",
+                      "w-full text-left  px-2 py-1 hover:bg-accent transition-all",
                       itemIdx === activeItemIdx && "bg-accent",
                       value === item._id && "bg-accent/50",
+                      item.taxsphere !== "non-profit" &&
+                        item.taxsphere !== "purpose-operations" &&
+                        "bg-red-50"
                     )}
                     onClick={() => onSelect(item._id)}
                     onMouseEnter={() => onActiveItemChange(itemIdx)}
                     type="button"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium leading-snug mb-1">
+                      <div className="flex-1 min-w-0 ">
+                        <div className="text-sm  font-medium leading-snug mb-1">
                           {item.name}
                         </div>
                         <div className="text-xs text-muted-foreground leading-relaxed">
@@ -173,7 +181,7 @@ export function SelectCategoryUI({
                       <Check
                         className={cn(
                           "h-4 w-4 shrink-0 mt-0.5 transition-all",
-                          value === item._id ? "opacity-100" : "opacity-0",
+                          value === item._id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </div>

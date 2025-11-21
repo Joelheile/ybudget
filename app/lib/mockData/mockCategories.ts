@@ -4,6 +4,18 @@ export const CATEGORY_GROUPS = [
     type: "income" as const,
     items: [
       {
+        value: "monetary-donations",
+        label: "Geldspenden",
+        description: "Finanzielle Zuwendungen ohne Gegenleistung",
+        taxsphere: "non-profit" as const,
+      },
+       {
+        value: "sponsorship-cash",
+        label: "Sponsoring (Geldleistung)",
+        description: "Finanzielle Unterstützung durch Sponsoren",
+        taxsphere: "commercial-operations" as const,
+      },
+      {
         value: "membership-fees",
         label: "Mitgliedsbeiträge",
         description: "Regelmäßige Beiträge der Vereinsmitglieder",
@@ -34,20 +46,10 @@ export const CATEGORY_GROUPS = [
         description: "Verkauf von Fanartikeln und Merchandise",
         taxsphere: "commercial-operations" as const,
       },
-      {
-        value: "sponsorship-cash",
-        label: "Sponsoring (Geldleistung)",
-        description: "Finanzielle Unterstützung durch Sponsoren",
-        taxsphere: "commercial-operations" as const,
-      },
+     
    
     
-      {
-        value: "monetary-donations",
-        label: "Geldspenden",
-        description: "Finanzielle Zuwendungen ohne Gegenleistung",
-        taxsphere: "non-profit" as const,
-      },
+      
     ],
   },
   {
@@ -110,14 +112,8 @@ export const CATEGORY_GROUPS = [
       },
       {
         value: "technical-equipment",
-        label: "Technik (Beamer, Mikrofone, Leinwand)",
-        description: "Grundlegende Veranstaltungstechnik",
-        taxsphere: "purpose-operations" as const,
-      },
-      {
-        value: "lighting-sound",
-        label: "Licht & Tontechnik",
-        description: "Professionelle Licht- und Tontechnik",
+        label: "Technik (Beamer, Mikrofone, Leinwand, Licht, etc.)",
+        description: "Grundlegende und professionelle Veranstaltungstechnik",
         taxsphere: "purpose-operations" as const,
       },
 
@@ -127,12 +123,7 @@ export const CATEGORY_GROUPS = [
         description: "Internet und IT-Infrastruktur",
         taxsphere: "purpose-operations" as const,
       },
-      {
-        value: "gema-fees",
-        label: "GEMA-Gebühren",
-        description: "Gebühren für Musikrechte",
-        taxsphere: "purpose-operations" as const,
-      },
+     
       {
         value: "decoration",
         label: "Dekoration",
@@ -149,18 +140,6 @@ export const CATEGORY_GROUPS = [
         value: "speaker-fees",
         label: "Speaker-Honorare",
         description: "Honorare für Referenten und Vortragende",
-        taxsphere: "purpose-operations" as const,
-      },
-      {
-        value: "moderator-fees",
-        label: "Moderatoren-Honorare",
-        description: "Honorare für Moderatoren",
-        taxsphere: "purpose-operations" as const,
-      },
-      {
-        value: "workshop-leader",
-        label: "Workshop-Leiter",
-        description: "Honorare für Workshop-Leiter",
         taxsphere: "purpose-operations" as const,
       },
       {
@@ -191,6 +170,12 @@ export const CATEGORY_GROUPS = [
         value: "ksk-contributions",
         label: "KSK-Abgaben",
         description: "Künstlersozialkasse-Abgaben",
+        taxsphere: "purpose-operations" as const,
+      },
+       {
+        value: "gema-fees",
+        label: "GEMA-Gebühren",
+        description: "Gebühren für Musikrechte",
         taxsphere: "purpose-operations" as const,
       },
     ],
