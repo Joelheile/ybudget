@@ -117,6 +117,15 @@ const RangeCalendar = ({
         >
           Letztes Jahr
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            handlePresetClick({ from: new Date(0), to: new Date() })
+          }
+        >
+          All
+        </Button>
       </CardFooter>
     </Card>
   );
