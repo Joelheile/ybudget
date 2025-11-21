@@ -30,16 +30,18 @@ export const sendInvitation = mutation({
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
+    const firstName = args.name.split(" ")[0];
 
     await resend.sendEmail(ctx, {
       from: "YBudget <team@ybudget.de>",
       to: args.email,
       subject: "Einladung zu YBudget",
       html: `
-      <p>Hallo ${args.name},</p>
-      <p>Du wurdest von ${user.name} zu YBudget eingeladen.</p>
+      <p>Hey ${firstName},</p>
+      <p>Du wurdest von ${user.firstName} zu YBudget eingeladen :) </p>
       <p>Klicke auf den folgenden Link, um dich einzuloggen:</p>
       <a href="https://ybudget.de/login">Login</a>
+      <p>Viel Spaß beim Budgeting!</p>
       `,
     });
   },
