@@ -26,20 +26,15 @@ export default function UserRow({ user, onRoleChange, isAdmin }: UserRowProps) {
   const addTeamMember = useMutation(api.teams.functions.addTeamMember);
   const removeTeamMember = useMutation(api.teams.functions.removeTeamMember);
 
-  const assignedTeamIds = new Set(userTeams?.map((t) => t.teamId) || []);
+  const assignedTeamIds = new Set(userTeams?.map((t) => t.teamId));
 
   const handleToggleTeam = async (teamId: Id<"teams">) => {
     try {
-      const isAssigned = assignedTeamIds.has(teamId);
-
-      if (isAssigned) {
+      if (assignedTeamIds.has(teamId)) {
         await removeTeamMember({ teamId, userId: user._id });
         toast.success("Aus Team entfernt");
       } else {
         await addTeamMember({ teamId, userId: user._id });
-        posthog.capture("team_member_added", {
-          timestamp: new Date().toISOString(),
-        });
         toast.success("Zum Team hinzugefügt");
       }
     } catch (error) {

@@ -16,9 +16,8 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
   const renameTeam = useMutation(api.teams.functions.renameTeam);
 
   const handleToggleProject = async (projectId: Id<"projects">) => {
-    const isAssigned = team.projectIds?.includes(projectId) || false;
     try {
-      if (isAssigned) {
+      if (team.projectIds?.includes(projectId)) {
         await removeProject({ teamId: team._id, projectId });
         toast.success("Projekt entfernt");
       } else {
@@ -32,14 +31,6 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
 
   const handleSave = async () => {
     const trimmedName = editedName.trim();
-
-    if (!trimmedName) {
-      toast.error("Team-Name darf nicht leer sein");
-      setEditedName(team.name);
-      setIsEditing(false);
-      return;
-    }
-
     if (trimmedName === team.name) {
       setIsEditing(false);
       return;
@@ -48,12 +39,12 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
     try {
       await renameTeam({ teamId: team._id, name: trimmedName });
       toast.success("Team umbenannt");
-      setIsEditing(false);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Fehler beim Umbenennen"
       );
       setEditedName(team.name);
+    } finally {
       setIsEditing(false);
     }
   };

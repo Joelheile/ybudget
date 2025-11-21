@@ -4,14 +4,12 @@ import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
 
 export const createTeam = mutation({
-  args: {
-    name: v.string(),
-  },
+  args: { name: v.string() },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
     const user = await getCurrentUser(ctx);
 
-    return await ctx.db.insert("teams", {
+    return ctx.db.insert("teams", {
       name: args.name,
       organizationId: user.organizationId,
       memberIds: [],
@@ -22,47 +20,26 @@ export const createTeam = mutation({
 });
 
 export const renameTeam = mutation({
-  args: {
-    teamId: v.id("teams"),
-    name: v.string(),
-  },
+  args: { teamId: v.id("teams"), name: v.string() },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
-    
-    if (!args.name.trim()) {
-      throw new Error("Team name cannot be empty");
-    }
-
     const user = await getCurrentUser(ctx);
     const team = await ctx.db.get(args.teamId);
 
-    if (!team) {
-      throw new Error("Team not found");
-    }
-    if (team.organizationId !== user.organizationId) {
-      throw new Error("Access denied");
-    }
+    if (!team) throw new Error("Team not found");
+    if (team.organizationId !== user.organizationId) throw new Error("Access denied");
 
-    await ctx.db.patch(args.teamId, {
-      name: args.name,
-    });
+    await ctx.db.patch(args.teamId, { name: args.name });
   },
 });
 
 export const addTeamMember = mutation({
-  args: {
-    teamId: v.id("teams"),
-    userId: v.id("users"),
-  },
+  args: { teamId: v.id("teams"), userId: v.id("users") },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
-    
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
-    
-    if (team.memberIds.includes(args.userId)) {
-      throw new Error("User is already a team member");
-    }
+    if (team.memberIds.includes(args.userId)) throw new Error("User is already a team member");
 
     await ctx.db.patch(args.teamId, {
       memberIds: [...team.memberIds, args.userId],
@@ -71,13 +48,9 @@ export const addTeamMember = mutation({
 });
 
 export const removeTeamMember = mutation({
-  args: {
-    teamId: v.id("teams"),
-    userId: v.id("users"),
-  },
+  args: { teamId: v.id("teams"), userId: v.id("users") },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
-    
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 
@@ -86,22 +59,13 @@ export const removeTeamMember = mutation({
     });
   },
 });
-
-
 export const assignProjectToTeam = mutation({
-  args: {
-    teamId: v.id("teams"),
-    projectId: v.id("projects"),
-  },
+  args: { teamId: v.id("teams"), projectId: v.id("projects") },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
-
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
-    
-    if (team.projectIds.includes(args.projectId)) {
-      throw new Error("Project already assigned to team");
-    }
+    if (team.projectIds.includes(args.projectId)) throw new Error("Project already assigned");
 
     await ctx.db.patch(args.teamId, {
       projectIds: [...team.projectIds, args.projectId],
@@ -110,13 +74,9 @@ export const assignProjectToTeam = mutation({
 });
 
 export const removeProjectFromTeam = mutation({
-  args: {
-    teamId: v.id("teams"),
-    projectId: v.id("projects"),
-  },
+  args: { teamId: v.id("teams"), projectId: v.id("projects") },
   handler: async (ctx, args) => {
     await requireRole(ctx, "admin");
-    
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 

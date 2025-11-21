@@ -6,8 +6,6 @@ async function isOrgAdmin(ctx: QueryCtx | MutationCtx, userId: Id<"users">) {
   return user?.role === "admin";
 }
 
-
-
 export async function getUserAccessibleProjectIds(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">,
@@ -34,7 +32,6 @@ export async function getUserAccessibleProjectIds(
       team.projectIds.forEach((pid) => projectIds.add(pid));
     }
   }
-
   return Array.from(projectIds);
 }
 
@@ -53,8 +50,8 @@ export async function canAccessProject(
     .withIndex("by_organization", (q) => q.eq("organizationId", project.organizationId))
     .collect();
 
-  return teams.some(
-    (team) => team.memberIds.includes(userId) && team.projectIds.includes(projectId)
+  return teams.some((team) => 
+    team.memberIds.includes(userId) && team.projectIds.includes(projectId)
   );
 }
 
@@ -67,12 +64,6 @@ export async function filterByProjectAccess<
   organizationId: Id<"organizations">,
   items: T[],
 ): Promise<T[]> {
-  const accessibleIds = await getUserAccessibleProjectIds(
-    ctx,
-    userId,
-    organizationId,
-  );
-  return items.filter(
-    (item) => item.projectId && accessibleIds.includes(item.projectId),
-  );
+  const accessibleIds = await getUserAccessibleProjectIds(ctx, userId, organizationId);
+  return items.filter((item) => item.projectId && accessibleIds.includes(item.projectId));
 }
