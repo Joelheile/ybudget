@@ -23,7 +23,6 @@ import { useMutation } from "convex/react";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
-import posthog from "posthog-js";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -44,7 +43,7 @@ export function ImportTransactionsSheet({
 
   const allTransactions = useQuery(
     api.transactions.queries.getAllTransactions,
-    {},
+    {}
   );
 
   const existingIds = useMemo(() => {
@@ -54,7 +53,7 @@ export function ImportTransactionsSheet({
       .filter(Boolean) as string[];
   }, [allTransactions]);
   const addTransaction = useMutation(
-    api.transactions.functions.createImportedTransaction,
+    api.transactions.functions.createImportedTransaction
   );
 
   const handleFile = (file: File) => {
@@ -95,7 +94,7 @@ export function ImportTransactionsSheet({
 
     const skipped = csvData.length - newTransactions.length;
     const toastId = toast.loading(
-      `Importiere 0/${newTransactions.length} Transaktionen...`,
+      `Importiere 0/${newTransactions.length} Transaktionen...`
     );
 
     try {
@@ -120,33 +119,19 @@ export function ImportTransactionsSheet({
           `Importiere ${processed}/${newTransactions.length} Transaktionen...`,
           {
             id: toastId,
-          },
+          }
         );
       }
 
-      posthog.capture("transaction_imported", {
-        source: importSource,
-        total_transactions: csvData.length,
-        new_transactions: inserted,
-        skipped_duplicates: skipped,
-        timestamp: new Date().toISOString(),
-      });
-
       toast.success(
         `${inserted} neue Transaktionen importiert, ${skipped} Duplikate übersprungen`,
-        { id: toastId },
+        { id: toastId }
       );
       router.push("/import");
       setCsvData([]);
       setImportSource("");
       onOpenChange(false);
     } catch (error) {
-      posthog.captureException(error as Error);
-      posthog.capture("import_error", {
-        source: importSource,
-        total_attempted: csvData.length,
-        error_message: error instanceof Error ? error.message : "Unknown error",
-      });
       toast.error("Fehler beim Importieren", { id: toastId });
     }
   };

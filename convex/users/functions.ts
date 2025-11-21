@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { action, mutation } from "../_generated/server";
 import { getCurrentUser } from "./getCurrentUser";
 import { requireRole } from "./permissions";
 
@@ -53,3 +53,4 @@ export const updateUserRole = mutation({
     await ctx.db.patch(args.userId, { role: args.role });
   },
 });
+
