@@ -63,21 +63,21 @@ export function Paywall({ open, onOpenChange }: PaywallProps) {
 
         <DialogFooter className="flex-col sm:flex-col gap-2">
           <Button
-            onClick={() => handlePayment("monthly")}
+            onClick={() => handlePayment("yearly")}
             disabled={isLoading}
             className="w-full"
             size="lg"
           >
-            {isLoading ? "Wird geladen..." : "YBudget Premium Monthly"}
+            Auf YBudget Yearly upgraden
           </Button>
           <Button
-            onClick={() => handlePayment("yearly")}
+            onClick={() => handlePayment("monthly")}
             disabled={isLoading}
             variant="outline"
             className="w-full"
             size="lg"
           >
-            {isLoading ? "Wird geladen..." : "YBudget Premium Yearly"}
+            Auf YBudget Monthly upgraden
           </Button>
         </DialogFooter>
       </DialogContent>
