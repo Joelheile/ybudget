@@ -19,21 +19,25 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { useAction } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import {
   ChevronsUpDown,
   CreditCard,
   Handshake,
   LogOut,
-  SquareStack,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Paywall } from "../Payment/Paywall";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const { isMobile } = useSidebar();
   const isAdmin = user?.role === "admin";
+
+  const isCustomer = Boolean(useQuery(api.payments.queries.getActivePayment));
+
   const createPortalSession = useAction(api.stripe.createCustomerPortalSession);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
 
@@ -48,6 +52,10 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
       setIsLoadingPortal(false);
       console.error("Failed to create portal session: " + err);
     }
+  };
+
+  const openPaywall = () => {
+    setPaywallOpen(!paywallOpen);
   };
 
   if (!user) {
@@ -67,39 +75,16 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
   }
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={user.image}
-                  alt={user.name}
-                  referrerPolicy="no-referrer"
-                />
-                <AvatarFallback className="rounded-lg">
-                  {user.name?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+    <>
+      <Paywall open={paywallOpen} onOpenChange={setPaywallOpen} />
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
                     src={user.image}
@@ -107,47 +92,83 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
                     referrerPolicy="no-referrer"
                   />
                   <AvatarFallback className="rounded-lg">
-                    {user.name?.charAt(0).toUpperCase() ?? ""}
+                    {user.name?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {isAdmin && (
-              <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings/users">
-                    <Users />
-                    Benutzer
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings/teams">
-                    <Handshake />
-                    Teams
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleBillingClick}
-                  disabled={isLoadingPortal}
-                >
-                  <CreditCard />
-                  {isLoadingPortal ? "Laden..." : "Abrechnung"}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            )}
-            {isAdmin && <DropdownMenuSeparator />}
-            <DropdownMenuItem>
-              <LogOut />
-              <SignOut>Abmelden</SignOut>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+                <ChevronsUpDown className="ml-auto size-4" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              side={isMobile ? "bottom" : "right"}
+              align="end"
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src={user.image}
+                      alt={user.name}
+                      referrerPolicy="no-referrer"
+                    />
+                    <AvatarFallback className="rounded-lg">
+                      {user.name?.charAt(0).toUpperCase() ?? ""}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs">{user.email}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {isAdmin && (
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/users">
+                      <Users />
+                      Benutzer
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/teams">
+                      <Handshake />
+                      Teams
+                    </Link>
+                  </DropdownMenuItem>
+                  {isCustomer && (
+                    <DropdownMenuItem
+                      onClick={handleBillingClick}
+                      disabled={isLoadingPortal}
+                    >
+                      <CreditCard />
+                      {isLoadingPortal ? "Laden..." : "Abrechnung"}
+                    </DropdownMenuItem>
+                  )}
+                  {!isCustomer && (
+                    <DropdownMenuItem asChild>
+                      <button onClick={openPaywall}>
+                        <CreditCard />
+                        YBudget Premium
+                      </button>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuGroup>
+              )}
+              {isAdmin && <DropdownMenuSeparator />}
+              <DropdownMenuItem>
+                <LogOut />
+                <SignOut>Abmelden</SignOut>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </>
   );
 }

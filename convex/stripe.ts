@@ -71,10 +71,8 @@ export const createCustomerPortalSession = action({
       throw new Error("No organization found for user");
     }
 
-    const payment = await ctx.runQuery(
-      internal.payments.queries.getActivePayment,
-      { organizationId: user.organizationId },
-    );
+    const payment = await ctx.runQuery(api.payments.queries.getActivePayment, {});
+
     if (!payment) {
       throw new Error("No active payment found for organization");
     }

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,17 +20,14 @@ interface PaywallProps {
 export function Paywall({ open, onOpenChange }: PaywallProps) {
   const [isLoading, setIsLoading] = useState(false);
   const initializePayment = useAction(api.stripe.pay);
-
-  async function handleUpgrade() {
-    setIsLoading(true);
-    const paymentUrl = await initializePayment({ tier: "monthly" });
-    if (paymentUrl) {
-      window.location.href = paymentUrl;
-    }
-    setIsLoading(false);
-  }
-
   const user = useQuery(api.users.queries.getCurrentUserProfile);
+
+  const handlePayment = async (tier: "monthly" | "yearly") => {
+    setIsLoading(true);
+    const paymentUrl = await initializePayment({ tier });
+    if (paymentUrl) window.location.href = paymentUrl;
+    setIsLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,25 +36,22 @@ export function Paywall({ open, onOpenChange }: PaywallProps) {
           <div className="flex items-center gap-2 mb-2">
             <DialogTitle className="text-2xl flex flex-col">
               Hey {user?.firstName} :)
-              <span className="text-xl">
-                Es freut uns, dass dir YBudget gefällt!
-              </span>
+              <span className="text-xl">Ich hoffe YBudget gefällt dir</span>
             </DialogTitle>
           </div>
-          <DialogDescription className="text-base pt-2">
-            Da du bereits 3 Projekte erstellt hast, sind deine kostenlosen
-            Projekte aufgebraucht. <br />
-            <br /> Falls dir YBudget gefällt und dir Zeit beim Budgeting spart,
-            würde es mich freuen, wenn du auf unseren Premium Plan wechseln
-            würdest. Dort kannst du unbegrenzt viele Projekte anlegen und sparst
-            somit noch mehr Zeit und Nerven beim Planen eurer Budgets.
-          </DialogDescription>
+          <p className="pt-2  ">
+            Du hast deine kostenlosen Projekte aufgebraucht oder möchtest schon
+            früher alle YBudget Features nutzen? <br />
+            <br /> Dann ist der Premium Plan genau das Richtige für dich. Dort
+            kannst du unbegrenzt viele Projekte anlegen und sparst somit noch
+            mehr Zeit und Nerven beim Planen eurer Budgets 🙌
+          </p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-            <p className="font-semibold text-sm">Mit Premium erhältst du:</p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
+          <div className="bg-muted/50 rounded-lg  space-y-2">
+            <p className="font-semibold text-md ">Mit Premium erhältst du:</p>
+            <ul className="space-y-1 text-sm ">
               <li>✨ Unbegrenzt Projekte</li>
               <li>📊 Unbegrenzte Teams</li>
               <li>🧑‍🧒‍🧒 Unbegrenzte Nutzer</li>
@@ -70,21 +63,21 @@ export function Paywall({ open, onOpenChange }: PaywallProps) {
 
         <DialogFooter className="flex-col sm:flex-col gap-2">
           <Button
-            onClick={handleUpgrade}
+            onClick={() => handlePayment("monthly")}
             disabled={isLoading}
             className="w-full"
             size="lg"
           >
-            {isLoading
-              ? "Wird geladen..."
-              : "Auf unbegrenzte Projekte upgraden"}
+            {isLoading ? "Wird geladen..." : "YBudget Premium Monthly"}
           </Button>
           <Button
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handlePayment("yearly")}
+            disabled={isLoading}
+            variant="outline"
             className="w-full"
+            size="lg"
           >
-            3 Projekte reichen mir
+            {isLoading ? "Wird geladen..." : "YBudget Premium Yearly"}
           </Button>
         </DialogFooter>
       </DialogContent>
