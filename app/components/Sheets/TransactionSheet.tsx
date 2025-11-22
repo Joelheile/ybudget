@@ -57,7 +57,7 @@ export function TransactionSheet({
   const donorButtonRef = useRef<HTMLButtonElement>(null);
 
   const addTransaction = useMutation(
-    api.transactions.functions.createExpectedTransaction,
+    api.transactions.functions.createExpectedTransaction
   );
 
   const dateColor = date ? "text-foreground" : "text-muted-foreground";
@@ -68,7 +68,7 @@ export function TransactionSheet({
 
   const handleKeyPress = (
     e: React.KeyboardEvent,
-    nextRef: React.RefObject<HTMLElement | null>,
+    nextRef: React.RefObject<HTMLElement | null>
   ) => {
     if (e.key === "Enter" || e.key === "Tab") {
       e.preventDefault();
@@ -95,14 +95,14 @@ export function TransactionSheet({
         donorId: donor ? (donor as Id<"donors">) : undefined,
       });
       toast.success(
-        type === "expense" ? "Ausgabe gespeichert!" : "Einnahme gespeichert!",
+        type === "expense" ? "Ausgabe gespeichert!" : "Einnahme gespeichert!"
       );
       onOpenChange(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "";
       if (errorMessage.includes("cannot be used for category")) {
         toast.error(
-          "Der Förderer kann nicht für diese Kategorie verwendet werden. Wähle bitte einen anderen Förderer aus",
+          "Der Förderer kann nicht für diese Kategorie verwendet werden. Wähle bitte einen anderen Förderer aus"
         );
       } else {
         toast.error("Oh nein! Es gab einen Fehler beim Speichern :(");
@@ -274,7 +274,6 @@ export function TransactionSheet({
               ref={donorButtonRef}
               value={donor}
               onValueChange={setDonor}
-              categoryId={category ? (category as Id<"categories">) : undefined}
             />
           </div>
         </div>
