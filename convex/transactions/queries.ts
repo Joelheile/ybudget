@@ -76,6 +76,7 @@ export const getOldestTransactionDate = query({
         q.and(
           q.eq(q.field("organizationId"), user.organizationId),
           q.neq(q.field("isArchived"), true),
+          q.neq(q.field("projectId"), undefined),
         ),
       )
       .order("asc")
