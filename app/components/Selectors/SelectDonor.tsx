@@ -26,14 +26,13 @@ interface SelectDonorProps {
   value: string;
   onValueChange: (value: string) => void;
   onTabPressed?: () => void;
-  categoryId?: Id<"categories">;
   projectId?: Id<"projects">;
 }
 
 export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
   function SelectDonor(
-    { value, onValueChange, onTabPressed, categoryId, projectId },
-    buttonRef,
+    { value, onValueChange, onTabPressed, projectId },
+    buttonRef
   ) {
     const [open, setOpen] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,11 +40,11 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
 
     const allDonors = useQuery(
       api.donors.queries.getAllDonors,
-      projectId ? "skip" : {},
+      projectId ? "skip" : {}
     );
     const projectDonors = useQuery(
       api.donors.queries.getDonorsByProject,
-      projectId ? { projectId } : "skip",
+      projectId ? { projectId } : "skip"
     );
 
     const donors = projectId ? projectDonors : allDonors;
@@ -64,53 +63,69 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
       setOpen(false);
     };
 
-    const handleDonorCreated = (donorId: string) => {
-      onValueChange(donorId);
-    };
-
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Tab" || e.key === "Enter") {
-        if (!open) {
-          e.preventDefault();
-          setOpen(true);
-        } else {
-          e.preventDefault();
-          if (e.key === "Enter" && donors && donors[highlightedIndex]) {
-            handleSelect(donors[highlightedIndex]._id.toString());
-          } else if (e.key === "Tab" && onTabPressed) {
-            setOpen(false);
-            onTabPressed();
-          }
-        }
-      } else if (e.key === "ArrowDown" && !open) {
-        e.preventDefault();
-        setOpen(true);
-      } else if (e.key === "ArrowDown" && open) {
-        e.preventDefault();
-        setHighlightedIndex((prev) =>
-          prev < (donors?.length ?? 0) ? prev + 1 : 0,
-        );
-      } else if (e.key === "ArrowUp" && open) {
-        e.preventDefault();
-        setHighlightedIndex((prev) =>
-          prev > 0 ? prev - 1 : (donors?.length ?? 0) - 1,
-        );
-      } else if (e.key === "Escape") {
+      if (e.key === "Escape") {
         e.preventDefault();
         setOpen(false);
+        return;
       }
-    };
 
-    const handleOpenChange = (newOpen: boolean) => {
-      setOpen(newOpen);
-      if (newOpen) {
-        setHighlightedIndex(0);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (!open) {
+          setOpen(true);
+        } else {
+          setHighlightedIndex((prev) =>
+            prev < (donors?.length ?? 0) - 1 ? prev + 1 : 0
+          );
+        }
+        return;
+      }
+
+      if (e.key === "ArrowUp" && open) {
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : (donors?.length ?? 0) - 1
+        );
+        return;
+      }
+
+      if (e.key === "Enter" && open && donors?.[highlightedIndex]) {
+        e.preventDefault();
+        handleSelect(donors[highlightedIndex]._id.toString());
+        return;
+      }
+
+      if (e.key === "Tab") {
+        e.preventDefault();
+        if (open) {
+          setOpen(false);
+          if (onTabPressed) {
+            onTabPressed();
+          }
+        } else {
+          setOpen(true);
+        }
+        return;
+      }
+
+      if (e.key === "Enter" && !open && !value) {
+        e.preventDefault();
+        setOpen(true);
       }
     };
 
     return (
       <>
-        <Popover open={open} onOpenChange={handleOpenChange}>
+        <Popover
+          open={open}
+          onOpenChange={(newOpen) => {
+            setOpen(newOpen);
+            if (newOpen) {
+              setHighlightedIndex(0);
+            }
+          }}
+        >
           <PopoverTrigger asChild>
             <Button
               ref={buttonRef}
@@ -123,7 +138,7 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
               <span
                 className={cn(
                   "font-medium",
-                  value ? "text-foreground" : "text-muted-foreground",
+                  value ? "text-foreground" : "text-muted-foreground"
                 )}
               >
                 {displayText}
@@ -159,7 +174,7 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
                           "ml-auto",
                           value === donor._id.toString()
                             ? "opacity-100"
-                            : "opacity-0",
+                            : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -182,9 +197,9 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
         <AddDonorDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
-          onDonorCreated={handleDonorCreated}
+          onDonorCreated={onValueChange}
         />
       </>
     );
-  },
+  }
 );

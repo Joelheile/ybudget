@@ -100,13 +100,7 @@ export const ImportTransactionCardUI = ({
       {isIncome && (
         <div className="flex flex-col gap-2">
           <Label className="text-sm font-semibold">Förderer</Label>
-          <SelectDonor
-            value={donorId}
-            onValueChange={onDonorChange}
-            categoryId={
-              categoryId ? (categoryId as Id<"categories">) : undefined
-            }
-          />
+          <SelectDonor value={donorId} onValueChange={onDonorChange} />
         </div>
       )}
       {isExpense && (
@@ -123,9 +117,6 @@ export const ImportTransactionCardUI = ({
           <SelectDonor
             value={donorId}
             onValueChange={onDonorChange}
-            categoryId={
-              categoryId ? (categoryId as Id<"categories">) : undefined
-            }
             projectId={projectId ? (projectId as Id<"projects">) : undefined}
           />
         </div>

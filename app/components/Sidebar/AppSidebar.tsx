@@ -44,12 +44,12 @@ function AppSidebarComponent(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                <div className="">
                   <Image
                     src="/AppIcon.png"
                     alt="YBudget"
-                    width={48}
-                    height={48}
+                    width={32}
+                    height={32}
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">

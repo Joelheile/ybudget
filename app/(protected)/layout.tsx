@@ -9,6 +9,7 @@ import { DateRangeProvider } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex-helpers/react/cache";
 import { useConvexAuth } from "convex/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Onborda, OnbordaProvider } from "onborda";
 import { useEffect } from "react";
@@ -32,7 +33,13 @@ export default function ProtectedLayout({
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <Image
+          src="/AppIcon.png"
+          alt="Logo"
+          width={48}
+          height={48}
+          className="animate-spin"
+        />
       </div>
     );
   }

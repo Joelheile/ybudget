@@ -33,7 +33,7 @@ export default function TransactionsOverviewUI({
   const toDate = formatDate(selectedDateRange.to);
 
   return (
-    <div>
+    <div className="flex flex-col w-full h-screen">
       <PageHeader title="Transaktionen" />
       <div className="text-sm text-muted-foreground pb-4 ">
         {fromDate} - {toDate}
