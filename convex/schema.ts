@@ -93,6 +93,14 @@ export default defineSchema({
     .index("by_project", ["projectId"])
     .index("by_source_transaction", ["sourceTransactionId"]),
 
+    budgets: defineTable({
+      projectId: v.id("projects"),
+      amount: v.number(),
+      allocatedBy: v.id("users"),
+      note: v.optional(v.string()),
+    }).index("by_project", ["projectId"]),
+
+
   categories: defineTable({
     name: v.string(),
     description: v.string(),
