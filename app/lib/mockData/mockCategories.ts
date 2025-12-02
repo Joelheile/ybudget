@@ -133,6 +133,12 @@ export const CATEGORY_GROUPS = [
     type: "expense" as const,
     items: [
       {
+        value: "expense-reimbursement",
+        label: "Auslagenerstattung",
+        description: "Erstattung von Auslagen und Kosten",
+        taxsphere: "purpose-operations" as const,
+      },
+      {
         value: "speaker-fees",
         label: "Speaker-Honorare",
         description: "Honorare für Referenten und Vortragende",
@@ -144,12 +150,7 @@ export const CATEGORY_GROUPS = [
         description: "Pauschale für ehrenamtliche Tätigkeiten (840€/Jahr)",
         taxsphere: "purpose-operations" as const,
       },
-      {
-        value: "course-instructor-allowance",
-        label: "Übungsleiterpauschale",
-        description: "Steuerfreie Übungsleiterpauschale (3.000€/Jahr)",
-        taxsphere: "purpose-operations" as const,
-      },
+     
       {
         value: "minijobs",
         label: "Minijobs",

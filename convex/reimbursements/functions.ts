@@ -180,6 +180,24 @@ export const markAsPaid = mutation({
     ) {
       throw new Error("Unauthorized");
     }
+
+    const category = await ctx.db
+      .query("categories")
+      .filter((q) => q.eq(q.field("name"), "Auslagenerstattung"))
+      .first();
+
+    await ctx.db.insert("transactions", {
+      organizationId: reimbursement.organizationId,
+      projectId: reimbursement.projectId,
+      date: Date.now(),
+      amount: -reimbursement.amount,
+      description: "Auslagenerstattung",
+      counterparty: reimbursement.accountHolder,
+      categoryId: category?._id,
+      status: "expected",
+      importedBy: user._id,
+    });
+
     await ctx.db.patch(args.reimbursementId, { status: "paid" });
   },
 });
