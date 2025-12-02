@@ -44,6 +44,14 @@ export const createReimbursement = mutation({
   },
 });
 
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    await getCurrentUser(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+
 export const addReceipt = mutation({
   args: {
     reimbursementId: v.id("reimbursements"),
@@ -79,23 +87,31 @@ export const deleteReceipt = mutation({
   },
   handler: async (ctx, args) => {
     await getCurrentUser(ctx);
-    await ctx.db.delete(args.receiptId);
+    const receipt = await ctx.db.get(args.receiptId);
+    if (receipt) {
+      await ctx.storage.delete(receipt.fileStorageId);
+      await ctx.db.delete(args.receiptId);
+    }
   },
 });
 
-export const submitReimbursement = mutation({
+export const deleteReimbursement = mutation({
   args: {
     reimbursementId: v.id("reimbursements"),
   },
   handler: async (ctx, args) => {
     await getCurrentUser(ctx);
-    await ctx.db.patch(args.reimbursementId, { status: "pending" });
+    const receipts = await ctx.db
+      .query("receipts")
+      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))
+      .collect();
+
+    for (const receipt of receipts) {
+      await ctx.storage.delete(receipt.fileStorageId);
+      await ctx.db.delete(receipt._id);
+    }
+
+    await ctx.db.delete(args.reimbursementId);
   },
 });
 
-export const generateUploadUrl = mutation({
-  handler: async (ctx) => {
-    await getCurrentUser(ctx);
-    return await ctx.storage.generateUploadUrl();
-  },
-});
