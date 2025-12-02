@@ -16,4 +16,3 @@ export const getActivePayment = query({
       .first();
   },
 });
-

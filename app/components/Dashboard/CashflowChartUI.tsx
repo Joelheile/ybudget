@@ -185,6 +185,7 @@ export function CashflowChartUI({
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                width={90}
                 tickFormatter={formatCurrency}
                 domain={[
                   -axisConfig.roundedMaxBarValue,
@@ -215,8 +216,8 @@ export function CashflowChartUI({
                       const formattedNumber = new Intl.NumberFormat("de-DE", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
-                      }).format(Math.abs(numValue));
-                      const formattedValue = `${formattedNumber}€`;
+                      }).format(numValue);
+                      const formattedValue = `${formattedNumber} €`;
 
                       const itemConfig =
                         chartConfig[name as keyof typeof chartConfig];

@@ -32,7 +32,7 @@ interface SelectDonorProps {
 export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
   function SelectDonor(
     { value, onValueChange, onTabPressed, projectId },
-    buttonRef
+    buttonRef,
   ) {
     const [open, setOpen] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -40,11 +40,11 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
 
     const allDonors = useQuery(
       api.donors.queries.getAllDonors,
-      projectId ? "skip" : {}
+      projectId ? "skip" : {},
     );
     const projectDonors = useQuery(
       api.donors.queries.getDonorsByProject,
-      projectId ? { projectId } : "skip"
+      projectId ? { projectId } : "skip",
     );
 
     const donors = projectId ? projectDonors : allDonors;
@@ -76,7 +76,7 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
           setOpen(true);
         } else {
           setHighlightedIndex((prev) =>
-            prev < (donors?.length ?? 0) - 1 ? prev + 1 : 0
+            prev < (donors?.length ?? 0) - 1 ? prev + 1 : 0,
           );
         }
         return;
@@ -85,7 +85,7 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
       if (e.key === "ArrowUp" && open) {
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev > 0 ? prev - 1 : (donors?.length ?? 0) - 1
+          prev > 0 ? prev - 1 : (donors?.length ?? 0) - 1,
         );
         return;
       }
@@ -138,7 +138,7 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
               <span
                 className={cn(
                   "font-medium",
-                  value ? "text-foreground" : "text-muted-foreground"
+                  value ? "text-foreground" : "text-muted-foreground",
                 )}
               >
                 {displayText}
@@ -174,7 +174,7 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
                           "ml-auto",
                           value === donor._id.toString()
                             ? "opacity-100"
-                            : "opacity-0"
+                            : "opacity-0",
                         )}
                       />
                     </CommandItem>
@@ -201,5 +201,5 @@ export const SelectDonor = forwardRef<HTMLButtonElement, SelectDonorProps>(
         />
       </>
     );
-  }
+  },
 );

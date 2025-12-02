@@ -69,9 +69,7 @@ export const getOldestTransactionDate = query({
 
     const oldest = await ctx.db
       .query("transactions")
-      .withIndex("by_date", (q) =>
-        q.gte("date", 0),
-      )
+      .withIndex("by_date", (q) => q.gte("date", 0))
       .filter((q) =>
         q.and(
           q.eq(q.field("organizationId"), user.organizationId),
