@@ -21,7 +21,7 @@ export function ReceiptUpload({ onUploadComplete, storageId }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const generateUploadUrl = useMutation(
-    api.reimbursements.mutations.generateUploadUrl
+    api.reimbursements.functions.generateUploadUrl
   );
   const previewUrl = useQuery(
     api.reimbursements.queries.getFileUrl,
@@ -63,11 +63,27 @@ export function ReceiptUpload({ onUploadComplete, storageId }: Props) {
 
   if (previewUrl) {
     return (
-      <div className="border rounded-lg p-4">
+      <div
+        className="border rounded-lg p-4 relative group cursor-pointer"
+        onClick={() => inputRef.current?.click()}
+      >
         <img
           src={previewUrl}
           alt="Beleg"
           className="max-h-48 mx-auto rounded"
+        />
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+          <div className="text-white text-center">
+            <Upload className="size-8 mx-auto mb-2" />
+            <p className="text-sm font-medium">Klicken zum Ändern</p>
+          </div>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".jpg,.jpeg,.png,.heic,.pdf"
+          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          className="hidden"
         />
       </div>
     );

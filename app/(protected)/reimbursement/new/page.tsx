@@ -28,7 +28,7 @@ export default function ReimbursementFormPage() {
   );
   const projects = useQuery(api.projects.queries.getAllProjects);
   const createReimbursement = useMutation(
-    api.reimbursements.mutations.createReimbursement
+    api.reimbursements.functions.createReimbursement
   );
   const updateUserBankDetails = useMutation(
     api.users.functions.updateBankDetails

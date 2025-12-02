@@ -2,8 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
@@ -85,12 +95,14 @@ export function ReimbursementFormUI({
         <p className="text-muted-foreground mt-1">
           Füge deine Belege hinzu und reiche sie zur Genehmigung ein
         </p>
-      </div>
 
-      <div className="space-y-4">
-        <div>
-          <Label>Projekt *</Label>
-          <Select value={selectedProjectId || ""} onValueChange={(value) => setSelectedProjectId(value as Id<"projects">)}>
+        <div className="mt-4">
+          <Select
+            value={selectedProjectId || ""}
+            onValueChange={(value) =>
+              setSelectedProjectId(value as Id<"projects">)
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Wählen Sie ein Projekt" />
             </SelectTrigger>
@@ -242,7 +254,9 @@ export function ReimbursementFormUI({
         <div>
           <Label>Beleg hochladen *</Label>
           <ReceiptUpload
-            onUploadComplete={(storageId) => setCurrentReceipt({ ...currentReceipt, fileStorageId: storageId })}
+            onUploadComplete={(storageId) =>
+              setCurrentReceipt({ ...currentReceipt, fileStorageId: storageId })
+            }
             storageId={currentReceipt.fileStorageId || undefined}
           />
         </div>
@@ -333,9 +347,7 @@ export function ReimbursementFormUI({
                 className="flex items-center justify-between px-3 bg-gray-50 border rounded-md"
               >
                 <div className="flex items-center gap-8 flex-1">
-                  <span className="font-semibold">
-                    {receipt.companyName}
-                  </span>
+                  <span className="font-semibold">{receipt.companyName}</span>
                   <span className="text-sm text-muted-foreground">
                     {receipt.description || "Keine Beschreibung"}
                   </span>

@@ -23,7 +23,7 @@ import type * as payments_functions from "../payments/functions.js";
 import type * as payments_queries from "../payments/queries.js";
 import type * as projects_functions from "../projects/functions.js";
 import type * as projects_queries from "../projects/queries.js";
-import type * as reimbursements_mutations from "../reimbursements/mutations.js";
+import type * as reimbursements_functions from "../reimbursements/functions.js";
 import type * as reimbursements_queries from "../reimbursements/queries.js";
 import type * as stripe from "../stripe.js";
 import type * as subscriptions_functions from "../subscriptions/functions.js";
@@ -63,7 +63,7 @@ declare const fullApi: ApiFromModules<{
   "payments/queries": typeof payments_queries;
   "projects/functions": typeof projects_functions;
   "projects/queries": typeof projects_queries;
-  "reimbursements/mutations": typeof reimbursements_mutations;
+  "reimbursements/functions": typeof reimbursements_functions;
   "reimbursements/queries": typeof reimbursements_queries;
   stripe: typeof stripe;
   "subscriptions/functions": typeof subscriptions_functions;
