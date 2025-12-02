@@ -30,11 +30,14 @@ export const getReceipts = query({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId) return [];
-    
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId)
+      return [];
+
     return await ctx.db
       .query("receipts")
-      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))
+      .withIndex("by_reimbursement", (q) =>
+        q.eq("reimbursementId", args.reimbursementId),
+      )
       .collect();
   },
 });
@@ -56,12 +59,16 @@ export const getAllReimbursements = query({
     const reimbursements = isAdmin
       ? await ctx.db
           .query("reimbursements")
-          .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+          .withIndex("by_organization", (q) =>
+            q.eq("organizationId", user.organizationId),
+          )
           .collect()
       : await ctx.db
           .query("reimbursements")
           .withIndex("by_organization_and_createdBy", (q) =>
-            q.eq("organizationId", user.organizationId).eq("createdBy", user._id)
+            q
+              .eq("organizationId", user.organizationId)
+              .eq("createdBy", user._id),
           )
           .collect();
 
@@ -74,7 +81,7 @@ export const getAllReimbursements = query({
           creatorName: creator?.name || "Unknown",
           projectName: project?.name || "Unbekanntes Projekt",
         };
-      })
+      }),
     );
   },
 });

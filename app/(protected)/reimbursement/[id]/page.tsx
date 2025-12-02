@@ -34,10 +34,10 @@ export default function EditReimbursementPage() {
   const projects = useQuery(api.projects.queries.getAllProjects);
 
   const updateReimbursement = useMutation(
-    api.reimbursements.functions.updateReimbursement
+    api.reimbursements.functions.updateReimbursement,
   );
   const deleteReceiptMutation = useMutation(
-    api.reimbursements.functions.deleteReceipt
+    api.reimbursements.functions.deleteReceipt,
   );
   const updateReceipt = useMutation(api.reimbursements.functions.updateReceipt);
   const addReceipt = useMutation(api.reimbursements.functions.addReceipt);
@@ -52,7 +52,7 @@ export default function EditReimbursementPage() {
   });
 
   const [editMode, setEditMode] = useState<"list" | "add" | "edit" | "image">(
-    "list"
+    "list",
   );
   const [editingReceiptId, setEditingReceiptId] =
     useState<Id<"receipts"> | null>(null);
@@ -138,7 +138,7 @@ export default function EditReimbursementPage() {
     setEditMode("list");
     setEditingReceiptId(null);
     toast.success(
-      editMode === "image" ? "Bild aktualisiert" : "Beleg aktualisiert"
+      editMode === "image" ? "Bild aktualisiert" : "Beleg aktualisiert",
     );
   };
 

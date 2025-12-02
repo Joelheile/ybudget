@@ -1,6 +1,12 @@
 "use client";
 
-import { Coins, LayoutDashboard, SquareCheckBig, Upload, Users } from "lucide-react";
+import {
+  Coins,
+  LayoutDashboard,
+  SquareCheckBig,
+  Upload,
+  Users,
+} from "lucide-react";
 import { memo, useMemo } from "react";
 
 import {

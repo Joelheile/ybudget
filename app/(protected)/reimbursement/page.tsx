@@ -44,14 +44,14 @@ export default function ReimbursementPage() {
   const convex = useConvex();
   const currentUser = useQuery(api.users.queries.getCurrentUserProfile);
   const reimbursements = useQuery(
-    api.reimbursements.queries.getAllReimbursements
+    api.reimbursements.queries.getAllReimbursements,
   );
   const markAsPaid = useMutation(api.reimbursements.functions.markAsPaid);
   const rejectReimbursement = useMutation(
-    api.reimbursements.functions.rejectReimbursement
+    api.reimbursements.functions.rejectReimbursement,
   );
   const deleteReimbursement = useMutation(
-    api.reimbursements.functions.deleteReimbursementAdmin
+    api.reimbursements.functions.deleteReimbursementAdmin,
   );
 
   const [rejectDialog, setRejectDialog] = useState<{
@@ -89,13 +89,13 @@ export default function ReimbursementPage() {
     try {
       const reimbursement = await convex.query(
         api.reimbursements.queries.getReimbursement,
-        { reimbursementId }
+        { reimbursementId },
       );
       if (!reimbursement) return;
 
       const receipts = await convex.query(
         api.reimbursements.queries.getReceipts,
-        { reimbursementId }
+        { reimbursementId },
       );
 
       const receiptsWithUrls = await Promise.all(
@@ -104,12 +104,12 @@ export default function ReimbursementPage() {
           fileUrl: await convex.query(api.reimbursements.queries.getFileUrl, {
             storageId: receipt.fileStorageId,
           }),
-        }))
+        })),
       );
 
       const pdfBlob = await generateReimbursementPDF(
         reimbursement,
-        receiptsWithUrls
+        receiptsWithUrls,
       );
 
       const url = URL.createObjectURL(pdfBlob);

@@ -23,13 +23,24 @@ const emptyReceipt = {
 
 export default function ReimbursementFormPage() {
   const router = useRouter();
-  const bankDetailsQuery = useQuery(api.reimbursements.queries.getUserBankDetails);
+  const bankDetailsQuery = useQuery(
+    api.reimbursements.queries.getUserBankDetails,
+  );
   const projects = useQuery(api.projects.queries.getAllProjects);
-  const createReimbursement = useMutation(api.reimbursements.functions.createReimbursement);
-  const updateUserBankDetails = useMutation(api.users.functions.updateBankDetails);
+  const createReimbursement = useMutation(
+    api.reimbursements.functions.createReimbursement,
+  );
+  const updateUserBankDetails = useMutation(
+    api.users.functions.updateBankDetails,
+  );
 
-  const [selectedProjectId, setSelectedProjectId] = useState<Id<"projects"> | null>(null);
-  const [bankDetails, setBankDetails] = useState({ iban: "", bic: "", accountHolder: "" });
+  const [selectedProjectId, setSelectedProjectId] =
+    useState<Id<"projects"> | null>(null);
+  const [bankDetails, setBankDetails] = useState({
+    iban: "",
+    bic: "",
+    accountHolder: "",
+  });
   const [bankDetailsLoaded, setBankDetailsLoaded] = useState(false);
   const [editingBank, setEditingBank] = useState(false);
   const [receipts, setReceipts] = useState<Doc<"receipts">[]>([]);
@@ -45,7 +56,7 @@ export default function ReimbursementFormPage() {
   const calculatedNet = currentReceipt.grossAmount
     ? calculateNet(
         parseFloat(currentReceipt.grossAmount),
-        parseFloat(currentReceipt.taxRate)
+        parseFloat(currentReceipt.taxRate),
       )
     : 0;
 

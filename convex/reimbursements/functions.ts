@@ -9,16 +9,18 @@ export const createReimbursement = mutation({
     iban: v.string(),
     bic: v.string(),
     accountHolder: v.string(),
-    receipts: v.array(v.object({
-      receiptNumber: v.string(),
-      receiptDate: v.string(),
-      companyName: v.string(),
-      description: v.string(),
-      netAmount: v.number(),
-      taxRate: v.number(),
-      grossAmount: v.number(),
-      fileStorageId: v.id("_storage"),
-    })),
+    receipts: v.array(
+      v.object({
+        receiptNumber: v.string(),
+        receiptDate: v.string(),
+        companyName: v.string(),
+        description: v.string(),
+        netAmount: v.number(),
+        taxRate: v.number(),
+        grossAmount: v.number(),
+        fileStorageId: v.id("_storage"),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -68,7 +70,11 @@ export const addReceipt = mutation({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId ||
+      reimbursement.createdBy !== user._id
+    ) {
       throw new Error("Unauthorized");
     }
     return ctx.db.insert("receipts", args);
@@ -83,7 +89,11 @@ export const deleteReceipt = mutation({
     if (!receipt) throw new Error("Not found");
 
     const reimbursement = await ctx.db.get(receipt.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId ||
+      reimbursement.createdBy !== user._id
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -110,7 +120,11 @@ export const updateReceipt = mutation({
     if (!receipt) throw new Error("Not found");
 
     const reimbursement = await ctx.db.get(receipt.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId ||
+      reimbursement.createdBy !== user._id
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -132,11 +146,20 @@ export const deleteReimbursement = mutation({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId ||
+      reimbursement.createdBy !== user._id
+    ) {
       throw new Error("Unauthorized");
     }
 
-    const receipts = await ctx.db.query("receipts").withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId)).collect();
+    const receipts = await ctx.db
+      .query("receipts")
+      .withIndex("by_reimbursement", (q) =>
+        q.eq("reimbursementId", args.reimbursementId),
+      )
+      .collect();
     for (const receipt of receipts) {
       await ctx.storage.delete(receipt.fileStorageId);
       await ctx.db.delete(receipt._id);
@@ -151,7 +174,10 @@ export const markAsPaid = mutation({
     const user = await getCurrentUser(ctx);
     if (user.role !== "admin") throw new Error("Admin required");
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId
+    ) {
       throw new Error("Unauthorized");
     }
     await ctx.db.patch(args.reimbursementId, { status: "paid" });
@@ -167,10 +193,16 @@ export const rejectReimbursement = mutation({
     const user = await getCurrentUser(ctx);
     if (user.role !== "admin") throw new Error("Admin required");
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId
+    ) {
       throw new Error("Unauthorized");
     }
-    await ctx.db.patch(args.reimbursementId, { status: "rejected", adminNote: args.adminNote });
+    await ctx.db.patch(args.reimbursementId, {
+      status: "rejected",
+      adminNote: args.adminNote,
+    });
   },
 });
 
@@ -183,7 +215,10 @@ export const updateReimbursement = mutation({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId
+    ) {
       throw new Error("Not found");
     }
     if (reimbursement.createdBy !== user._id && user.role !== "admin") {
@@ -204,11 +239,19 @@ export const deleteReimbursementAdmin = mutation({
     const user = await getCurrentUser(ctx);
     if (user.role !== "admin") throw new Error("Admin required");
     const reimbursement = await ctx.db.get(args.reimbursementId);
-    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+    if (
+      !reimbursement ||
+      reimbursement.organizationId !== user.organizationId
+    ) {
       throw new Error("Unauthorized");
     }
 
-    const receipts = await ctx.db.query("receipts").withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId)).collect();
+    const receipts = await ctx.db
+      .query("receipts")
+      .withIndex("by_reimbursement", (q) =>
+        q.eq("reimbursementId", args.reimbursementId),
+      )
+      .collect();
     for (const receipt of receipts) {
       await ctx.storage.delete(receipt.fileStorageId);
       await ctx.db.delete(receipt._id);

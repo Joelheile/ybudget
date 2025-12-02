@@ -259,7 +259,7 @@ export function EditReimbursementUI({
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !formData.receiptDate && "text-muted-foreground"
+                    !formData.receiptDate && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 size-4" />
@@ -281,7 +281,7 @@ export function EditReimbursementUI({
                   onSelect={(date) => {
                     updateFormField(
                       "receiptDate",
-                      date ? format(date, "yyyy-MM-dd") : ""
+                      date ? format(date, "yyyy-MM-dd") : "",
                     );
                     setCalendarOpen(false);
                   }}

@@ -174,7 +174,7 @@ export function ReimbursementFormUI({
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !currentReceipt.receiptDate && "text-muted-foreground"
+                    !currentReceipt.receiptDate && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 size-4" />
@@ -182,7 +182,7 @@ export function ReimbursementFormUI({
                     ? format(
                         new Date(currentReceipt.receiptDate),
                         "dd.MM.yyyy",
-                        { locale: de }
+                        { locale: de },
                       )
                     : "Datum wählen"}
                 </Button>
