@@ -1,7 +1,5 @@
-export default function ReimbursementForm() {
-  return (
-    <div>
-      <div>asdf</div>
-    </div>
-  );
+import ReimbursementFormLogic from "./ReimbursementFormLogic";
+
+export default function ReimbursementFormPage() {
+  return <ReimbursementFormLogic />;
 }

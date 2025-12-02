@@ -1,0 +1,390 @@
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import { CalendarIcon, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { useState } from "react";
+
+type Props = {
+  bankDetails: { iban: string; bic: string; accountHolder: string };
+  setBankDetails: (details: {
+    iban: string;
+    bic: string;
+    accountHolder: string;
+  }) => void;
+  editingBank: boolean;
+  setEditingBank: () => void;
+  currentReceipt: {
+    receiptDate: string;
+    companyName: string;
+    description: string;
+    grossAmount: string;
+    taxRate: string;
+    receiptNumber: string;
+  };
+  setCurrentReceipt: (receipt: {
+    receiptDate: string;
+    companyName: string;
+    description: string;
+    grossAmount: string;
+    taxRate: string;
+    receiptNumber: string;
+  }) => void;
+  calculatedNet: number;
+  handleAddReceipt: () => void;
+  receipts: Doc<"receipts">[];
+  handleDeleteReceipt: (id: Id<"receipts">) => void;
+  handleSubmit: () => void;
+};
+
+export function ReimbursementFormUI({
+  bankDetails,
+  setBankDetails,
+  editingBank,
+  setEditingBank,
+  currentReceipt,
+  setCurrentReceipt,
+  calculatedNet,
+  handleAddReceipt,
+  receipts,
+  handleDeleteReceipt,
+  handleSubmit,
+}: Props) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const totalNet = receipts.reduce((sum, r) => sum + r.netAmount, 0);
+  const totalTax7 = receipts
+    .filter((r) => r.taxRate === 7)
+    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
+  const totalTax19 = receipts
+    .filter((r) => r.taxRate === 19)
+    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
+  const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
+
+  return (
+    <div className="container mx-auto max-w-4xl p-6 space-y-10">
+      <div>
+        <h1 className="text-3xl font-bold">Neue Auslagenerstattung</h1>
+        <p className="text-muted-foreground mt-1">
+          Füge deine Belege hinzu und reiche sie zur Genehmigung ein
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Beleg hinzufügen</h2>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Name/Firma *</Label>
+            <Input
+              value={currentReceipt.companyName}
+              onChange={(e) =>
+                setCurrentReceipt({
+                  ...currentReceipt,
+                  companyName: e.target.value,
+                })
+              }
+              placeholder="z.B. Amazon, Deutsche Bahn"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Beleg-Nr. *</Label>
+            <Input
+              value={currentReceipt.receiptNumber}
+              onChange={(e) =>
+                setCurrentReceipt({
+                  ...currentReceipt,
+                  receiptNumber: e.target.value,
+                })
+              }
+              placeholder="z.B. INV-2024-001"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Beschreibung</Label>
+          <Textarea
+            value={currentReceipt.description}
+            onChange={(e) =>
+              setCurrentReceipt({
+                ...currentReceipt,
+                description: e.target.value,
+              })
+            }
+            placeholder="z.B. Büromaterial für Q1, Zugfahrt München-Berlin, Hotelübernachtung"
+            rows={2}
+            className="resize-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <Label>Datum *</Label>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !currentReceipt.receiptDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {currentReceipt.receiptDate
+                    ? format(
+                        new Date(currentReceipt.receiptDate),
+                        "dd.MM.yyyy",
+                        { locale: de }
+                      )
+                    : "Datum wählen"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={
+                    currentReceipt.receiptDate
+                      ? new Date(currentReceipt.receiptDate)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    setCurrentReceipt({
+                      ...currentReceipt,
+                      receiptDate: date ? format(date, "yyyy-MM-dd") : "",
+                    });
+                    setCalendarOpen(false);
+                  }}
+                  locale={de}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="space-y-2">
+            <Label>Bruttobetrag (€) *</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={currentReceipt.grossAmount}
+              onChange={(e) =>
+                setCurrentReceipt({
+                  ...currentReceipt,
+                  grossAmount: e.target.value,
+                })
+              }
+              placeholder="119,95"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Wie viel MwSt.?</Label>
+            <Select
+              value={currentReceipt.taxRate}
+              onValueChange={(value) =>
+                setCurrentReceipt({ ...currentReceipt, taxRate: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="19">19%</SelectItem>
+                <SelectItem value="7">7%</SelectItem>
+                <SelectItem value="0">0%</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Nettobetrag (€)</Label>
+            <Input
+              type="number"
+              value={calculatedNet.toFixed(2)}
+              disabled
+              className="bg-muted/50 font-mono"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Beleg hochladen (PDF)</Label>
+          <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
+            <div className="flex flex-col items-center gap-3">
+              <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Upload className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">
+                  Klicke hier oder ziehe deine PDF-Datei herein
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Maximal 10 MB
+                </p>
+              </div>
+            </div>
+            <input type="file" accept=".pdf" className="hidden" />
+          </div>
+        </div>
+
+        <Button
+          onClick={handleAddReceipt}
+          className="w-full"
+          variant="outline"
+          size="lg"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Beleg hinzufügen
+        </Button>
+      </div>
+
+      {receipts.length > 0 && (
+        <div className="space-y-8 mt-24">
+          <h2 className="text-2xl font-bold mb-8">Zusammenfassung</h2>
+
+          <div className="flex items-end gap-4">
+            <div
+              className="grid gap-4 flex-1"
+              style={{ gridTemplateColumns: "1fr 2fr 1fr" }}
+            >
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase">
+                  Kontoinhaber
+                </Label>
+                <Input
+                  value={bankDetails.accountHolder}
+                  onChange={(e) =>
+                    setBankDetails({
+                      ...bankDetails,
+                      accountHolder: e.target.value,
+                    })
+                  }
+                  disabled={!editingBank}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase">
+                  IBAN
+                </Label>
+                <Input
+                  value={bankDetails.iban}
+                  onChange={(e) =>
+                    setBankDetails({ ...bankDetails, iban: e.target.value })
+                  }
+                  disabled={!editingBank}
+                  placeholder="DE89 3704 0044 0532 0130 00"
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase">
+                  BIC
+                </Label>
+                <Input
+                  value={bankDetails.bic}
+                  onChange={(e) =>
+                    setBankDetails({ ...bankDetails, bic: e.target.value })
+                  }
+                  disabled={!editingBank}
+                  placeholder="COBADEFFXXX"
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <Button
+              variant={editingBank ? "default" : "outline"}
+              size="sm"
+              onClick={setEditingBank}
+            >
+              {editingBank ? (
+                "Speichern"
+              ) : (
+                <>
+                  <Pencil className="h-4 w-4 mr-2" />
+                </>
+              )}
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {receipts.map((receipt) => (
+              <div
+                key={receipt._id}
+                className="flex items-center justify-between px-3 bg-gray-50 border  rounded-md "
+              >
+                <div className="flex items-center gap-8 flex-1">
+                  <span className="font-semibold text-base ">
+                    {receipt.companyName}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {receipt.description || "Keine Beschreibung"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold text-base">
+                    {receipt.grossAmount.toFixed(2)} €
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteReceipt(receipt._id)}
+                    className="hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-3 pt-6">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Netto gesamt</span>
+              <span>{totalNet.toFixed(2)} €</span>
+            </div>
+            {totalTax7 > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">UST 7% gesamt</span>
+                <span>{totalTax7.toFixed(2)} €</span>
+              </div>
+            )}
+            {totalTax19 > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">UST 19% gesamt</span>
+                <span>{totalTax19.toFixed(2)} €</span>
+              </div>
+            )}
+            <Separator className="my-4" />
+            <div className="flex justify-between text-lg font-semibold pt-2">
+              <span>Brutto gesamt</span>
+              <span>{totalGross.toFixed(2)} €</span>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleSubmit}
+            className="w-full h-14 font-semibold mt-8"
+            size="lg"
+          >
+            Zur Genehmigung einreichen
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
