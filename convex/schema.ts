@@ -157,6 +157,7 @@ export default defineSchema({
 
   reimbursements: defineTable({
     organizationId: v.id("organizations"),
+    projectId: v.id("projects"),
     amount: v.number(),
     status: v.union(v.literal("draft"), v.literal("pending"), v.literal("approved"), v.literal("rejected"), v.literal("paid")),
     iban: v.string(),

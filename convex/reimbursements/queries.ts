@@ -40,3 +40,31 @@ export const getFileUrl = query({
     return await ctx.storage.getUrl(args.storageId);
   },
 });
+
+export const getAllReimbursements = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    const isAdmin = user.role === "admin";
+
+    const query = ctx.db
+      .query("reimbursements")
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId));
+
+    const reimbursements = isAdmin
+      ? await query.collect()
+      : await query.filter((q) => q.eq(q.field("createdBy"), user._id)).collect();
+
+    return await Promise.all(
+      reimbursements.map(async (r) => {
+        const creator = await ctx.db.get(r.createdBy);
+        const project = await ctx.db.get(r.projectId);
+        return {
+          ...r,
+          creatorName: creator?.name || "Unknown",
+          projectName: project?.name || "Unbekanntes Projekt",
+        };
+      })
+    );
+  },
+});

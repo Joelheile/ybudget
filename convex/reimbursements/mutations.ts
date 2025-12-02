@@ -2,10 +2,12 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
+import { requireRole } from "../users/permissions";
 
 export const createReimbursement = mutation({
   args: {
     amount: v.number(),
+    projectId: v.id("projects"),
     iban: v.string(),
     bic: v.string(),
     accountHolder: v.string(),
@@ -25,6 +27,7 @@ export const createReimbursement = mutation({
 
     const reimbursementId = await ctx.db.insert("reimbursements", {
       organizationId: user.organizationId,
+      projectId: args.projectId,
       amount: args.amount,
       status: "pending",
       iban: args.iban,
@@ -101,6 +104,50 @@ export const deleteReimbursement = mutation({
   },
   handler: async (ctx, args) => {
     await getCurrentUser(ctx);
+    const receipts = await ctx.db
+      .query("receipts")
+      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))
+      .collect();
+
+    for (const receipt of receipts) {
+      await ctx.storage.delete(receipt.fileStorageId);
+      await ctx.db.delete(receipt._id);
+    }
+
+    await ctx.db.delete(args.reimbursementId);
+  },
+});
+
+export const markAsPaid = mutation({
+  args: {
+    reimbursementId: v.id("reimbursements"),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
+    await ctx.db.patch(args.reimbursementId, { status: "paid" });
+  },
+});
+
+export const rejectReimbursement = mutation({
+  args: {
+    reimbursementId: v.id("reimbursements"),
+    adminNote: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
+    await ctx.db.patch(args.reimbursementId, {
+      status: "rejected",
+      adminNote: args.adminNote,
+    });
+  },
+});
+
+export const deleteReimbursementAdmin = mutation({
+  args: {
+    reimbursementId: v.id("reimbursements"),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
     const receipts = await ctx.db
       .query("receipts")
       .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))

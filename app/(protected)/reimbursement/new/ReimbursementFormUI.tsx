@@ -15,6 +15,9 @@ import { useState } from "react";
 import { ReceiptUpload } from "./ReceiptUpload";
 
 type Props = {
+  projects: Doc<"projects">[];
+  selectedProjectId: Id<"projects"> | null;
+  setSelectedProjectId: (id: Id<"projects"> | null) => void;
   bankDetails: { iban: string; bic: string; accountHolder: string };
   setBankDetails: (details: {
     iban: string;
@@ -49,6 +52,9 @@ type Props = {
 };
 
 export function ReimbursementFormUI({
+  projects,
+  selectedProjectId,
+  setSelectedProjectId,
   bankDetails,
   setBankDetails,
   editingBank,
@@ -79,6 +85,24 @@ export function ReimbursementFormUI({
         <p className="text-muted-foreground mt-1">
           Füge deine Belege hinzu und reiche sie zur Genehmigung ein
         </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <Label>Projekt *</Label>
+          <Select value={selectedProjectId || ""} onValueChange={(value) => setSelectedProjectId(value as Id<"projects">)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Wählen Sie ein Projekt" />
+            </SelectTrigger>
+            <SelectContent>
+              {projects.map((project) => (
+                <SelectItem key={project._id} value={project._id}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-6">
