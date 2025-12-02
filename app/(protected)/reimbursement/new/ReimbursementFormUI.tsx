@@ -56,8 +56,8 @@ type Props = {
   }) => void;
   calculatedNet: number;
   handleAddReceipt: () => void;
-  receipts: Doc<"receipts">[];
-  handleDeleteReceipt: (id: Id<"receipts">) => void;
+  receipts: Omit<Doc<"receipts">, "_id" | "_creationTime">[];
+  handleDeleteReceipt: (index: number) => void;
   handleSubmit: () => void;
 };
 
@@ -341,9 +341,9 @@ export function ReimbursementFormUI({
           </div>
 
           <div className="space-y-3">
-            {receipts.map((receipt) => (
+            {receipts.map((receipt, index) => (
               <div
-                key={receipt._id}
+                key={index}
                 className="flex items-center justify-between px-3 bg-gray-50 border rounded-md"
               >
                 <div className="flex items-center gap-8 flex-1">
@@ -359,7 +359,7 @@ export function ReimbursementFormUI({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDeleteReceipt(receipt._id)}
+                    onClick={() => handleDeleteReceipt(index)}
                     className="hover:bg-destructive/10 hover:text-destructive"
                   >
                     <Trash2 className="size-4" />

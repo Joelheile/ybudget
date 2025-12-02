@@ -43,7 +43,9 @@ export default function ReimbursementFormPage() {
   });
   const [bankDetailsLoaded, setBankDetailsLoaded] = useState(false);
   const [editingBank, setEditingBank] = useState(false);
-  const [receipts, setReceipts] = useState<Doc<"receipts">[]>([]);
+  const [receipts, setReceipts] = useState<
+    Omit<Doc<"receipts">, "_id" | "_creationTime">[]
+  >([]);
   const [currentReceipt, setCurrentReceipt] = useState(emptyReceipt);
 
   useEffect(() => {
@@ -87,20 +89,15 @@ export default function ReimbursementFormPage() {
 
     setReceipts([
       ...receipts,
-      {
-        ...receipt,
-        _id: crypto.randomUUID() as any,
-        _creationTime: Date.now(),
-        reimbursementId: "" as any,
-      },
+      { ...receipt, reimbursementId: "" as Id<"reimbursements"> },
     ]);
 
     setCurrentReceipt(emptyReceipt);
     toast.success(`Beleg ${receipts.length + 1} hinzugefügt`);
   };
 
-  const handleDeleteReceipt = (id: Id<"receipts">) => {
-    setReceipts(receipts.filter((r) => r._id !== id));
+  const handleDeleteReceipt = (index: number) => {
+    setReceipts(receipts.filter((_, i) => i !== index));
     toast.success("Beleg entfernt");
   };
 
