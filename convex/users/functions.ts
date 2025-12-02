@@ -53,3 +53,15 @@ export const updateUserRole = mutation({
     await ctx.db.patch(args.userId, { role: args.role });
   },
 });
+
+export const updateBankDetails = mutation({
+  args: {
+    iban: v.string(),
+    bic: v.string(),
+    accountHolder: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    await ctx.db.patch(user._id, args);
+  },
+});
