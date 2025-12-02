@@ -17,15 +17,21 @@ export const getUserBankDetails = query({
 export const getReimbursement = query({
   args: { reimbursementId: v.id("reimbursements") },
   handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
-    return await ctx.db.get(args.reimbursementId);
+    const user = await getCurrentUser(ctx);
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement) return null;
+    if (reimbursement.organizationId !== user.organizationId) return null;
+    return reimbursement;
   },
 });
 
 export const getReceipts = query({
   args: { reimbursementId: v.id("reimbursements") },
   handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId) return [];
+    
     return await ctx.db
       .query("receipts")
       .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))
@@ -47,13 +53,17 @@ export const getAllReimbursements = query({
     const user = await getCurrentUser(ctx);
     const isAdmin = user.role === "admin";
 
-    const query = ctx.db
-      .query("reimbursements")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId));
-
     const reimbursements = isAdmin
-      ? await query.collect()
-      : await query.filter((q) => q.eq(q.field("createdBy"), user._id)).collect();
+      ? await ctx.db
+          .query("reimbursements")
+          .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+          .collect()
+      : await ctx.db
+          .query("reimbursements")
+          .withIndex("by_organization_and_createdBy", (q) =>
+            q.eq("organizationId", user.organizationId).eq("createdBy", user._id)
+          )
+          .collect();
 
     return await Promise.all(
       reimbursements.map(async (r) => {

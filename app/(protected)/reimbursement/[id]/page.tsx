@@ -5,18 +5,24 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { EditReimbursementUI } from "./EditReimbursementUI";
 
-interface EditReimbursementPageProps {
-  reimbursementId: Id<"reimbursements">;
-}
+const emptyReceipt = {
+  receiptDate: "",
+  companyName: "",
+  description: "",
+  grossAmount: "",
+  taxRate: "19",
+  receiptNumber: "",
+  fileStorageId: "" as Id<"_storage"> | "",
+};
 
-export function EditReimbursementPage({
-  reimbursementId,
-}: EditReimbursementPageProps) {
+export default function EditReimbursementPage() {
+  const params = useParams();
+  const reimbursementId = params.id as Id<"reimbursements">;
   const router = useRouter();
 
   const reimbursement = useQuery(api.reimbursements.queries.getReimbursement, {
@@ -30,7 +36,9 @@ export function EditReimbursementPage({
   const updateReimbursement = useMutation(
     api.reimbursements.functions.updateReimbursement
   );
-  const deleteReceipt = useMutation(api.reimbursements.functions.deleteReceipt);
+  const deleteReceiptMutation = useMutation(
+    api.reimbursements.functions.deleteReceipt
+  );
   const updateReceipt = useMutation(api.reimbursements.functions.updateReceipt);
   const addReceipt = useMutation(api.reimbursements.functions.addReceipt);
 
@@ -43,24 +51,13 @@ export function EditReimbursementPage({
     accountHolder: "",
   });
 
+  const [editMode, setEditMode] = useState<"list" | "add" | "edit" | "image">(
+    "list"
+  );
   const [editingReceiptId, setEditingReceiptId] =
     useState<Id<"receipts"> | null>(null);
-  const defaultReceipt = () => ({
-    receiptDate: "",
-    companyName: "",
-    description: "",
-    grossAmount: "",
-    taxRate: "19",
-    receiptNumber: "",
-    fileStorageId: "" as Id<"_storage"> | "",
-  });
+  const [formData, setFormData] = useState(emptyReceipt);
 
-  const [editingReceipt, setEditingReceipt] = useState(defaultReceipt());
-  const [showAddReceipt, setShowAddReceipt] = useState(false);
-  const [newReceipt, setNewReceipt] = useState(defaultReceipt());
-
-  const [changingImageReceiptId, setChangingImageReceiptId] =
-    useState<Id<"receipts"> | null>(null);
   useEffect(() => {
     if (reimbursement) {
       setSelectedProjectId(reimbursement.projectId);
@@ -74,6 +71,28 @@ export function EditReimbursementPage({
 
   const calculateNetto = (brutto: string, rate: string) =>
     (parseFloat(brutto) || 0) / (1 + parseFloat(rate) / 100);
+
+  const formatReceiptForEdit = (receipt: Doc<"receipts">) => ({
+    receiptDate: format(new Date(receipt.receiptDate), "yyyy-MM-dd"),
+    companyName: receipt.companyName,
+    description: receipt.description || "",
+    grossAmount: receipt.grossAmount.toString(),
+    taxRate: receipt.taxRate.toString(),
+    receiptNumber: receipt.receiptNumber,
+    fileStorageId: receipt.fileStorageId,
+  });
+
+  const prepareReceiptData = () => ({
+    receiptNumber: formData.receiptNumber,
+    receiptDate: formData.receiptDate,
+    companyName: formData.companyName,
+    description: formData.description,
+    netAmount: calculateNetto(formData.grossAmount, formData.taxRate),
+    taxRate: parseFloat(formData.taxRate),
+    grossAmount: parseFloat(formData.grossAmount),
+    fileStorageId: formData.fileStorageId as Id<"_storage">,
+  });
+
   const handleSaveProject = async (projectId: Id<"projects">) => {
     setSelectedProjectId(projectId);
     await updateReimbursement({
@@ -98,59 +117,33 @@ export function EditReimbursementPage({
     router.push("/reimbursement");
   };
 
-  const formatReceiptForEdit = (receipt: Doc<"receipts">) => ({
-    receiptDate: format(new Date(receipt.receiptDate), "yyyy-MM-dd"),
-    companyName: receipt.companyName,
-    description: receipt.description || "",
-    grossAmount: receipt.grossAmount.toString(),
-    taxRate: receipt.taxRate.toString(),
-    receiptNumber: receipt.receiptNumber,
-    fileStorageId: receipt.fileStorageId,
-  });
-
   const handleEditReceipt = (receipt: Doc<"receipts">) => {
     setEditingReceiptId(receipt._id);
-    setEditingReceipt(formatReceiptForEdit(receipt));
+    setFormData(formatReceiptForEdit(receipt));
+    setEditMode("edit");
   };
 
   const handleImageClick = (receipt: Doc<"receipts">) => {
-    setChangingImageReceiptId(receipt._id);
-    setEditingReceipt(formatReceiptForEdit(receipt));
+    setEditingReceiptId(receipt._id);
+    setFormData(formatReceiptForEdit(receipt));
+    setEditMode("image");
   };
 
-  const prepareReceiptData = (receipt: typeof editingReceipt) => ({
-    receiptNumber: receipt.receiptNumber,
-    receiptDate: receipt.receiptDate,
-    companyName: receipt.companyName,
-    description: receipt.description,
-    netAmount: calculateNetto(receipt.grossAmount, receipt.taxRate),
-    taxRate: parseFloat(receipt.taxRate),
-    grossAmount: parseFloat(receipt.grossAmount),
-    fileStorageId: receipt.fileStorageId as Id<"_storage">,
-  });
-
-  const handleSaveReceipt = async () => {
+  const handleSave = async () => {
     if (!editingReceiptId) return;
     await updateReceipt({
       receiptId: editingReceiptId,
-      ...prepareReceiptData(editingReceipt),
+      ...prepareReceiptData(),
     });
+    setEditMode("list");
     setEditingReceiptId(null);
-    toast.success("Beleg aktualisiert");
-  };
-
-  const handleSaveImageChange = async () => {
-    if (!changingImageReceiptId) return;
-    await updateReceipt({
-      receiptId: changingImageReceiptId,
-      ...prepareReceiptData(editingReceipt),
-    });
-    setChangingImageReceiptId(null);
-    toast.success("Bild aktualisiert");
+    toast.success(
+      editMode === "image" ? "Bild aktualisiert" : "Beleg aktualisiert"
+    );
   };
 
   const handleDeleteReceipt = async (receiptId: Id<"receipts">) => {
-    await deleteReceipt({ receiptId });
+    await deleteReceiptMutation({ receiptId });
     toast.success("Beleg gelöscht");
   };
 
@@ -161,7 +154,7 @@ export function EditReimbursementPage({
       receiptDate,
       grossAmount,
       fileStorageId,
-    } = newReceipt;
+    } = formData;
     if (
       !companyName ||
       !receiptNumber ||
@@ -172,10 +165,21 @@ export function EditReimbursementPage({
       toast.error("Bitte füllen Sie alle Pflichtfelder aus");
       return;
     }
-    await addReceipt({ reimbursementId, ...prepareReceiptData(newReceipt) });
-    setNewReceipt(defaultReceipt());
-    setShowAddReceipt(false);
+    await addReceipt({ reimbursementId, ...prepareReceiptData() });
+    setFormData(emptyReceipt);
+    setEditMode("list");
     toast.success("Beleg hinzugefügt");
+  };
+
+  const handleCancel = () => {
+    setEditMode("list");
+    setEditingReceiptId(null);
+    setFormData(emptyReceipt);
+  };
+
+  const handleStartAdd = () => {
+    setFormData(emptyReceipt);
+    setEditMode("add");
   };
 
   const totalNet = receipts?.reduce((sum, r) => sum + r.netAmount, 0) || 0;
@@ -207,12 +211,8 @@ export function EditReimbursementPage({
         selectedProjectId={selectedProjectId}
         bankDetails={bankDetails}
         editingBank={editingBank}
-        showAddReceipt={showAddReceipt}
-        editingReceiptId={editingReceiptId}
-        editingReceipt={editingReceipt}
-        newReceipt={newReceipt}
-        changingImageReceiptId={changingImageReceiptId}
-        changingImageReceipt={changingImageReceiptId ? editingReceipt : null}
+        editMode={editMode}
+        formData={formData}
         totalNet={totalNet}
         totalTax7={totalTax7}
         totalTax19={totalTax19}
@@ -223,22 +223,15 @@ export function EditReimbursementPage({
           setEditingBank(!editingBank);
           if (editingBank) toast.success("Bankdaten aktualisiert");
         }}
-        onAddReceiptToggle={() => setShowAddReceipt(true)}
+        onAddReceiptToggle={handleStartAdd}
         onEditReceipt={handleEditReceipt}
         onDeleteReceipt={handleDeleteReceipt}
         onImageClick={handleImageClick}
-        onSaveReceipt={handleSaveReceipt}
+        onSave={handleSave}
         onAddNewReceipt={handleAddNewReceipt}
-        onCancelEdit={() => {
-          setEditingReceiptId(null);
-          setShowAddReceipt(false);
-        }}
-        onSaveImageChange={handleSaveImageChange}
-        onCancelImageChange={() => setChangingImageReceiptId(null)}
+        onCancel={handleCancel}
         onSaveAll={handleSaveAll}
-        setEditingReceipt={setEditingReceipt}
-        setNewReceipt={setNewReceipt}
-        setChangingImageReceipt={setEditingReceipt}
+        setFormData={setFormData}
       />
     </div>
   );

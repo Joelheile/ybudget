@@ -30,6 +30,14 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+function StatusDot({ status }: { status: string }) {
+  if (status === "paid")
+    return <div className="w-2 h-2 rounded-full bg-green-500" />;
+  if (status === "rejected")
+    return <div className="w-2 h-2 rounded-full bg-red-500" />;
+  return <div className="w-2 h-2 rounded-full bg-yellow-500" />;
+}
+
 export default function ReimbursementPage() {
   const isAdmin = useIsAdmin();
   const router = useRouter();
@@ -57,24 +65,14 @@ export default function ReimbursementPage() {
   });
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<
-      string,
-      {
-        variant: "default" | "secondary" | "destructive" | "outline";
-        label: string;
-      }
-    > = {
-      draft: { variant: "outline", label: "Entwurf" },
-      pending: { variant: "secondary", label: "Ausstehend" },
-      approved: { variant: "default", label: "Genehmigt" },
-      rejected: { variant: "destructive", label: "Abgelehnt" },
-      paid: { variant: "default", label: "Bezahlt" },
-    };
-    const config = variants[status] || {
-      variant: "outline" as const,
-      label: status,
-    };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    if (status === "paid") return <Badge variant="default">Bezahlt</Badge>;
+    if (status === "approved")
+      return <Badge variant="default">Genehmigt</Badge>;
+    if (status === "rejected")
+      return <Badge variant="destructive">Abgelehnt</Badge>;
+    if (status === "pending")
+      return <Badge variant="secondary">Ausstehend</Badge>;
+    return <Badge variant="outline">Entwurf</Badge>;
   };
 
   const handleReject = async () => {
@@ -187,15 +185,7 @@ export default function ReimbursementPage() {
                 >
                   <TableCell className="px-1">
                     <div className="flex items-center justify-center">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          reimbursement.status === "paid"
-                            ? "bg-green-500"
-                            : reimbursement.status === "rejected"
-                              ? "bg-red-500"
-                              : "bg-yellow-500"
-                        }`}
-                      />
+                      <StatusDot status={reimbursement.status} />
                     </div>
                   </TableCell>
                   <TableCell className="pl-2">

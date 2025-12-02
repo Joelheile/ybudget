@@ -1,8 +1,6 @@
-
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getCurrentUser } from "../users/getCurrentUser";
-import { requireRole } from "../users/permissions";
 
 export const createReimbursement = mutation({
   args: {
@@ -24,6 +22,10 @@ export const createReimbursement = mutation({
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
+    const project = await ctx.db.get(args.projectId);
+    if (!project || project.organizationId !== user.organizationId) {
+      throw new Error("Invalid project");
+    }
 
     const reimbursementId = await ctx.db.insert("reimbursements", {
       organizationId: user.organizationId,
@@ -37,10 +39,7 @@ export const createReimbursement = mutation({
     });
 
     for (const receipt of args.receipts) {
-      await ctx.db.insert("receipts", {
-        reimbursementId,
-        ...receipt,
-      });
+      await ctx.db.insert("receipts", { reimbursementId, ...receipt });
     }
 
     return reimbursementId;
@@ -67,7 +66,11 @@ export const addReceipt = mutation({
     fileStorageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+      throw new Error("Unauthorized");
+    }
     return ctx.db.insert("receipts", args);
   },
 });
@@ -75,9 +78,14 @@ export const addReceipt = mutation({
 export const deleteReceipt = mutation({
   args: { receiptId: v.id("receipts") },
   handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
     const receipt = await ctx.db.get(args.receiptId);
-    if (!receipt) return;
+    if (!receipt) throw new Error("Not found");
+
+    const reimbursement = await ctx.db.get(receipt.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+      throw new Error("Unauthorized");
+    }
 
     await ctx.storage.delete(receipt.fileStorageId);
     await ctx.db.delete(args.receiptId);
@@ -97,29 +105,42 @@ export const updateReceipt = mutation({
     fileStorageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
-    const { receiptId, ...data } = args;
-    await ctx.db.patch(receiptId, data);
+    const user = await getCurrentUser(ctx);
+    const receipt = await ctx.db.get(args.receiptId);
+    if (!receipt) throw new Error("Not found");
+
+    const reimbursement = await ctx.db.get(receipt.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.receiptId, {
+      receiptNumber: args.receiptNumber,
+      receiptDate: args.receiptDate,
+      companyName: args.companyName,
+      description: args.description,
+      netAmount: args.netAmount,
+      taxRate: args.taxRate,
+      grossAmount: args.grossAmount,
+      fileStorageId: args.fileStorageId,
+    });
   },
 });
-
-async function deleteAllReceipts(ctx: any, reimbursementId: any) {
-  const receipts = await ctx.db
-    .query("receipts")
-    .withIndex("by_reimbursement", (q: any) => q.eq("reimbursementId", reimbursementId))
-    .collect();
-
-  for (const receipt of receipts) {
-    await ctx.storage.delete(receipt.fileStorageId);
-    await ctx.db.delete(receipt._id);
-  }
-}
 
 export const deleteReimbursement = mutation({
   args: { reimbursementId: v.id("reimbursements") },
   handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
-    await deleteAllReceipts(ctx, args.reimbursementId);
+    const user = await getCurrentUser(ctx);
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId || reimbursement.createdBy !== user._id) {
+      throw new Error("Unauthorized");
+    }
+
+    const receipts = await ctx.db.query("receipts").withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId)).collect();
+    for (const receipt of receipts) {
+      await ctx.storage.delete(receipt.fileStorageId);
+      await ctx.db.delete(receipt._id);
+    }
     await ctx.db.delete(args.reimbursementId);
   },
 });
@@ -127,7 +148,12 @@ export const deleteReimbursement = mutation({
 export const markAsPaid = mutation({
   args: { reimbursementId: v.id("reimbursements") },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "admin");
+    const user = await getCurrentUser(ctx);
+    if (user.role !== "admin") throw new Error("Admin required");
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
     await ctx.db.patch(args.reimbursementId, { status: "paid" });
   },
 });
@@ -138,11 +164,13 @@ export const rejectReimbursement = mutation({
     adminNote: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "admin");
-    await ctx.db.patch(args.reimbursementId, {
-      status: "rejected",
-      adminNote: args.adminNote,
-    });
+    const user = await getCurrentUser(ctx);
+    if (user.role !== "admin") throw new Error("Admin required");
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(args.reimbursementId, { status: "rejected", adminNote: args.adminNote });
   },
 });
 
@@ -155,8 +183,9 @@ export const updateReimbursement = mutation({
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const reimbursement = await ctx.db.get(args.reimbursementId);
-
-    if (!reimbursement) throw new Error("Reimbursement not found");
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+      throw new Error("Not found");
+    }
     if (reimbursement.createdBy !== user._id && user.role !== "admin") {
       throw new Error("Unauthorized");
     }
@@ -172,9 +201,18 @@ export const updateReimbursement = mutation({
 export const deleteReimbursementAdmin = mutation({
   args: { reimbursementId: v.id("reimbursements") },
   handler: async (ctx, args) => {
-    await requireRole(ctx, "admin");
-    await deleteAllReceipts(ctx, args.reimbursementId);
+    const user = await getCurrentUser(ctx);
+    if (user.role !== "admin") throw new Error("Admin required");
+    const reimbursement = await ctx.db.get(args.reimbursementId);
+    if (!reimbursement || reimbursement.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
+
+    const receipts = await ctx.db.query("receipts").withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId)).collect();
+    for (const receipt of receipts) {
+      await ctx.storage.delete(receipt.fileStorageId);
+      await ctx.db.delete(receipt._id);
+    }
     await ctx.db.delete(args.reimbursementId);
   },
 });
-

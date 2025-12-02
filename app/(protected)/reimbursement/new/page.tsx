@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ReimbursementFormUI } from "./ReimbursementFormUI";
 
@@ -23,36 +23,24 @@ const emptyReceipt = {
 
 export default function ReimbursementFormPage() {
   const router = useRouter();
-  const bankDetailsQuery = useQuery(
-    api.reimbursements.queries.getUserBankDetails
-  );
+  const bankDetailsQuery = useQuery(api.reimbursements.queries.getUserBankDetails);
   const projects = useQuery(api.projects.queries.getAllProjects);
-  const createReimbursement = useMutation(
-    api.reimbursements.functions.createReimbursement
-  );
-  const updateUserBankDetails = useMutation(
-    api.users.functions.updateBankDetails
-  );
+  const createReimbursement = useMutation(api.reimbursements.functions.createReimbursement);
+  const updateUserBankDetails = useMutation(api.users.functions.updateBankDetails);
 
-  const [selectedProjectId, setSelectedProjectId] =
-    useState<Id<"projects"> | null>(null);
-  const [bankDetails, setBankDetails] = useState({
-    iban: "",
-    bic: "",
-    accountHolder: "",
-  });
+  const [selectedProjectId, setSelectedProjectId] = useState<Id<"projects"> | null>(null);
+  const [bankDetails, setBankDetails] = useState({ iban: "", bic: "", accountHolder: "" });
+  const [bankDetailsLoaded, setBankDetailsLoaded] = useState(false);
   const [editingBank, setEditingBank] = useState(false);
   const [receipts, setReceipts] = useState<Doc<"receipts">[]>([]);
   const [currentReceipt, setCurrentReceipt] = useState(emptyReceipt);
 
-  if (
-    bankDetailsQuery &&
-    bankDetails.iban === "" &&
-    bankDetails.bic === "" &&
-    bankDetails.accountHolder === ""
-  ) {
-    setBankDetails(bankDetailsQuery);
-  }
+  useEffect(() => {
+    if (bankDetailsQuery && !bankDetailsLoaded) {
+      setBankDetails(bankDetailsQuery);
+      setBankDetailsLoaded(true);
+    }
+  }, [bankDetailsQuery, bankDetailsLoaded]);
 
   const calculatedNet = currentReceipt.grossAmount
     ? calculateNet(

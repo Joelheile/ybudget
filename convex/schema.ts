@@ -165,7 +165,9 @@ export default defineSchema({
     accountHolder: v.string(),
     adminNote: v.optional(v.string()),
     createdBy: v.id("users"),
-  }).index("by_organization", ["organizationId"]),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_organization_and_createdBy", ["organizationId", "createdBy"]),
 
 // multiple receipts make one reimbursement
   receipts: defineTable({
