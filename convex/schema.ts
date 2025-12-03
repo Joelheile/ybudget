@@ -207,4 +207,12 @@ export default defineSchema({
     accommodationAmount: v.number(),
     fileStorageId: v.optional(v.id("_storage")), // single receipt for travel
   }).index("by_reimbursement", ["reimbursementId"]),
+
+  logs: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),
+    action: v.string(),
+    entityId: v.string(),
+    details: v.optional(v.string()),
+  }).index("by_organization", ["organizationId"]),
 });

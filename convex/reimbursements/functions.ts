@@ -10,6 +10,7 @@ export const createReimbursement = mutation({
     iban: v.string(),
     bic: v.string(),
     accountHolder: v.string(),
+    type: v.optional(v.union(v.literal("expense"), v.literal("travel"))),
     receipts: v.array(
       v.object({
         receiptNumber: v.string(),
@@ -34,7 +35,7 @@ export const createReimbursement = mutation({
       organizationId: user.organizationId,
       projectId: args.projectId,
       amount: args.amount,
-      type: "expense",
+      type: args.type || "expense",
       status: "pending",
       iban: args.iban,
       bic: args.bic,
@@ -45,6 +46,64 @@ export const createReimbursement = mutation({
     for (const receipt of args.receipts) {
       await ctx.db.insert("receipts", { reimbursementId, ...receipt });
     }
+
+    await addLog(ctx, user.organizationId, user._id, "reimbursement.create", reimbursementId, `${args.amount}€`);
+
+    return reimbursementId;
+  },
+});
+
+export const createTravelReimbursement = mutation({
+  args: {
+    amount: v.number(),
+    projectId: v.id("projects"),
+    iban: v.string(),
+    bic: v.string(),
+    accountHolder: v.string(),
+    travelDetails: v.object({
+      travelStartDate: v.string(),
+      travelEndDate: v.string(),
+      destination: v.string(),
+      travelPurpose: v.string(),
+      isInternational: v.boolean(),
+      transportationMode: v.union(
+        v.literal("car"),
+        v.literal("train"),
+        v.literal("flight"),
+        v.literal("taxi"),
+        v.literal("bus"),
+      ),
+      kilometers: v.optional(v.number()),
+      transportationAmount: v.number(),
+      accommodationAmount: v.number(),
+      fileStorageId: v.optional(v.id("_storage")),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    const project = await ctx.db.get(args.projectId);
+    if (!project || project.organizationId !== user.organizationId) {
+      throw new Error("Invalid project");
+    }
+
+    const reimbursementId = await ctx.db.insert("reimbursements", {
+      organizationId: user.organizationId,
+      projectId: args.projectId,
+      amount: args.amount,
+      type: "travel",
+      status: "pending",
+      iban: args.iban,
+      bic: args.bic,
+      accountHolder: args.accountHolder,
+      createdBy: user._id,
+    });
+
+    await ctx.db.insert("travelDetails", {
+      reimbursementId,
+      ...args.travelDetails,
+    });
+
+    await addLog(ctx, user.organizationId, user._id, "reimbursement.create", reimbursementId, `Travel ${args.amount}€`);
 
     return reimbursementId;
   },
@@ -267,6 +326,8 @@ export const markAsPaid = mutation({
     });
 
     await ctx.db.patch(args.reimbursementId, { status: "paid" });
+
+    await addLog(ctx, user.organizationId, user._id, "reimbursement.pay", args.reimbursementId, `${reimbursement.amount}€ → ${reimbursement.accountHolder}`);
   },
 });
 
@@ -281,6 +342,8 @@ export const rejectReimbursement = mutation({
       status: "rejected",
       adminNote: args.adminNote,
     });
+
+    await addLog(ctx, user.organizationId, user._id, "reimbursement.reject", args.reimbursementId, `${reimbursement.amount}€ - ${args.adminNote}`);
   },
 });
 
@@ -388,5 +451,7 @@ export const deleteReimbursementAdmin = mutation({
     }
     
     await ctx.db.delete(args.reimbursementId);
+
+    await addLog(ctx, user.organizationId, user._id, "reimbursement.delete", args.reimbursementId, `${reimbursement.amount}€`);
   },
 });
