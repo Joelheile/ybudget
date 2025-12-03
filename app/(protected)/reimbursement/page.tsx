@@ -205,7 +205,11 @@ export default function ReimbursementPage() {
                         <span>Reisekostenerstattung</span>
                         {reimbursement.travelDetails && (
                           <span className="block text-xs">
-                            {reimbursement.travelDetails.destination} • {reimbursement.travelDetails.transportationMode === "car" ? "PKW" : reimbursement.travelDetails.transportationMode}
+                            {reimbursement.travelDetails.destination} •{" "}
+                            {reimbursement.travelDetails.transportationMode ===
+                            "car"
+                              ? "PKW"
+                              : reimbursement.travelDetails.transportationMode}
                           </span>
                         )}
                       </div>

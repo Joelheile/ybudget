@@ -66,7 +66,14 @@ export const createExpectedTransaction = mutation({
       organizationId: user.organizationId,
     });
 
-    await addLog(ctx, user.organizationId, user._id, "transaction.create", transactionId, `${args.description} (${args.amount}€)`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "transaction.create",
+      transactionId,
+      `${args.description} (${args.amount}€)`,
+    );
 
     return transactionId;
   },
@@ -158,7 +165,14 @@ export const updateTransaction = mutation({
     );
 
     await ctx.db.patch(transactionId, updates);
-    await addLog(ctx, user.organizationId, user._id, "transaction.update", transactionId, transaction.description);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "transaction.update",
+      transactionId,
+      transaction.description,
+    );
   },
 });
 
@@ -246,7 +260,14 @@ export const splitTransaction = mutation({
       createdIds.push(reservesTransactionId);
     }
 
-    await addLog(ctx, user.organizationId, user._id, "transaction.split", args.transactionId, `${original.description} → ${args.splits.length} parts`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "transaction.split",
+      args.transactionId,
+      `${original.description} → ${args.splits.length} parts`,
+    );
 
     return createdIds;
   },
@@ -270,7 +291,14 @@ export const deleteExpectedTransaction = mutation({
     }
 
     await ctx.db.delete(args.transactionId);
-    await addLog(ctx, user.organizationId, user._id, "transaction.delete", args.transactionId, `${transaction.description} (${transaction.amount}€)`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "transaction.delete",
+      args.transactionId,
+      `${transaction.description} (${transaction.amount}€)`,
+    );
   },
 });
 
@@ -311,6 +339,13 @@ export const transferMoney = mutation({
       projectId: args.receivingProjectId,
     });
 
-    await addLog(ctx, user.organizationId, user._id, "transaction.transfer", debitId, `${args.amount}€: ${sendingProject?.name} → ${receivingProject?.name}`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "transaction.transfer",
+      debitId,
+      `${args.amount}€: ${sendingProject?.name} → ${receivingProject?.name}`,
+    );
   },
 });

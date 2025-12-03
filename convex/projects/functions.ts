@@ -50,7 +50,14 @@ export const createProject = mutation({
       createdBy: user._id,
     });
 
-    await addLog(ctx, user.organizationId, user._id, "project.create", projectId, args.name);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "project.create",
+      projectId,
+      args.name,
+    );
 
     return projectId;
   },
@@ -67,7 +74,14 @@ export const renameProject = mutation({
     }
 
     await ctx.db.patch(args.projectId, { name: args.name });
-    await addLog(ctx, user.organizationId, user._id, "project.rename", args.projectId, `${project.name} → ${args.name}`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "project.rename",
+      args.projectId,
+      `${project.name} → ${args.name}`,
+    );
   },
 });
 
@@ -79,6 +93,13 @@ export const archiveProject = mutation({
     const project = await ctx.db.get(args.projectId);
 
     await ctx.db.patch(args.projectId, { isArchived: true });
-    await addLog(ctx, user.organizationId, user._id, "project.archive", args.projectId, project?.name);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "project.archive",
+      args.projectId,
+      project?.name,
+    );
   },
 });

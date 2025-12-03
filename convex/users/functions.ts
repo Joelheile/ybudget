@@ -53,7 +53,14 @@ export const updateUserRole = mutation({
 
     const oldRole = targetUser.role ?? "member";
     await ctx.db.patch(args.userId, { role: args.role });
-    await addLog(ctx, currentUser.organizationId, currentUser._id, "user.role_change", args.userId, `${targetUser.name ?? targetUser.email}: ${oldRole} → ${args.role}`);
+    await addLog(
+      ctx,
+      currentUser.organizationId,
+      currentUser._id,
+      "user.role_change",
+      args.userId,
+      `${targetUser.name ?? targetUser.email}: ${oldRole} → ${args.role}`,
+    );
   },
 });
 

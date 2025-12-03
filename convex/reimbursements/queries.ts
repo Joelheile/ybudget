@@ -89,12 +89,16 @@ export const getAllReimbursements = query({
         const [creator, project, travelDetails] = await Promise.all([
           ctx.db.get(r.createdBy),
           ctx.db.get(r.projectId),
-          r.type === "travel" ? ctx.db
-            .query("travelDetails")
-            .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", r._id))
-            .first() : null
+          r.type === "travel"
+            ? ctx.db
+                .query("travelDetails")
+                .withIndex("by_reimbursement", (q) =>
+                  q.eq("reimbursementId", r._id),
+                )
+                .first()
+            : null,
         ]);
-        
+
         return {
           ...r,
           creatorName: creator?.name || "Unknown",

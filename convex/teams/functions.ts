@@ -18,7 +18,14 @@ export const createTeam = mutation({
       createdBy: user._id,
     });
 
-    await addLog(ctx, user.organizationId, user._id, "team.create", teamId, args.name);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "team.create",
+      teamId,
+      args.name,
+    );
 
     return teamId;
   },
@@ -36,7 +43,14 @@ export const renameTeam = mutation({
       throw new Error("Access denied");
 
     await ctx.db.patch(args.teamId, { name: args.name });
-    await addLog(ctx, user.organizationId, user._id, "team.update", args.teamId, `${team.name} → ${args.name}`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "team.update",
+      args.teamId,
+      `${team.name} → ${args.name}`,
+    );
   },
 });
 

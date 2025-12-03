@@ -2,8 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +40,11 @@ type Props = {
   selectedProjectId: Id<"projects"> | null;
   setSelectedProjectId: (id: Id<"projects"> | null) => void;
   bankDetails: { iban: string; bic: string; accountHolder: string };
-  setBankDetails: (details: { iban: string; bic: string; accountHolder: string }) => void;
+  setBankDetails: (details: {
+    iban: string;
+    bic: string;
+    accountHolder: string;
+  }) => void;
   editingBank: boolean;
   setEditingBank: () => void;
   currentReceipt: CurrentReceipt;
@@ -81,7 +95,13 @@ export function ReimbursementFormUI({
           Wählen Sie den Erstattungstyp und reichen Sie zur Genehmigung ein
         </p>
 
-        <Tabs value={reimbursementType} onValueChange={(value) => setReimbursementType(value as "expense" | "travel")} className="mt-4">
+        <Tabs
+          value={reimbursementType}
+          onValueChange={(value) =>
+            setReimbursementType(value as "expense" | "travel")
+          }
+          className="mt-4"
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
             <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>

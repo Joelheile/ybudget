@@ -11,7 +11,8 @@ import { TravelReimbursementFormUI } from "./TravelReimbursementFormUI";
 
 type TransportationMode = "car" | "train" | "flight" | "taxi" | "bus";
 
-const calculateNet = (gross: number, taxRate: number) => gross / (1 + taxRate / 100);
+const calculateNet = (gross: number, taxRate: number) =>
+  gross / (1 + taxRate / 100);
 
 const emptyReceipt = {
   receiptDate: "",
@@ -25,18 +26,35 @@ const emptyReceipt = {
 
 export default function ReimbursementFormPage() {
   const router = useRouter();
-  const bankDetailsQuery = useQuery(api.reimbursements.queries.getUserBankDetails);
+  const bankDetailsQuery = useQuery(
+    api.reimbursements.queries.getUserBankDetails,
+  );
   const projects = useQuery(api.projects.queries.getAllProjects);
-  const createReimbursement = useMutation(api.reimbursements.functions.createReimbursement);
-  const createTravelReimbursement = useMutation(api.reimbursements.functions.createTravelReimbursement);
-  const updateUserBankDetails = useMutation(api.users.functions.updateBankDetails);
+  const createReimbursement = useMutation(
+    api.reimbursements.functions.createReimbursement,
+  );
+  const createTravelReimbursement = useMutation(
+    api.reimbursements.functions.createTravelReimbursement,
+  );
+  const updateUserBankDetails = useMutation(
+    api.users.functions.updateBankDetails,
+  );
 
-  const [reimbursementType, setReimbursementType] = useState<"expense" | "travel">("expense");
-  const [selectedProjectId, setSelectedProjectId] = useState<Id<"projects"> | null>(null);
-  const [bankDetails, setBankDetails] = useState({ iban: "", bic: "", accountHolder: "" });
+  const [reimbursementType, setReimbursementType] = useState<
+    "expense" | "travel"
+  >("expense");
+  const [selectedProjectId, setSelectedProjectId] =
+    useState<Id<"projects"> | null>(null);
+  const [bankDetails, setBankDetails] = useState({
+    iban: "",
+    bic: "",
+    accountHolder: "",
+  });
   const [bankDetailsLoaded, setBankDetailsLoaded] = useState(false);
   const [editingBank, setEditingBank] = useState(false);
-  const [receipts, setReceipts] = useState<Omit<Doc<"receipts">, "_id" | "_creationTime">[]>([]);
+  const [receipts, setReceipts] = useState<
+    Omit<Doc<"receipts">, "_id" | "_creationTime">[]
+  >([]);
   const [currentReceipt, setCurrentReceipt] = useState(emptyReceipt);
   const [travelDetails, setTravelDetails] = useState({
     travelStartDate: "",
@@ -59,11 +77,19 @@ export default function ReimbursementFormPage() {
   }, [bankDetailsQuery, bankDetailsLoaded]);
 
   const calculatedNet = currentReceipt.grossAmount
-    ? calculateNet(parseFloat(currentReceipt.grossAmount), parseFloat(currentReceipt.taxRate))
+    ? calculateNet(
+        parseFloat(currentReceipt.grossAmount),
+        parseFloat(currentReceipt.taxRate),
+      )
     : 0;
 
   const handleAddReceipt = () => {
-    if (!currentReceipt.receiptNumber || !currentReceipt.companyName || !currentReceipt.grossAmount || !currentReceipt.fileStorageId) {
+    if (
+      !currentReceipt.receiptNumber ||
+      !currentReceipt.companyName ||
+      !currentReceipt.grossAmount ||
+      !currentReceipt.fileStorageId
+    ) {
       toast.error("Bitte Pflichtfelder ausfüllen");
       return;
     }
@@ -113,7 +139,9 @@ export default function ReimbursementFormPage() {
     } else {
       await createTravelReimbursement({
         projectId: selectedProjectId!,
-        amount: travelDetails.transportationAmount + travelDetails.accommodationAmount,
+        amount:
+          travelDetails.transportationAmount +
+          travelDetails.accommodationAmount,
         ...bankDetails,
         travelDetails,
       });
