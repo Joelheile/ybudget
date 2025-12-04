@@ -66,7 +66,8 @@ export default function ReimbursementFormPage() {
     kilometers: 0,
     transportationAmount: 0,
     accommodationAmount: 0,
-    fileStorageId: undefined as Id<"_storage"> | undefined,
+    transportationReceiptId: undefined as Id<"_storage"> | undefined,
+    accommodationReceiptId: undefined as Id<"_storage"> | undefined,
   });
 
   useEffect(() => {

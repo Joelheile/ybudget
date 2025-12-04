@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { CalendarIcon, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
 import { ReceiptUpload } from "./ReceiptUpload";
 
 type CurrentReceipt = {
@@ -76,27 +75,27 @@ export function ReimbursementFormUI({
   reimbursementType,
   setReimbursementType,
 }: Props) {
-  const [calendarOpen, setCalendarOpen] = useState(false);
-
   const totalNet = receipts.reduce((sum, r) => sum + r.netAmount, 0);
+  const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
   const totalTax7 = receipts
     .filter((r) => r.taxRate === 7)
     .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
   const totalTax19 = receipts
     .filter((r) => r.taxRate === 19)
     .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
-  const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
+
+  const update = (fields: Partial<CurrentReceipt>) =>
+    setCurrentReceipt({ ...currentReceipt, ...fields });
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold">Neue Erstattung</h1>
-
         <div className="flex items-center gap-3">
           <Tabs
             value={reimbursementType}
-            onValueChange={(value) =>
-              setReimbursementType(value as "expense" | "travel")
+            onValueChange={(v) =>
+              setReimbursementType(v as "expense" | "travel")
             }
           >
             <TabsList>
@@ -104,20 +103,17 @@ export function ReimbursementFormUI({
               <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
             </TabsList>
           </Tabs>
-
           <Select
             value={selectedProjectId || ""}
-            onValueChange={(value) =>
-              setSelectedProjectId(value as Id<"projects">)
-            }
+            onValueChange={(v) => setSelectedProjectId(v as Id<"projects">)}
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Projekt wählen" />
             </SelectTrigger>
             <SelectContent>
-              {projects.map((project) => (
-                <SelectItem key={project._id} value={project._id}>
-                  {project.name}
+              {projects.map((p) => (
+                <SelectItem key={p._id} value={p._id}>
+                  {p.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -127,18 +123,12 @@ export function ReimbursementFormUI({
 
       <div className="space-y-4">
         <h2 className="text-lg font-medium">Beleg hinzufügen</h2>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Name/Firma *</Label>
             <Input
               value={currentReceipt.companyName}
-              onChange={(e) =>
-                setCurrentReceipt({
-                  ...currentReceipt,
-                  companyName: e.target.value,
-                })
-              }
+              onChange={(e) => update({ companyName: e.target.value })}
               placeholder="z.B. Amazon, Deutsche Bahn"
             />
           </div>
@@ -146,12 +136,7 @@ export function ReimbursementFormUI({
             <Label>Beleg-Nr. *</Label>
             <Input
               value={currentReceipt.receiptNumber}
-              onChange={(e) =>
-                setCurrentReceipt({
-                  ...currentReceipt,
-                  receiptNumber: e.target.value,
-                })
-              }
+              onChange={(e) => update({ receiptNumber: e.target.value })}
               placeholder="z.B. INV-2024-001"
             />
           </div>
@@ -161,13 +146,8 @@ export function ReimbursementFormUI({
           <Label>Beschreibung</Label>
           <Textarea
             value={currentReceipt.description}
-            onChange={(e) =>
-              setCurrentReceipt({
-                ...currentReceipt,
-                description: e.target.value,
-              })
-            }
-            placeholder="z.B. Büromaterial für Q1, Zugfahrt München-Berlin, Hotelübernachtung"
+            onChange={(e) => update({ description: e.target.value })}
+            placeholder="z.B. Büromaterial für Q1"
             rows={2}
             className="resize-none"
           />
@@ -176,13 +156,13 @@ export function ReimbursementFormUI({
         <div className="grid grid-cols-4 gap-4">
           <div>
             <Label>Datum *</Label>
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !currentReceipt.receiptDate && "text-muted-foreground"
+                    !currentReceipt.receiptDate && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 size-4" />
@@ -190,7 +170,7 @@ export function ReimbursementFormUI({
                     ? format(
                         new Date(currentReceipt.receiptDate),
                         "dd.MM.yyyy",
-                        { locale: de }
+                        { locale: de },
                       )
                     : "Datum wählen"}
                 </Button>
@@ -203,13 +183,11 @@ export function ReimbursementFormUI({
                       ? new Date(currentReceipt.receiptDate)
                       : undefined
                   }
-                  onSelect={(date) => {
-                    setCurrentReceipt({
-                      ...currentReceipt,
+                  onSelect={(date) =>
+                    update({
                       receiptDate: date ? format(date, "yyyy-MM-dd") : "",
-                    });
-                    setCalendarOpen(false);
-                  }}
+                    })
+                  }
                   locale={de}
                 />
               </PopoverContent>
@@ -221,12 +199,7 @@ export function ReimbursementFormUI({
               type="number"
               step="0.01"
               value={currentReceipt.grossAmount}
-              onChange={(e) =>
-                setCurrentReceipt({
-                  ...currentReceipt,
-                  grossAmount: e.target.value,
-                })
-              }
+              onChange={(e) => update({ grossAmount: e.target.value })}
               placeholder="119,95"
             />
           </div>
@@ -234,9 +207,7 @@ export function ReimbursementFormUI({
             <Label>Wie viel MwSt.?</Label>
             <Select
               value={currentReceipt.taxRate}
-              onValueChange={(value) =>
-                setCurrentReceipt({ ...currentReceipt, taxRate: value })
-              }
+              onValueChange={(v) => update({ taxRate: v })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -262,10 +233,8 @@ export function ReimbursementFormUI({
         <div>
           <Label>Beleg hochladen *</Label>
           <ReceiptUpload
-            onUploadComplete={(storageId) =>
-              setCurrentReceipt({ ...currentReceipt, fileStorageId: storageId })
-            }
-            storageId={currentReceipt.fileStorageId || undefined}
+            onUploadComplete={(id) => update({ fileStorageId: id })}
+            storageId={currentReceipt.fileStorageId}
           />
         </div>
 
@@ -338,20 +307,14 @@ export function ReimbursementFormUI({
               size="sm"
               onClick={setEditingBank}
             >
-              {editingBank ? (
-                "Speichern"
-              ) : (
-                <>
-                  <Pencil className="size-4 mr-2" />
-                </>
-              )}
+              {editingBank ? "Speichern" : <Pencil className="size-4" />}
             </Button>
           </div>
 
           <div className="space-y-3">
-            {receipts.map((receipt, index) => (
+            {receipts.map((receipt, i) => (
               <div
-                key={index}
+                key={i}
                 className="flex items-center justify-between px-3 bg-gray-50 border rounded-md"
               >
                 <div className="flex items-center gap-8 flex-1">
@@ -367,7 +330,7 @@ export function ReimbursementFormUI({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDeleteReceipt(index)}
+                    onClick={() => handleDeleteReceipt(i)}
                     className="hover:bg-destructive/10 hover:text-destructive"
                   >
                     <Trash2 className="size-4" />

@@ -3,31 +3,24 @@ import { mutation } from "../_generated/server";
 import { addLog } from "../logs/functions";
 import { getCurrentUser } from "../users/getCurrentUser";
 
-function validateTravelAmounts(amount: number, travelDetails: { transportationAmount: number; accommodationAmount: number; kilometers?: number }) {
-  if (amount < 0 || travelDetails.transportationAmount < 0 || travelDetails.accommodationAmount < 0 || (travelDetails.kilometers !== undefined && travelDetails.kilometers < 0)) {
-    throw new Error("Amounts cannot be negative");
-  }
-}
-
-const transportationModeValidator = v.union(
-  v.literal("car"),
-  v.literal("train"),
-  v.literal("flight"),
-  v.literal("taxi"),
-  v.literal("bus"),
-);
-
 const travelDetailsValidator = v.object({
   travelStartDate: v.string(),
   travelEndDate: v.string(),
   destination: v.string(),
   travelPurpose: v.string(),
   isInternational: v.boolean(),
-  transportationMode: transportationModeValidator,
+  transportationMode: v.union(
+    v.literal("car"),
+    v.literal("train"),
+    v.literal("flight"),
+    v.literal("taxi"),
+    v.literal("bus"),
+  ),
   kilometers: v.optional(v.number()),
   transportationAmount: v.number(),
   accommodationAmount: v.number(),
-  fileStorageId: v.optional(v.id("_storage")),
+  transportationReceiptId: v.optional(v.id("_storage")),
+  accommodationReceiptId: v.optional(v.id("_storage")),
 });
 
 export const createReimbursement = mutation({
@@ -52,8 +45,6 @@ export const createReimbursement = mutation({
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-
-    if (args.amount < 0) throw new Error("Amount cannot be negative");
 
     const reimbursementId = await ctx.db.insert("reimbursements", {
       organizationId: user.organizationId,
@@ -94,8 +85,6 @@ export const createTravelReimbursement = mutation({
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-
-    validateTravelAmounts(args.amount, args.travelDetails);
 
     const reimbursementId = await ctx.db.insert("reimbursements", {
       organizationId: user.organizationId,
@@ -150,18 +139,6 @@ export const addReceipt = mutation({
   },
 });
 
-export const deleteReceipt = mutation({
-  args: { receiptId: v.id("receipts") },
-  handler: async (ctx, args) => {
-    await getCurrentUser(ctx);
-    const receipt = await ctx.db.get(args.receiptId);
-    if (!receipt) return;
-
-    await ctx.storage.delete(receipt.fileStorageId);
-    await ctx.db.delete(args.receiptId);
-  },
-});
-
 export const updateReceipt = mutation({
   args: {
     receiptId: v.id("receipts"),
@@ -178,6 +155,17 @@ export const updateReceipt = mutation({
     await getCurrentUser(ctx);
     const { receiptId, ...data } = args;
     await ctx.db.patch(receiptId, data);
+  },
+});
+
+export const deleteReceipt = mutation({
+  args: { receiptId: v.id("receipts") },
+  handler: async (ctx, args) => {
+    await getCurrentUser(ctx);
+    const receipt = await ctx.db.get(args.receiptId);
+    if (!receipt) return;
+    await ctx.storage.delete(receipt.fileStorageId);
+    await ctx.db.delete(args.receiptId);
   },
 });
 
@@ -208,8 +196,10 @@ export const deleteReimbursement = mutation({
         )
         .first();
       if (travel) {
-        if (travel.fileStorageId)
-          await ctx.storage.delete(travel.fileStorageId);
+        if (travel.transportationReceiptId)
+          await ctx.storage.delete(travel.transportationReceiptId);
+        if (travel.accommodationReceiptId)
+          await ctx.storage.delete(travel.accommodationReceiptId);
         await ctx.db.delete(travel._id);
       }
     }
@@ -296,8 +286,6 @@ export const updateReimbursement = mutation({
     amount: v.number(),
   },
   handler: async (ctx, args) => {
-    if (args.amount < 0) throw new Error("Amount cannot be negative");
-
     await ctx.db.patch(args.reimbursementId, {
       projectId: args.projectId,
       amount: args.amount,
@@ -314,8 +302,6 @@ export const updateTravelReimbursement = mutation({
     travelDetails: travelDetailsValidator,
   },
   handler: async (ctx, args) => {
-    validateTravelAmounts(args.amount, args.travelDetails);
-
     await ctx.db.patch(args.reimbursementId, {
       projectId: args.projectId,
       amount: args.amount,

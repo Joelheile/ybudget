@@ -205,7 +205,8 @@ export default defineSchema({
     kilometers: v.optional(v.number()), // for car travel
     transportationAmount: v.number(),
     accommodationAmount: v.number(),
-    fileStorageId: v.optional(v.id("_storage")), // single receipt for travel
+    transportationReceiptId: v.optional(v.id("_storage")),
+    accommodationReceiptId: v.optional(v.id("_storage")),
   }).index("by_reimbursement", ["reimbursementId"]),
 
   logs: defineTable({

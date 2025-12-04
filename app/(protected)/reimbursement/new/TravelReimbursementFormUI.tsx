@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { CalendarIcon, Pencil } from "lucide-react";
-import { useState } from "react";
 import { ReceiptUpload } from "./ReceiptUpload";
 
 type TransportationMode = "car" | "train" | "flight" | "taxi" | "bus";
@@ -37,7 +36,8 @@ type TravelDetails = {
   kilometers: number;
   transportationAmount: number;
   accommodationAmount: number;
-  fileStorageId: Id<"_storage"> | undefined;
+  transportationReceiptId: Id<"_storage"> | undefined;
+  accommodationReceiptId: Id<"_storage"> | undefined;
 };
 
 type Props = {
@@ -59,6 +59,56 @@ type Props = {
   setReimbursementType: (type: "expense" | "travel") => void;
 };
 
+const modeLabels: Record<TransportationMode, string> = {
+  car: "PKW (Privat)",
+  train: "Bahn",
+  flight: "Flug",
+  taxi: "Taxi",
+  bus: "Bus",
+};
+
+function DatePicker({
+  value,
+  onChange,
+  label,
+}: {
+  value: string;
+  onChange: (date: string) => void;
+  label: string;
+}) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !value && "text-muted-foreground",
+            )}
+          >
+            <CalendarIcon className="mr-2 size-4" />
+            {value
+              ? format(new Date(value), "dd.MM.yyyy", { locale: de })
+              : "Datum wählen"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={value ? new Date(value) : undefined}
+            onSelect={(date) =>
+              onChange(date ? format(date, "yyyy-MM-dd") : "")
+            }
+            locale={de}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
 export function TravelReimbursementFormUI({
   projects,
   selectedProjectId,
@@ -73,29 +123,34 @@ export function TravelReimbursementFormUI({
   reimbursementType,
   setReimbursementType,
 }: Props) {
-  const [startCalendarOpen, setStartCalendarOpen] = useState(false);
-  const [endCalendarOpen, setEndCalendarOpen] = useState(false);
-
   const totalAmount =
     travelDetails.transportationAmount + travelDetails.accommodationAmount;
-
   const hasBasicInfo =
     travelDetails.destination &&
     travelDetails.travelPurpose &&
     travelDetails.travelStartDate &&
     travelDetails.travelEndDate;
+  const hasTransportationCost = travelDetails.transportationAmount > 0;
+  const hasAccommodationCost = travelDetails.accommodationAmount > 0;
+  const isCar = travelDetails.transportationMode === "car";
+
+  const hasRequiredReceipts =
+    (hasTransportationCost ? !!travelDetails.transportationReceiptId : true) &&
+    (hasAccommodationCost ? !!travelDetails.accommodationReceiptId : true) &&
+    (hasTransportationCost || hasAccommodationCost);
+
+  const update = (fields: Partial<TravelDetails>) =>
+    setTravelDetails({ ...travelDetails, ...fields });
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* Header */}
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold">Neue Erstattung</h1>
-
         <div className="flex items-center gap-3">
           <Tabs
             value={reimbursementType}
-            onValueChange={(value) =>
-              setReimbursementType(value as "expense" | "travel")
+            onValueChange={(v) =>
+              setReimbursementType(v as "expense" | "travel")
             }
           >
             <TabsList>
@@ -103,20 +158,17 @@ export function TravelReimbursementFormUI({
               <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
             </TabsList>
           </Tabs>
-
           <Select
             value={selectedProjectId || ""}
-            onValueChange={(value) =>
-              setSelectedProjectId(value as Id<"projects">)
-            }
+            onValueChange={(v) => setSelectedProjectId(v as Id<"projects">)}
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Projekt wählen" />
             </SelectTrigger>
             <SelectContent>
-              {projects.map((project) => (
-                <SelectItem key={project._id} value={project._id}>
-                  {project.name}
+              {projects.map((p) => (
+                <SelectItem key={p._id} value={p._id}>
+                  {p.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -124,21 +176,14 @@ export function TravelReimbursementFormUI({
         </div>
       </div>
 
-      {/* Travel Details */}
       <div className="space-y-4">
         <h2 className="text-lg font-medium">Reiseangaben</h2>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Reiseziel *</Label>
             <Input
               value={travelDetails.destination}
-              onChange={(e) =>
-                setTravelDetails({
-                  ...travelDetails,
-                  destination: e.target.value,
-                })
-              }
+              onChange={(e) => update({ destination: e.target.value })}
               placeholder="z.B. München, Berlin"
             />
           </div>
@@ -146,111 +191,28 @@ export function TravelReimbursementFormUI({
             <Label>Reisezweck *</Label>
             <Input
               value={travelDetails.travelPurpose}
-              onChange={(e) =>
-                setTravelDetails({
-                  ...travelDetails,
-                  travelPurpose: e.target.value,
-                })
-              }
+              onChange={(e) => update({ travelPurpose: e.target.value })}
               placeholder="z.B. Kundentermin, Konferenz"
             />
           </div>
         </div>
-
         <div className="grid grid-cols-4 gap-4">
-          <div>
-            <Label>Reisebeginn *</Label>
-            <Popover open={startCalendarOpen} onOpenChange={setStartCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !travelDetails.travelStartDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 size-4" />
-                  {travelDetails.travelStartDate
-                    ? format(
-                        new Date(travelDetails.travelStartDate),
-                        "dd.MM.yyyy",
-                        { locale: de },
-                      )
-                    : "Datum wählen"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    travelDetails.travelStartDate
-                      ? new Date(travelDetails.travelStartDate)
-                      : undefined
-                  }
-                  onSelect={(date) => {
-                    setTravelDetails({
-                      ...travelDetails,
-                      travelStartDate: date ? format(date, "yyyy-MM-dd") : "",
-                    });
-                    setStartCalendarOpen(false);
-                  }}
-                  locale={de}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div>
-            <Label>Reiseende *</Label>
-            <Popover open={endCalendarOpen} onOpenChange={setEndCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !travelDetails.travelEndDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 size-4" />
-                  {travelDetails.travelEndDate
-                    ? format(
-                        new Date(travelDetails.travelEndDate),
-                        "dd.MM.yyyy",
-                        { locale: de },
-                      )
-                    : "Datum wählen"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    travelDetails.travelEndDate
-                      ? new Date(travelDetails.travelEndDate)
-                      : undefined
-                  }
-                  onSelect={(date) => {
-                    setTravelDetails({
-                      ...travelDetails,
-                      travelEndDate: date ? format(date, "yyyy-MM-dd") : "",
-                    });
-                    setEndCalendarOpen(false);
-                  }}
-                  locale={de}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <DatePicker
+            label="Reisebeginn *"
+            value={travelDetails.travelStartDate}
+            onChange={(d) => update({ travelStartDate: d })}
+          />
+          <DatePicker
+            label="Reiseende *"
+            value={travelDetails.travelEndDate}
+            onChange={(d) => update({ travelEndDate: d })}
+          />
           <div className="col-span-2 flex items-end pb-2">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="international"
                 checked={travelDetails.isInternational}
-                onCheckedChange={(checked: boolean) =>
-                  setTravelDetails({
-                    ...travelDetails,
-                    isInternational: checked,
-                  })
-                }
+                onCheckedChange={(c: boolean) => update({ isInternational: c })}
               />
               <Label htmlFor="international" className="font-normal">
                 Auslandsreise
@@ -260,43 +222,40 @@ export function TravelReimbursementFormUI({
         </div>
       </div>
 
-      {/* Costs - only show when basic info is filled */}
       {hasBasicInfo && (
         <div className="space-y-4">
-          <h2 className="text-lg font-medium">Kosten</h2>
-
+          <h2 className="text-lg font-medium">Fahrtkosten</h2>
           <div className="grid grid-cols-4 gap-4">
             <div>
               <Label>Verkehrsmittel</Label>
               <Select
                 value={travelDetails.transportationMode}
-                onValueChange={(value) =>
-                  setTravelDetails({
-                    ...travelDetails,
-                    transportationMode: value as TransportationMode,
-                    // Reset kilometers when switching away from car
-                    kilometers: value === "car" ? travelDetails.kilometers : 0,
+                onValueChange={(v) => {
+                  const mode = v as TransportationMode;
+                  const km = mode === "car" ? travelDetails.kilometers : 0;
+                  update({
+                    transportationMode: mode,
+                    kilometers: km,
                     transportationAmount:
-                      value === "car"
-                        ? travelDetails.kilometers * 0.3
+                      mode === "car"
+                        ? km * 0.3
                         : travelDetails.transportationAmount,
-                  })
-                }
+                  });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="car">PKW (Privat)</SelectItem>
-                  <SelectItem value="train">Bahn</SelectItem>
-                  <SelectItem value="flight">Flugzeug</SelectItem>
-                  <SelectItem value="taxi">Taxi</SelectItem>
-                  <SelectItem value="bus">Bus</SelectItem>
+                  {Object.entries(modeLabels).map(([k, label]) => (
+                    <SelectItem key={k} value={k}>
+                      {label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-
-            {travelDetails.transportationMode === "car" ? (
+            {isCar ? (
               <>
                 <div>
                   <Label>Kilometer *</Label>
@@ -309,8 +268,7 @@ export function TravelReimbursementFormUI({
                         0,
                         Math.floor(parseFloat(e.target.value) || 0),
                       );
-                      setTravelDetails({
-                        ...travelDetails,
+                      update({
                         kilometers: km,
                         transportationAmount: Math.round(km * 0.3 * 100) / 100,
                       });
@@ -338,8 +296,7 @@ export function TravelReimbursementFormUI({
                   min={0}
                   value={travelDetails.transportationAmount || ""}
                   onChange={(e) =>
-                    setTravelDetails({
-                      ...travelDetails,
+                    update({
                       transportationAmount: Math.max(
                         0,
                         parseFloat(e.target.value) || 0,
@@ -350,17 +307,34 @@ export function TravelReimbursementFormUI({
                 />
               </div>
             )}
-
+          </div>
+          {hasTransportationCost && (
             <div>
-              <Label>Übernachtung (€)</Label>
+              <Label>Beleg Fahrtkosten *</Label>
+              <ReceiptUpload
+                onUploadComplete={(id) =>
+                  update({ transportationReceiptId: id })
+                }
+                storageId={travelDetails.transportationReceiptId}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {hasBasicInfo && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Übernachtung</h2>
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <Label>Übernachtungskosten (€)</Label>
               <Input
                 type="number"
                 step="0.01"
                 min={0}
                 value={travelDetails.accommodationAmount || ""}
                 onChange={(e) =>
-                  setTravelDetails({
-                    ...travelDetails,
+                  update({
                     accommodationAmount: Math.max(
                       0,
                       parseFloat(e.target.value) || 0,
@@ -371,27 +345,23 @@ export function TravelReimbursementFormUI({
               />
             </div>
           </div>
+          {hasAccommodationCost && (
+            <div>
+              <Label>Beleg Übernachtung *</Label>
+              <ReceiptUpload
+                onUploadComplete={(id) =>
+                  update({ accommodationReceiptId: id })
+                }
+                storageId={travelDetails.accommodationReceiptId}
+              />
+            </div>
+          )}
         </div>
       )}
 
-      {/* Receipt Upload - only show when there are costs */}
-      {totalAmount > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Beleg hochladen *</h2>
-          <ReceiptUpload
-            onUploadComplete={(storageId) =>
-              setTravelDetails({ ...travelDetails, fileStorageId: storageId })
-            }
-            storageId={travelDetails.fileStorageId || undefined}
-          />
-        </div>
-      )}
-
-      {/* Summary - only show when receipt is uploaded */}
-      {totalAmount > 0 && travelDetails.fileStorageId && (
+      {hasRequiredReceipts && (
         <div className="space-y-8 mt-24">
           <h2 className="text-2xl font-bold">Zusammenfassung</h2>
-
           <div className="flex items-end gap-4">
             <div
               className="grid gap-4 flex-1"
@@ -450,29 +420,23 @@ export function TravelReimbursementFormUI({
             </Button>
           </div>
 
-          {/* Cost breakdown */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
-              <div className="flex items-center gap-8 flex-1">
-                <span className="font-semibold">Fahrtkosten</span>
-                <span className="text-sm text-muted-foreground">
-                  {travelDetails.transportationMode === "car"
-                    ? `${travelDetails.kilometers} km × 0,30€`
-                    : travelDetails.transportationMode === "train"
-                      ? "Bahn"
-                      : travelDetails.transportationMode === "flight"
-                        ? "Flug"
-                        : travelDetails.transportationMode === "taxi"
-                          ? "Taxi"
-                          : "Bus"}
+            {hasTransportationCost && (
+              <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
+                <div className="flex items-center gap-8 flex-1">
+                  <span className="font-semibold">Fahrtkosten</span>
+                  <span className="text-sm text-muted-foreground">
+                    {isCar
+                      ? `${travelDetails.kilometers} km × 0,30€`
+                      : modeLabels[travelDetails.transportationMode]}
+                  </span>
+                </div>
+                <span className="font-semibold">
+                  {travelDetails.transportationAmount.toFixed(2)} €
                 </span>
               </div>
-              <span className="font-semibold">
-                {travelDetails.transportationAmount.toFixed(2)} €
-              </span>
-            </div>
-
-            {travelDetails.accommodationAmount > 0 && (
+            )}
+            {hasAccommodationCost && (
               <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
                 <div className="flex items-center gap-8 flex-1">
                   <span className="font-semibold">Übernachtung</span>
