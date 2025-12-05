@@ -1,47 +1,40 @@
+import { DateInput } from "@/components/Selectors/DateInput";
+import { SelectProject } from "@/components/Selectors/SelectProject";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Doc, Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
-import { CalendarIcon, Pencil } from "lucide-react";
+import { Bus, Car, Hotel, Pencil, Plane, Train, Utensils } from "lucide-react";
 import { ReceiptUpload } from "./ReceiptUpload";
 
-type TransportationMode = "car" | "train" | "flight" | "taxi" | "bus";
-
-type TravelDetails = {
+export type TravelDetails = {
   travelStartDate: string;
   travelEndDate: string;
   destination: string;
   travelPurpose: string;
   isInternational: boolean;
-  transportationMode: TransportationMode;
-  kilometers: number;
-  transportationAmount: number;
-  accommodationAmount: number;
-  transportationReceiptId: Id<"_storage"> | undefined;
+  carAmount: number | undefined;
+  carKilometers: number | undefined;
+  carReceiptId: Id<"_storage"> | undefined;
+  trainAmount: number | undefined;
+  trainReceiptId: Id<"_storage"> | undefined;
+  flightAmount: number | undefined;
+  flightReceiptId: Id<"_storage"> | undefined;
+  taxiAmount: number | undefined;
+  taxiReceiptId: Id<"_storage"> | undefined;
+  busAmount: number | undefined;
+  busReceiptId: Id<"_storage"> | undefined;
+  accommodationAmount: number | undefined;
   accommodationReceiptId: Id<"_storage"> | undefined;
+  foodAmount: number | undefined;
+  foodReceiptId: Id<"_storage"> | undefined;
 };
 
 type Props = {
-  projects: Doc<"projects">[];
   selectedProjectId: Id<"projects"> | null;
   setSelectedProjectId: (id: Id<"projects"> | null) => void;
   bankDetails: { iban: string; bic: string; accountHolder: string };
@@ -59,58 +52,22 @@ type Props = {
   setReimbursementType: (type: "expense" | "travel") => void;
 };
 
-const modeLabels: Record<TransportationMode, string> = {
-  car: "PKW (Privat)",
-  train: "Bahn",
-  flight: "Flug",
-  taxi: "Taxi",
-  bus: "Bus",
-};
+const transportModes = [
+  { key: "car", label: "PKW", icon: Car },
+  { key: "train", label: "Bahn", icon: Train },
+  { key: "flight", label: "Flug", icon: Plane },
+  { key: "taxi", label: "Taxi", icon: Car },
+  { key: "bus", label: "Bus", icon: Bus },
+] as const;
 
-function DatePicker({
-  value,
-  onChange,
-  label,
-}: {
-  value: string;
-  onChange: (date: string) => void;
-  label: string;
-}) {
-  return (
-    <div>
-      <Label>{label}</Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground",
-            )}
-          >
-            <CalendarIcon className="mr-2 size-4" />
-            {value
-              ? format(new Date(value), "dd.MM.yyyy", { locale: de })
-              : "Datum wählen"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={value ? new Date(value) : undefined}
-            onSelect={(date) =>
-              onChange(date ? format(date, "yyyy-MM-dd") : "")
-            }
-            locale={de}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-}
+const extras = [
+  { key: "accommodation", label: "Hotel", icon: Hotel },
+  { key: "food", label: "Essen", icon: Utensils },
+] as const;
+
+type Category = (typeof transportModes)[number]["key"] | (typeof extras)[number]["key"];
 
 export function TravelReimbursementFormUI({
-  projects,
   selectedProjectId,
   setSelectedProjectId,
   bankDetails,
@@ -123,24 +80,58 @@ export function TravelReimbursementFormUI({
   reimbursementType,
   setReimbursementType,
 }: Props) {
-  const totalAmount =
-    travelDetails.transportationAmount + travelDetails.accommodationAmount;
+  const update = (fields: Partial<TravelDetails>) =>
+    setTravelDetails({ ...travelDetails, ...fields });
+
+  const getAmount = (cat: Category) =>
+    travelDetails[`${cat}Amount` as keyof TravelDetails] as number | undefined;
+
+  const getReceiptId = (cat: Category) =>
+    travelDetails[`${cat}ReceiptId` as keyof TravelDetails] as Id<"_storage"> | undefined;
+
+  const isSelected = (cat: Category) => getAmount(cat) !== undefined;
+
+  const toggleCategory = (cat: Category) => {
+    if (isSelected(cat)) {
+      update({
+        [`${cat}Amount`]: undefined,
+        [`${cat}ReceiptId`]: undefined,
+        ...(cat === "car" ? { carKilometers: undefined } : {}),
+      });
+    } else {
+      update({ [`${cat}Amount`]: 0 });
+    }
+  };
+
   const hasBasicInfo =
     travelDetails.destination &&
     travelDetails.travelPurpose &&
     travelDetails.travelStartDate &&
     travelDetails.travelEndDate;
-  const hasTransportationCost = travelDetails.transportationAmount > 0;
-  const hasAccommodationCost = travelDetails.accommodationAmount > 0;
-  const isCar = travelDetails.transportationMode === "car";
 
-  const hasRequiredReceipts =
-    (hasTransportationCost ? !!travelDetails.transportationReceiptId : true) &&
-    (hasAccommodationCost ? !!travelDetails.accommodationReceiptId : true) &&
-    (hasTransportationCost || hasAccommodationCost);
+  const totalAmount = [...transportModes, ...extras].reduce(
+    (sum, { key }) => sum + (getAmount(key) || 0),
+    0,
+  );
 
-  const update = (fields: Partial<TravelDetails>) =>
-    setTravelDetails({ ...travelDetails, ...fields });
+  const allReceiptsUploaded = [...transportModes, ...extras].every(
+    ({ key }) => (getAmount(key) || 0) <= 0 || getReceiptId(key),
+  );
+
+  const canSubmit = hasBasicInfo && totalAmount > 0 && allReceiptsUploaded;
+
+  const summaryItems = [...transportModes, ...extras]
+    .filter(({ key }) => (getAmount(key) || 0) > 0)
+    .map(({ key, label }) => ({
+      label: key === "accommodation" ? "Hotel" : key === "food" ? "Verpflegung" : label,
+      detail:
+        key === "car"
+          ? `${travelDetails.carKilometers || 0} km × 0,30€`
+          : key === "accommodation"
+            ? travelDetails.destination
+            : "",
+      amount: getAmount(key) || 0,
+    }));
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -149,30 +140,19 @@ export function TravelReimbursementFormUI({
         <div className="flex items-center gap-3">
           <Tabs
             value={reimbursementType}
-            onValueChange={(v) =>
-              setReimbursementType(v as "expense" | "travel")
-            }
+            onValueChange={(v) => setReimbursementType(v as "expense" | "travel")}
           >
             <TabsList>
               <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
               <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Select
-            value={selectedProjectId || ""}
-            onValueChange={(v) => setSelectedProjectId(v as Id<"projects">)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Projekt wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((p) => (
-                <SelectItem key={p._id} value={p._id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-[200px]">
+            <SelectProject
+              value={selectedProjectId || ""}
+              onValueChange={(v) => setSelectedProjectId(v ? (v as Id<"projects">) : null)}
+            />
+          </div>
         </div>
       </div>
 
@@ -197,16 +177,20 @@ export function TravelReimbursementFormUI({
           </div>
         </div>
         <div className="grid grid-cols-4 gap-4">
-          <DatePicker
-            label="Reisebeginn *"
-            value={travelDetails.travelStartDate}
-            onChange={(d) => update({ travelStartDate: d })}
-          />
-          <DatePicker
-            label="Reiseende *"
-            value={travelDetails.travelEndDate}
-            onChange={(d) => update({ travelEndDate: d })}
-          />
+          <div>
+            <Label>Reisebeginn *</Label>
+            <DateInput
+              value={travelDetails.travelStartDate}
+              onChange={(d) => update({ travelStartDate: d })}
+            />
+          </div>
+          <div>
+            <Label>Reiseende *</Label>
+            <DateInput
+              value={travelDetails.travelEndDate}
+              onChange={(d) => update({ travelEndDate: d })}
+            />
+          </div>
           <div className="col-span-2 flex items-end pb-2">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -223,188 +207,172 @@ export function TravelReimbursementFormUI({
       </div>
 
       {hasBasicInfo && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Fahrtkosten</h2>
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label>Verkehrsmittel</Label>
-              <Select
-                value={travelDetails.transportationMode}
-                onValueChange={(v) => {
-                  const mode = v as TransportationMode;
-                  const km = mode === "car" ? travelDetails.kilometers : 0;
-                  update({
-                    transportationMode: mode,
-                    kilometers: km,
-                    transportationAmount:
-                      mode === "car"
-                        ? km * 0.3
-                        : travelDetails.transportationAmount,
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(modeLabels).map(([k, label]) => (
-                    <SelectItem key={k} value={k}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-medium mb-3">Kostenarten auswählen</h2>
+            <div className="flex flex-wrap gap-2">
+              {transportModes.map(({ key, label, icon: Icon }) => (
+                <Button
+                  key={key}
+                  type="button"
+                  variant={isSelected(key) ? "default" : "outline"}
+                  onClick={() => toggleCategory(key)}
+                  className="gap-2"
+                >
+                  <Icon className="size-4" />
+                  {label}
+                </Button>
+              ))}
+              <div className="w-px bg-border mx-2" />
+              {extras.map(({ key, label, icon: Icon }) => (
+                <Button
+                  key={key}
+                  type="button"
+                  variant={isSelected(key) ? "default" : "outline"}
+                  onClick={() => toggleCategory(key)}
+                  className="gap-2"
+                >
+                  <Icon className="size-4" />
+                  {label}
+                </Button>
+              ))}
             </div>
-            {isCar ? (
-              <>
+          </div>
+
+          {isSelected("car") && (
+            <CostSection title="PKW (0,30€/km)">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label>Kilometer *</Label>
                   <Input
                     type="number"
                     min={0}
-                    value={travelDetails.kilometers || ""}
+                    value={travelDetails.carKilometers || ""}
                     onChange={(e) => {
-                      const km = Math.max(
-                        0,
-                        Math.floor(parseFloat(e.target.value) || 0),
-                      );
-                      update({
-                        kilometers: km,
-                        transportationAmount: Math.round(km * 0.3 * 100) / 100,
-                      });
+                      const km = Math.max(0, Math.floor(parseFloat(e.target.value) || 0));
+                      update({ carKilometers: km, carAmount: Math.round(km * 0.3 * 100) / 100 });
                     }}
                     placeholder="0"
                   />
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">
-                    Fahrtkosten (0,30€/km)
-                  </Label>
+                  <Label className="text-muted-foreground">Betrag</Label>
                   <Input
-                    value={`${travelDetails.transportationAmount.toFixed(2)} €`}
+                    value={`${(travelDetails.carAmount || 0).toFixed(2)} €`}
                     disabled
                     className="bg-muted/50 font-mono"
                   />
                 </div>
-              </>
-            ) : (
-              <div>
-                <Label>Fahrtkosten (€) *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  value={travelDetails.transportationAmount || ""}
-                  onChange={(e) =>
-                    update({
-                      transportationAmount: Math.max(
-                        0,
-                        parseFloat(e.target.value) || 0,
-                      ),
-                    })
-                  }
-                  placeholder="0.00"
-                />
               </div>
-            )}
-          </div>
-          {hasTransportationCost && (
-            <div>
-              <Label>Beleg Fahrtkosten *</Label>
-              <ReceiptUpload
-                onUploadComplete={(id) =>
-                  update({ transportationReceiptId: id })
-                }
-                storageId={travelDetails.transportationReceiptId}
-              />
-            </div>
+              {(travelDetails.carAmount || 0) > 0 && (
+                <div className="mt-4">
+                  <Label>Beleg *</Label>
+                  <ReceiptUpload
+                    onUploadComplete={(id) => update({ carReceiptId: id })}
+                    storageId={travelDetails.carReceiptId}
+                  />
+                </div>
+              )}
+            </CostSection>
           )}
+
+          {transportModes
+            .filter(({ key }) => key !== "car" && isSelected(key))
+            .map(({ key, label }) => (
+              <CostSection key={key} title={label}>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label>Betrag (€) *</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={getAmount(key) || ""}
+                      onChange={(e) =>
+                        update({ [`${key}Amount`]: Math.max(0, parseFloat(e.target.value) || 0) })
+                      }
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                {(getAmount(key) || 0) > 0 && (
+                  <div className="mt-4">
+                    <Label>Beleg *</Label>
+                    <ReceiptUpload
+                      onUploadComplete={(id) => update({ [`${key}ReceiptId`]: id })}
+                      storageId={getReceiptId(key)}
+                    />
+                  </div>
+                )}
+              </CostSection>
+            ))}
+
+          {extras
+            .filter(({ key }) => isSelected(key))
+            .map(({ key }) => (
+              <CostSection
+                key={key}
+                title={key === "accommodation" ? "Übernachtung" : "Verpflegung"}
+              >
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label>Betrag (€) *</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={getAmount(key) || ""}
+                      onChange={(e) =>
+                        update({ [`${key}Amount`]: Math.max(0, parseFloat(e.target.value) || 0) })
+                      }
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                {(getAmount(key) || 0) > 0 && (
+                  <div className="mt-4">
+                    <Label>Beleg *</Label>
+                    <ReceiptUpload
+                      onUploadComplete={(id) => update({ [`${key}ReceiptId`]: id })}
+                      storageId={getReceiptId(key)}
+                    />
+                  </div>
+                )}
+              </CostSection>
+            ))}
         </div>
       )}
 
-      {hasBasicInfo && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Übernachtung</h2>
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label>Übernachtungskosten (€)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min={0}
-                value={travelDetails.accommodationAmount || ""}
-                onChange={(e) =>
-                  update({
-                    accommodationAmount: Math.max(
-                      0,
-                      parseFloat(e.target.value) || 0,
-                    ),
-                  })
-                }
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          {hasAccommodationCost && (
-            <div>
-              <Label>Beleg Übernachtung *</Label>
-              <ReceiptUpload
-                onUploadComplete={(id) =>
-                  update({ accommodationReceiptId: id })
-                }
-                storageId={travelDetails.accommodationReceiptId}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {hasRequiredReceipts && (
+      {canSubmit && (
         <div className="space-y-8 mt-24">
           <h2 className="text-2xl font-bold">Zusammenfassung</h2>
           <div className="flex items-end gap-4">
-            <div
-              className="grid gap-4 flex-1"
-              style={{ gridTemplateColumns: "1fr 2fr 1fr" }}
-            >
+            <div className="grid gap-4 flex-1" style={{ gridTemplateColumns: "1fr 2fr 1fr" }}>
               <div>
-                <Label className="text-xs text-muted-foreground uppercase">
-                  Kontoinhaber
-                </Label>
+                <Label className="text-xs text-muted-foreground uppercase">Kontoinhaber</Label>
                 <Input
                   value={bankDetails.accountHolder}
                   onChange={(e) =>
-                    setBankDetails({
-                      ...bankDetails,
-                      accountHolder: e.target.value,
-                    })
+                    setBankDetails({ ...bankDetails, accountHolder: e.target.value })
                   }
                   disabled={!editingBank}
                 />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground uppercase">
-                  IBAN
-                </Label>
+                <Label className="text-xs text-muted-foreground uppercase">IBAN</Label>
                 <Input
                   value={bankDetails.iban}
-                  onChange={(e) =>
-                    setBankDetails({ ...bankDetails, iban: e.target.value })
-                  }
+                  onChange={(e) => setBankDetails({ ...bankDetails, iban: e.target.value })}
                   disabled={!editingBank}
                   placeholder="DE89 3704 0044 0532 0130 00"
                   className="font-mono"
                 />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground uppercase">
-                  BIC
-                </Label>
+                <Label className="text-xs text-muted-foreground uppercase">BIC</Label>
                 <Input
                   value={bankDetails.bic}
-                  onChange={(e) =>
-                    setBankDetails({ ...bankDetails, bic: e.target.value })
-                  }
+                  onChange={(e) => setBankDetails({ ...bankDetails, bic: e.target.value })}
                   disabled={!editingBank}
                   placeholder="COBADEFFXXX"
                   className="font-mono"
@@ -421,34 +389,20 @@ export function TravelReimbursementFormUI({
           </div>
 
           <div className="space-y-3">
-            {hasTransportationCost && (
-              <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
+            {summaryItems.map((item, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between px-3 bg-gray-50 border rounded-md"
+              >
                 <div className="flex items-center gap-8 flex-1">
-                  <span className="font-semibold">Fahrtkosten</span>
-                  <span className="text-sm text-muted-foreground">
-                    {isCar
-                      ? `${travelDetails.kilometers} km × 0,30€`
-                      : modeLabels[travelDetails.transportationMode]}
-                  </span>
+                  <span className="font-semibold">{item.label}</span>
+                  {item.detail && (
+                    <span className="text-sm text-muted-foreground">{item.detail}</span>
+                  )}
                 </div>
-                <span className="font-semibold">
-                  {travelDetails.transportationAmount.toFixed(2)} €
-                </span>
+                <span className="font-semibold">{item.amount.toFixed(2)} €</span>
               </div>
-            )}
-            {hasAccommodationCost && (
-              <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
-                <div className="flex items-center gap-8 flex-1">
-                  <span className="font-semibold">Übernachtung</span>
-                  <span className="text-sm text-muted-foreground">
-                    {travelDetails.destination}
-                  </span>
-                </div>
-                <span className="font-semibold">
-                  {travelDetails.accommodationAmount.toFixed(2)} €
-                </span>
-              </div>
-            )}
+            ))}
           </div>
 
           <div className="space-y-3 pt-6">
@@ -459,15 +413,20 @@ export function TravelReimbursementFormUI({
             </div>
           </div>
 
-          <Button
-            onClick={handleSubmit}
-            className="w-full h-14 font-semibold mt-8"
-            size="lg"
-          >
+          <Button onClick={handleSubmit} className="w-full h-14 font-semibold mt-8" size="lg">
             Zur Genehmigung einreichen
           </Button>
         </div>
       )}
+    </div>
+  );
+}
+
+function CostSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="border rounded-lg p-4 space-y-4">
+      <h3 className="font-medium">{title}</h3>
+      {children}
     </div>
   );
 }

@@ -1,12 +1,8 @@
+import { DateInput } from "@/components/Selectors/DateInput";
+import { SelectProject } from "@/components/Selectors/SelectProject";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -18,10 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
-import { CalendarIcon, Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { ReceiptUpload } from "./ReceiptUpload";
 
 type CurrentReceipt = {
@@ -35,7 +28,6 @@ type CurrentReceipt = {
 };
 
 type Props = {
-  projects: Doc<"projects">[];
   selectedProjectId: Id<"projects"> | null;
   setSelectedProjectId: (id: Id<"projects"> | null) => void;
   bankDetails: { iban: string; bic: string; accountHolder: string };
@@ -58,7 +50,6 @@ type Props = {
 };
 
 export function ReimbursementFormUI({
-  projects,
   selectedProjectId,
   setSelectedProjectId,
   bankDetails,
@@ -103,21 +94,14 @@ export function ReimbursementFormUI({
               <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Select
-            value={selectedProjectId || ""}
-            onValueChange={(v) => setSelectedProjectId(v as Id<"projects">)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Projekt wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((p) => (
-                <SelectItem key={p._id} value={p._id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-[200px]">
+            <SelectProject
+              value={selectedProjectId || ""}
+              onValueChange={(v) =>
+                setSelectedProjectId(v ? (v as Id<"projects">) : null)
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -156,42 +140,10 @@ export function ReimbursementFormUI({
         <div className="grid grid-cols-4 gap-4">
           <div>
             <Label>Datum *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !currentReceipt.receiptDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 size-4" />
-                  {currentReceipt.receiptDate
-                    ? format(
-                        new Date(currentReceipt.receiptDate),
-                        "dd.MM.yyyy",
-                        { locale: de },
-                      )
-                    : "Datum wählen"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    currentReceipt.receiptDate
-                      ? new Date(currentReceipt.receiptDate)
-                      : undefined
-                  }
-                  onSelect={(date) =>
-                    update({
-                      receiptDate: date ? format(date, "yyyy-MM-dd") : "",
-                    })
-                  }
-                  locale={de}
-                />
-              </PopoverContent>
-            </Popover>
+            <DateInput
+              value={currentReceipt.receiptDate}
+              onChange={(date) => update({ receiptDate: date })}
+            />
           </div>
           <div>
             <Label>Bruttobetrag (€) *</Label>

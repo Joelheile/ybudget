@@ -1,12 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DateInput } from "@/components/Selectors/DateInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -17,11 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
-import { CalendarIcon, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { ReceiptUpload } from "../new/ReceiptUpload";
 
 type ReceiptFormData = {
@@ -90,7 +81,6 @@ export function EditReimbursementUI({
   onSaveAll,
   setFormData,
 }: Props) {
-  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const calculatedNet = formData.grossAmount
     ? (
@@ -253,42 +243,10 @@ export function EditReimbursementUI({
         <div className="grid grid-cols-4 gap-4">
           <div>
             <Label>Datum *</Label>
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.receiptDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 size-4" />
-                  {formData.receiptDate
-                    ? format(new Date(formData.receiptDate), "dd.MM.yyyy", {
-                        locale: de,
-                      })
-                    : "Datum wählen"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    formData.receiptDate
-                      ? new Date(formData.receiptDate)
-                      : undefined
-                  }
-                  onSelect={(date) => {
-                    updateFormField(
-                      "receiptDate",
-                      date ? format(date, "yyyy-MM-dd") : "",
-                    );
-                    setCalendarOpen(false);
-                  }}
-                  locale={de}
-                />
-              </PopoverContent>
-            </Popover>
+            <DateInput
+              value={formData.receiptDate}
+              onChange={(date) => updateFormField("receiptDate", date)}
+            />
           </div>
           <div>
             <Label>Bruttobetrag (€) *</Label>
