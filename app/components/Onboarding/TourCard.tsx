@@ -8,7 +8,6 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import type { CardComponentProps } from "onborda";
 import { useOnborda } from "onborda";
 import { useEffect, useRef } from "react";
@@ -23,88 +22,49 @@ export function TourCard({
 }: CardComponentProps) {
   const { closeOnborda } = useOnborda();
   const cardRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep + 1 === totalSteps;
-
-  const handleNextStep = () => {
-    if (step.nextRoute) {
-      router.push(step.nextRoute);
-      setTimeout(() => {
-        nextStep();
-      }, 100);
-    } else {
-      nextStep();
-    }
-  };
 
   useEffect(() => {
-    if (!cardRef.current) return;
+    const card = cardRef.current;
+    if (!card) return;
 
-    const adjustPosition = () => {
-      const card = cardRef.current;
-      if (!card) return;
+    card.style.transform = "";
 
+    const adjust = () => {
       const rect = card.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const paddingSide = 16;
-      const paddingTop = 200;
-      const paddingBottom = 16;
+      const x =
+        rect.right > window.innerWidth - 16
+          ? window.innerWidth - 16 - rect.right
+          : rect.left < 16
+            ? 16 - rect.left
+            : 0;
+      const y =
+        rect.bottom > window.innerHeight - 16
+          ? window.innerHeight - 16 - rect.bottom
+          : rect.top < 80
+            ? 80 - rect.top
+            : 0;
 
-      let adjustX = 0;
-      let adjustY = 0;
-
-      if (rect.right > viewportWidth - paddingSide) {
-        adjustX = viewportWidth - paddingSide - rect.right;
-      }
-      if (rect.left < paddingSide) {
-        adjustX = paddingSide - rect.left;
-      }
-      if (rect.bottom > viewportHeight - paddingBottom) {
-        adjustY = viewportHeight - paddingBottom - rect.bottom;
-      }
-      if (rect.top < paddingTop) {
-        adjustY = paddingTop - rect.top;
-      }
-
-      if (adjustX !== 0 || adjustY !== 0) {
-        card.style.transform = `translate(${adjustX}px, ${adjustY}px)`;
-      } else {
-        card.style.transform = "";
-      }
+      if (x || y) card.style.transform = `translate(${x}px, ${y}px)`;
     };
 
-    const timeoutId = setTimeout(adjustPosition, 50);
-    const intervalId = setInterval(adjustPosition, 100);
-
-    const resizeObserver = new ResizeObserver(adjustPosition);
-    resizeObserver.observe(cardRef.current);
-
-    window.addEventListener("resize", adjustPosition);
-    window.addEventListener("scroll", adjustPosition, true);
+    const t1 = setTimeout(adjust, 50);
+    const t2 = setTimeout(adjust, 200);
+    const t3 = setTimeout(adjust, 500);
 
     return () => {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", adjustPosition);
-      window.removeEventListener("scroll", adjustPosition, true);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
   }, [currentStep]);
 
   return (
-    <Card
-      ref={cardRef}
-      className="max-w-md shadow-lg relative transition-transform"
-      style={{ zIndex: 99999 }}
-    >
+    <Card ref={cardRef} className="max-w-md shadow-lg" style={{ zIndex: 99999 }}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
             {step.icon && <span className="text-2xl">{step.icon}</span>}
-            <div className="flex-1">
+            <div>
               <h3 className="font-semibold text-lg leading-tight">
                 {step.title}
               </h3>
@@ -120,7 +80,6 @@ export function TourCard({
             onClick={closeOnborda}
           >
             <X className="h-4 w-4" />
-            <span className="sr-only">Tour schließen</span>
           </Button>
         </div>
       </CardHeader>
@@ -133,18 +92,18 @@ export function TourCard({
         <Button
           variant="outline"
           onClick={prevStep}
-          disabled={isFirstStep}
+          disabled={currentStep === 0}
           className="min-w-24"
         >
           Zurück
         </Button>
 
-        {isLastStep ? (
+        {currentStep + 1 === totalSteps ? (
           <Button onClick={closeOnborda} className="min-w-24">
-            🎉 Fertig!
+            Fertig
           </Button>
         ) : (
-          <Button onClick={handleNextStep} className="min-w-24">
+          <Button onClick={nextStep} className="min-w-24">
             Weiter
           </Button>
         )}

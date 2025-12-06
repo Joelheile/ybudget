@@ -2,7 +2,6 @@ export const tourSteps = [
   {
     tour: "main-tour",
     steps: [
-      // 1. WELCOME
       {
         icon: "👋",
         title: "Willkommen bei YBudget!",
@@ -24,8 +23,6 @@ export const tourSteps = [
         pointerPadding: 10,
         pointerRadius: 10,
       },
-
-      // 2. CHART
       {
         icon: "📈",
         title: "Cashflow-Diagramm",
@@ -45,8 +42,6 @@ export const tourSteps = [
         pointerPadding: 10,
         pointerRadius: 10,
       },
-
-      // 3. ACTIONS DROPDOWN
       {
         icon: "➕",
         title: "Neue Transaktionen anlegen",
@@ -82,8 +77,6 @@ export const tourSteps = [
         pointerPadding: 10,
         pointerRadius: 10,
       },
-
-      // 4. MAIN PAGES
       {
         icon: "🧭",
         title: "Hauptseiten",
@@ -116,8 +109,6 @@ export const tourSteps = [
         pointerRadius: 10,
         nextRoute: "/transactions",
       },
-
-      // 6. TRANSACTIONS
       {
         icon: "📋",
         title: "Transaktionen",
@@ -137,8 +128,8 @@ export const tourSteps = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
+        nextRoute: "/dashboard",
       },
-
       {
         icon: "🎉",
         title: "Du bist startklar!",
@@ -153,7 +144,7 @@ export const tourSteps = [
               unten in der Sidebar neu starten.
             </p>
             <p className="text-sm font-medium">
-              Viel Erfolg bei der Verwaltung deines Budgets! 💪
+              Viel Erfolg bei der Verwaltung deines Budgets!
             </p>
           </>
         ),
@@ -162,7 +153,6 @@ export const tourSteps = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/dashboard",
       },
     ],
   },
