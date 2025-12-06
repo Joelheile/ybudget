@@ -65,7 +65,7 @@ const COST_TYPES = [
   { type: "food" as CostType, label: "Essen", icon: Utensils },
 ];
 
-const getLabel = (type: CostType) => COST_TYPES.find((c) => c.type === type)?.label || type;
+const getLabel = (type: CostType) => COST_TYPES.find((cost) => cost.type === type)?.label || type;
 
 export function TravelReimbursementFormUI({
   selectedProjectId,
@@ -82,11 +82,11 @@ export function TravelReimbursementFormUI({
   reimbursementType,
   setReimbursementType,
 }: Props) {
-  const hasReceipt = (type: CostType) => receipts.some((r) => r.costType === type);
+  const hasReceipt = (type: CostType) => receipts.some((receipt) => receipt.costType === type);
 
   const toggleType = (type: CostType) => {
     if (hasReceipt(type)) {
-      setReceipts(receipts.filter((r) => r.costType !== type));
+      setReceipts(receipts.filter((receipt) => receipt.costType !== type));
       return;
     }
     setReceipts([
@@ -107,15 +107,19 @@ export function TravelReimbursementFormUI({
   };
 
   const updateReceipt = (type: CostType, updates: Partial<TravelReceipt>) => {
-    setReceipts(receipts.map((r) => (r.costType === type ? { ...r, ...updates } : r)));
+    setReceipts(
+      receipts.map((receipt) =>
+        receipt.costType === type ? { ...receipt, ...updates } : receipt
+      )
+    );
   };
 
   const hasBasicInfo =
     travelInfo.destination && travelInfo.purpose && travelInfo.startDate && travelInfo.endDate;
 
-  const totalAmount = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
+  const totalAmount = receipts.reduce((sum, receipt) => sum + receipt.grossAmount, 0);
   const allReceiptsComplete = receipts.every(
-    (r) => r.grossAmount > 0 && r.fileStorageId && r.companyName
+    (receipt) => receipt.grossAmount > 0 && receipt.fileStorageId && receipt.companyName
   );
   const canSubmit = hasBasicInfo && receipts.length > 0 && allReceiptsComplete && selectedProjectId;
 
@@ -124,7 +128,7 @@ export function TravelReimbursementFormUI({
       <div className="space-y-4">
         <Tabs
           value={reimbursementType}
-          onValueChange={(v) => setReimbursementType(v as "expense" | "travel")}
+          onValueChange={(value) => setReimbursementType(value as "expense" | "travel")}
         >
           <TabsList>
             <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
@@ -134,7 +138,7 @@ export function TravelReimbursementFormUI({
         <div className="w-[200px]">
           <SelectProject
             value={selectedProjectId || ""}
-            onValueChange={(v) => setSelectedProjectId(v ? (v as Id<"projects">) : null)}
+            onValueChange={(value) => setSelectedProjectId(value ? (value as Id<"projects">) : null)}
           />
         </div>
       </div>
@@ -164,14 +168,14 @@ export function TravelReimbursementFormUI({
             <Label>Reisebeginn *</Label>
             <DateInput
               value={travelInfo.startDate}
-              onChange={(d) => setTravelInfo({ ...travelInfo, startDate: d })}
+              onChange={(date) => setTravelInfo({ ...travelInfo, startDate: date })}
             />
           </div>
           <div>
             <Label>Reiseende *</Label>
             <DateInput
               value={travelInfo.endDate}
-              onChange={(d) => setTravelInfo({ ...travelInfo, endDate: d })}
+              onChange={(date) => setTravelInfo({ ...travelInfo, endDate: date })}
             />
           </div>
           <div className="col-span-2 flex items-end pb-2">
@@ -179,7 +183,7 @@ export function TravelReimbursementFormUI({
               <Checkbox
                 id="international"
                 checked={travelInfo.isInternational}
-                onCheckedChange={(c) => setTravelInfo({ ...travelInfo, isInternational: !!c })}
+                onCheckedChange={(checked) => setTravelInfo({ ...travelInfo, isInternational: !!checked })}
               />
               <Label htmlFor="international" className="font-normal">
                 Auslandsreise
@@ -343,7 +347,7 @@ export function TravelReimbursementFormUI({
 
           <div className="space-y-3">
             {receipts
-              .filter((r) => r.grossAmount > 0)
+              .filter((receipt) => receipt.grossAmount > 0)
               .map((receipt) => (
                 <div
                   key={receipt.costType}

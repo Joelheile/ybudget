@@ -1,190 +1,185 @@
 "use client";
 
 import { PageHeader } from "@/components/Layout/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
-import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { format } from "date-fns";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { EditReimbursementUI, type ReceiptFormData } from "./EditReimbursementUI";
+import type { Id } from "@/convex/_generated/dataModel";
+import { formatCurrency } from "@/lib/formatCurrency";
+import { formatDate } from "@/lib/formatDate";
+import { useQuery } from "convex/react";
+import { useParams } from "next/navigation";
 
-const EMPTY_RECEIPT: ReceiptFormData = {
-  receiptDate: "",
-  companyName: "",
-  description: "",
-  grossAmount: "",
-  taxRate: "19",
-  receiptNumber: "",
-  fileStorageId: "",
+const STATUS_BADGES: Record<string, { variant: "default" | "destructive" | "secondary" | "outline"; label: string }> = {
+  paid: { variant: "default", label: "Bezahlt" },
+  approved: { variant: "default", label: "Genehmigt" },
+  rejected: { variant: "destructive", label: "Abgelehnt" },
+  pending: { variant: "secondary", label: "Ausstehend" },
 };
 
-const calculateNet = (gross: string, rate: string) =>
-  (parseFloat(gross) || 0) / (1 + parseFloat(rate) / 100);
+const COST_TYPE_LABELS: Record<string, string> = {
+  car: "PKW",
+  train: "Bahn",
+  flight: "Flug",
+  taxi: "Taxi",
+  bus: "Bus",
+  accommodation: "Hotel",
+  food: "Verpflegung",
+};
 
-export default function EditReimbursementPage() {
+function ReceiptImage({ storageId }: { storageId: Id<"_storage"> }) {
+  const url = useQuery(api.reimbursements.queries.getFileUrl, { storageId });
+  if (!url) return <div className="w-32 h-32 bg-muted animate-pulse rounded" />;
+  return <img src={url} alt="Beleg" className="w-32 h-32 object-cover rounded border" />;
+}
+
+export default function ReimbursementDetailPage() {
   const { id } = useParams();
   const reimbursementId = id as Id<"reimbursements">;
-  const router = useRouter();
 
   const reimbursement = useQuery(api.reimbursements.queries.getReimbursement, { reimbursementId });
   const receipts = useQuery(api.reimbursements.queries.getReceipts, { reimbursementId });
-  const projects = useQuery(api.projects.queries.getAllProjects);
 
-  const updateReimbursement = useMutation(api.reimbursements.functions.updateReimbursement);
-  const deleteReceiptMutation = useMutation(api.reimbursements.functions.deleteReceipt);
-  const updateReceipt = useMutation(api.reimbursements.functions.updateReceipt);
-  const addReceipt = useMutation(api.reimbursements.functions.addReceipt);
-
-  const [selectedProjectId, setSelectedProjectId] = useState<Id<"projects"> | null>(null);
-  const [editingBank, setEditingBank] = useState(false);
-  const [bankDetails, setBankDetails] = useState({ iban: "", bic: "", accountHolder: "" });
-  const [editMode, setEditMode] = useState<"list" | "add" | "edit" | "image">("list");
-  const [editingReceiptId, setEditingReceiptId] = useState<Id<"receipts"> | null>(null);
-  const [formData, setFormData] = useState<ReceiptFormData>(EMPTY_RECEIPT);
-
-  useEffect(() => {
-    if (!reimbursement) return;
-    setSelectedProjectId(reimbursement.projectId);
-    setBankDetails({
-      iban: reimbursement.iban || "",
-      bic: reimbursement.bic || "",
-      accountHolder: reimbursement.accountHolder || "",
-    });
-  }, [reimbursement]);
-
-  const formatReceiptForEdit = (receipt: Doc<"receipts">): ReceiptFormData => ({
-    receiptDate: format(new Date(receipt.receiptDate), "yyyy-MM-dd"),
-    companyName: receipt.companyName,
-    description: receipt.description || "",
-    grossAmount: receipt.grossAmount.toString(),
-    taxRate: receipt.taxRate.toString(),
-    receiptNumber: receipt.receiptNumber,
-    fileStorageId: receipt.fileStorageId,
-  });
-
-  const prepareReceiptData = () => ({
-    receiptNumber: formData.receiptNumber,
-    receiptDate: formData.receiptDate,
-    companyName: formData.companyName,
-    description: formData.description,
-    netAmount: calculateNet(formData.grossAmount, formData.taxRate),
-    taxRate: parseFloat(formData.taxRate),
-    grossAmount: parseFloat(formData.grossAmount),
-    fileStorageId: formData.fileStorageId as Id<"_storage">,
-  });
-
-  const handleSaveProject = async (projectId: Id<"projects">) => {
-    setSelectedProjectId(projectId);
-    const amount = receipts?.reduce((sum, r) => sum + r.grossAmount, 0) || 0;
-    await updateReimbursement({ reimbursementId, projectId, amount });
-    toast.success("Projekt aktualisiert");
-  };
-
-  const handleSaveAll = async () => {
-    if (!selectedProjectId) {
-      toast.error("Bitte wählen Sie ein Projekt");
-      return;
-    }
-    const amount = receipts?.reduce((sum, r) => sum + r.grossAmount, 0) || 0;
-    await updateReimbursement({ reimbursementId, projectId: selectedProjectId, amount });
-    toast.success("Alle Änderungen gespeichert");
-    router.push("/reimbursement");
-  };
-
-  const handleEditReceipt = (receipt: Doc<"receipts">) => {
-    setEditingReceiptId(receipt._id);
-    setFormData(formatReceiptForEdit(receipt));
-    setEditMode("edit");
-  };
-
-  const handleSave = async () => {
-    if (!editingReceiptId) return;
-    await updateReceipt({ receiptId: editingReceiptId, ...prepareReceiptData() });
-    setEditMode("list");
-    setEditingReceiptId(null);
-    toast.success(editMode === "image" ? "Bild aktualisiert" : "Beleg aktualisiert");
-  };
-
-  const handleDeleteReceipt = async (receiptId: Id<"receipts">) => {
-    await deleteReceiptMutation({ receiptId });
-    toast.success("Beleg gelöscht");
-  };
-
-  const handleAddNewReceipt = async () => {
-    const { companyName, receiptNumber, receiptDate, grossAmount, fileStorageId } = formData;
-    if (!companyName || !receiptNumber || !receiptDate || !grossAmount || !fileStorageId) {
-      toast.error("Bitte füllen Sie alle Pflichtfelder aus");
-      return;
-    }
-    await addReceipt({ reimbursementId, ...prepareReceiptData() });
-    setFormData(EMPTY_RECEIPT);
-    setEditMode("list");
-    toast.success("Beleg hinzugefügt");
-  };
-
-  const handleCancel = () => {
-    setEditMode("list");
-    setEditingReceiptId(null);
-    setFormData(EMPTY_RECEIPT);
-  };
-
-  const handleStartAdd = () => {
-    setFormData(EMPTY_RECEIPT);
-    setEditMode("add");
-  };
-
-  const handleBankToggle = () => {
-    if (editingBank) toast.success("Bankdaten aktualisiert");
-    setEditingBank(!editingBank);
-  };
-
-  if (!reimbursement || !receipts || !projects) {
+  if (!reimbursement || !receipts) {
     return (
       <div className="flex flex-col w-full h-screen">
-        <PageHeader title="Erstattung bearbeiten" />
+        <PageHeader title="Erstattung" showBackButton />
         <div className="p-6">Lädt...</div>
       </div>
     );
   }
 
-  const totalNet = receipts.reduce((sum, r) => sum + r.netAmount, 0);
+  const totalNet = receipts.reduce((sum, receipt) => sum + receipt.netAmount, 0);
   const totalTax7 = receipts
-    .filter((r) => r.taxRate === 7)
-    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
+    .filter((receipt) => receipt.taxRate === 7)
+    .reduce((sum, receipt) => sum + (receipt.grossAmount - receipt.netAmount), 0);
   const totalTax19 = receipts
-    .filter((r) => r.taxRate === 19)
-    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
-  const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
+    .filter((receipt) => receipt.taxRate === 19)
+    .reduce((sum, receipt) => sum + (receipt.grossAmount - receipt.netAmount), 0);
+  const totalGross = receipts.reduce((sum, receipt) => sum + receipt.grossAmount, 0);
+
+  const statusBadge = STATUS_BADGES[reimbursement.status] || { variant: "outline" as const, label: "Unbekannt" };
 
   return (
     <div className="flex flex-col w-full h-screen">
-      <PageHeader title="Erstattung bearbeiten" showBackButton />
-      <EditReimbursementUI
-        projects={projects}
-        receipts={receipts}
-        selectedProjectId={selectedProjectId}
-        bankDetails={bankDetails}
-        editingBank={editingBank}
-        editMode={editMode}
-        formData={formData}
-        totalNet={totalNet}
-        totalTax7={totalTax7}
-        totalTax19={totalTax19}
-        totalGross={totalGross}
-        onProjectChange={handleSaveProject}
-        onBankDetailsChange={setBankDetails}
-        onBankToggle={handleBankToggle}
-        onAddReceiptToggle={handleStartAdd}
-        onEditReceipt={handleEditReceipt}
-        onDeleteReceipt={handleDeleteReceipt}
-        onSave={handleSave}
-        onAddNewReceipt={handleAddNewReceipt}
-        onCancel={handleCancel}
-        onSaveAll={handleSaveAll}
-        setFormData={setFormData}
-      />
+      <PageHeader title="Erstattung" showBackButton />
+
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+            <span className="text-muted-foreground">
+              {reimbursement.type === "travel" ? "Reisekostenerstattung" : "Auslagenerstattung"}
+            </span>
+          </div>
+          <p className="text-3xl font-bold">{formatCurrency(totalGross)}</p>
+        </div>
+
+        {reimbursement.adminNote && reimbursement.status === "rejected" && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-red-800">Ablehnungsgrund:</p>
+            <p className="text-red-700">{reimbursement.adminNote}</p>
+          </div>
+        )}
+
+        {"travelDetails" in reimbursement && reimbursement.travelDetails && (
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <h3 className="font-medium">Reisedetails</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Reiseziel:</span> {reimbursement.travelDetails.destination}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Zweck:</span> {reimbursement.travelDetails.purpose}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Zeitraum:</span>{" "}
+                {formatDate(reimbursement.travelDetails.startDate)} – {formatDate(reimbursement.travelDetails.endDate)}
+              </div>
+              {reimbursement.travelDetails.isInternational && (
+                <div>
+                  <Badge variant="outline">Auslandsreise</Badge>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+          <h3 className="font-medium">Bankverbindung</h3>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="text-muted-foreground">Kontoinhaber:</span> {reimbursement.accountHolder || "–"}
+            </div>
+            <div>
+              <span className="text-muted-foreground">IBAN:</span>{" "}
+              <span className="font-mono">{reimbursement.iban || "–"}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">BIC:</span>{" "}
+              <span className="font-mono">{reimbursement.bic || "–"}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Belege ({receipts.length})</h3>
+          {receipts.map((receipt) => (
+            <div key={receipt._id} className="border rounded-lg p-4 flex gap-4">
+              <ReceiptImage storageId={receipt.fileStorageId} />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold">{receipt.companyName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Beleg-Nr. {receipt.receiptNumber} • {formatDate(receipt.receiptDate)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{formatCurrency(receipt.grossAmount)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatCurrency(receipt.netAmount)} netto + {receipt.taxRate}% USt
+                    </p>
+                  </div>
+                </div>
+                {receipt.description && <p className="text-sm text-muted-foreground">{receipt.description}</p>}
+                {receipt.costType && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">{COST_TYPE_LABELS[receipt.costType] || receipt.costType}</Badge>
+                    {receipt.kilometers && (
+                      <span className="text-sm text-muted-foreground">{receipt.kilometers} km × 0,30€</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Netto gesamt</span>
+            <span>{formatCurrency(totalNet)}</span>
+          </div>
+          {totalTax7 > 0 && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">USt 7%</span>
+              <span>{formatCurrency(totalTax7)}</span>
+            </div>
+          )}
+          {totalTax19 > 0 && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">USt 19%</span>
+              <span>{formatCurrency(totalTax19)}</span>
+            </div>
+          )}
+          <Separator />
+          <div className="flex justify-between text-lg font-semibold">
+            <span>Brutto gesamt</span>
+            <span>{formatCurrency(totalGross)}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -91,14 +91,14 @@ export function ReimbursementFormUI({
     ? calculateNet(parseFloat(draft.grossAmount), parseFloat(draft.taxRate))
     : 0;
 
-  const totalNet = receipts.reduce((sum, r) => sum + r.netAmount, 0);
-  const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
+  const totalNet = receipts.reduce((sum, receipt) => sum + receipt.netAmount, 0);
+  const totalGross = receipts.reduce((sum, receipt) => sum + receipt.grossAmount, 0);
   const totalTax7 = receipts
-    .filter((r) => r.taxRate === 7)
-    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
+    .filter((receipt) => receipt.taxRate === 7)
+    .reduce((sum, receipt) => sum + (receipt.grossAmount - receipt.netAmount), 0);
   const totalTax19 = receipts
-    .filter((r) => r.taxRate === 19)
-    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
+    .filter((receipt) => receipt.taxRate === 19)
+    .reduce((sum, receipt) => sum + (receipt.grossAmount - receipt.netAmount), 0);
 
   const updateDraft = (fields: Partial<ReceiptDraft>) => setDraft({ ...draft, ...fields });
 
@@ -139,7 +139,7 @@ export function ReimbursementFormUI({
       <div className="space-y-4">
         <Tabs
           value={reimbursementType}
-          onValueChange={(v) => setReimbursementType(v as "expense" | "travel")}
+          onValueChange={(value) => setReimbursementType(value as "expense" | "travel")}
         >
           <TabsList>
             <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
@@ -149,7 +149,7 @@ export function ReimbursementFormUI({
         <div className="w-[200px]">
           <SelectProject
             value={selectedProjectId || ""}
-            onValueChange={(v) => setSelectedProjectId(v ? (v as Id<"projects">) : null)}
+            onValueChange={(value) => setSelectedProjectId(value ? (value as Id<"projects">) : null)}
           />
         </div>
       </div>
@@ -206,7 +206,7 @@ export function ReimbursementFormUI({
           </div>
           <div>
             <Label>Wie viel MwSt.?</Label>
-            <Select value={draft.taxRate} onValueChange={(v) => updateDraft({ taxRate: v })}>
+            <Select value={draft.taxRate} onValueChange={(value) => updateDraft({ taxRate: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

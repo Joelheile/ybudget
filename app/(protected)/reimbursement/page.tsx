@@ -18,7 +18,7 @@ import { useIsAdmin } from "@/hooks/useCurrentUserRole";
 import { formatDate } from "@/lib/formatDate";
 import { generateReimbursementPDF } from "@/lib/generateReimbursementPDF";
 import { useConvex, useMutation, useQuery } from "convex/react";
-import { Check, Download, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, Download, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -41,7 +41,6 @@ export default function ReimbursementPage() {
   const isAdmin = useIsAdmin();
   const router = useRouter();
   const convex = useConvex();
-  const currentUser = useQuery(api.users.queries.getCurrentUserProfile);
   const reimbursements = useQuery(api.reimbursements.queries.getAllReimbursements);
   const markAsPaid = useMutation(api.reimbursements.functions.markAsPaid);
   const rejectReimbursement = useMutation(api.reimbursements.functions.rejectReimbursement);
@@ -91,8 +90,6 @@ export default function ReimbursementPage() {
     URL.revokeObjectURL(url);
   };
 
-  const canEdit = (createdBy: Id<"users">) => isAdmin || createdBy === currentUser?._id;
-
   return (
     <div className="flex flex-col w-full h-screen">
       <PageHeader title="Erstattungen" />
@@ -130,112 +127,105 @@ export default function ReimbursementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reimbursements.map((r) => (
+              {reimbursements.map((reimbursement) => (
                 <TableRow
-                  key={r._id}
+                  key={reimbursement._id}
                   className="cursor-pointer px-2"
-                  onClick={() => router.push(`/reimbursement/${r._id}`)}
+                  onClick={() => router.push(`/reimbursement/${reimbursement._id}`)}
                 >
                   <TableCell className="px-1">
                     <div className="flex items-center justify-center">
                       <div
-                        className={`w-2 h-2 rounded-full ${STATUS_COLORS[r.status] || "bg-yellow-500"}`}
+                        className={`w-2 h-2 rounded-full ${STATUS_COLORS[reimbursement.status] || "bg-yellow-500"}`}
                       />
                     </div>
                   </TableCell>
                   <TableCell className="pl-2">
-                    {formatDate(new Date(r._creationTime))}
+                    {formatDate(new Date(reimbursement._creationTime))}
                   </TableCell>
-                  <TableCell>{r.projectName}</TableCell>
+                  <TableCell>{reimbursement.projectName}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {r.type === "travel" ? (
+                    {reimbursement.type === "travel" ? (
                       <div>
                         <span>Reisekostenerstattung</span>
-                        {r.travelDetails?.destination && (
-                          <span className="block text-xs">{r.travelDetails.destination}</span>
+                        {reimbursement.travelDetails?.destination && (
+                          <span className="block text-xs">
+                            {reimbursement.travelDetails.destination}
+                          </span>
                         )}
                       </div>
                     ) : (
                       "Auslagenerstattung"
                     )}
-                    {r.adminNote && r.status === "rejected" && (
+                    {reimbursement.adminNote && reimbursement.status === "rejected" && (
                       <span className="block text-xs text-red-600">
-                        Ablehnung: {r.adminNote}
+                        Ablehnung: {reimbursement.adminNote}
                       </span>
                     )}
                   </TableCell>
-                  {isAdmin && <TableCell>{r.creatorName}</TableCell>}
+                  {isAdmin && <TableCell>{reimbursement.creatorName}</TableCell>}
                   <TableCell className="text-right font-medium">
-                    {r.amount.toFixed(2)} €
+                    {reimbursement.amount.toFixed(2)} €
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_BADGES[r.status]?.variant || "outline"}>
-                      {STATUS_BADGES[r.status]?.label || "Entwurf"}
+                    <Badge variant={STATUS_BADGES[reimbursement.status]?.variant || "outline"}>
+                      {STATUS_BADGES[reimbursement.status]?.label || "Entwurf"}
                     </Badge>
                   </TableCell>
-                  {canEdit(r.createdBy) ? (
-                    <TableCell onClick={(e) => e.stopPropagation()} className="w-fit">
-                      <div className="flex items-center justify-end gap-0.5">
-                        {isAdmin && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
-                              onClick={() => markAsPaid({ reimbursementId: r._id })}
-                              disabled={r.status === "paid"}
-                              title="Als bezahlt markieren"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() =>
-                                setRejectDialog({ open: true, reimbursementId: r._id, note: "" })
-                              }
-                              disabled={r.status === "rejected"}
-                              title="Ablehnen"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => handleDownloadPDF(r._id)}
-                          title="PDF herunterladen"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => router.push(`/reimbursement/${r._id}`)}
-                          title="Bearbeiten"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        {isAdmin && (
+                  <TableCell onClick={(e) => e.stopPropagation()} className="w-fit">
+                    <div className="flex items-center justify-end gap-0.5">
+                      {isAdmin && (
+                        <>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7"
-                            onClick={() => deleteReimbursement({ reimbursementId: r._id })}
-                            title="Löschen"
+                            className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
+                            onClick={() => markAsPaid({ reimbursementId: reimbursement._id })}
+                            disabled={reimbursement.status === "paid"}
+                            title="Als bezahlt markieren"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Check className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  ) : (
-                    <TableCell />
-                  )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() =>
+                              setRejectDialog({
+                                open: true,
+                                reimbursementId: reimbursement._id,
+                                note: "",
+                              })
+                            }
+                            disabled={reimbursement.status === "rejected"}
+                            title="Ablehnen"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleDownloadPDF(reimbursement._id)}
+                        title="PDF herunterladen"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => deleteReimbursement({ reimbursementId: reimbursement._id })}
+                          title="Löschen"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
