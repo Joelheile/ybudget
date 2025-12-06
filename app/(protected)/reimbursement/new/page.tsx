@@ -156,7 +156,7 @@ export default function ReimbursementFormPage() {
 
   return (
     <div>
-      <PageHeader title="Neue Erstattung" />
+      <PageHeader title="Neue Erstattung" showBackButton />
       {reimbursementType === "travel" && (
         <TravelReimbursementFormUI
           selectedProjectId={selectedProjectId}
