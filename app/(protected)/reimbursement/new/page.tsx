@@ -29,16 +29,16 @@ const emptyReceipt = {
 export default function ReimbursementFormPage() {
   const router = useRouter();
   const bankDetailsQuery = useQuery(
-    api.reimbursements.queries.getUserBankDetails,
+    api.reimbursements.queries.getUserBankDetails
   );
   const createReimbursement = useMutation(
-    api.reimbursements.functions.createReimbursement,
+    api.reimbursements.functions.createReimbursement
   );
   const createTravelReimbursement = useMutation(
-    api.reimbursements.functions.createTravelReimbursement,
+    api.reimbursements.functions.createTravelReimbursement
   );
   const updateUserBankDetails = useMutation(
-    api.users.functions.updateBankDetails,
+    api.users.functions.updateBankDetails
   );
 
   const [reimbursementType, setReimbursementType] = useState<
@@ -54,7 +54,7 @@ export default function ReimbursementFormPage() {
   const [bankDetailsLoaded, setBankDetailsLoaded] = useState(false);
   const [editingBank, setEditingBank] = useState(false);
   const [receipts, setReceipts] = useState<
-    Omit<Doc<"receipts">, "_id" | "_creationTime">[]
+    Omit<Doc<"receipts">, "_id" | "_creationTime" | "reimbursementId">[]
   >([]);
   const [currentReceipt, setCurrentReceipt] = useState(emptyReceipt);
   const [travelInfo, setTravelInfo] = useState<TravelInfo>({
@@ -76,7 +76,7 @@ export default function ReimbursementFormPage() {
   const calculatedNet = currentReceipt.grossAmount
     ? calculateNet(
         parseFloat(currentReceipt.grossAmount),
-        parseFloat(currentReceipt.taxRate),
+        parseFloat(currentReceipt.taxRate)
       )
     : 0;
 
@@ -97,7 +97,6 @@ export default function ReimbursementFormPage() {
     setReceipts([
       ...receipts,
       {
-        reimbursementId: "" as Id<"reimbursements">,
         receiptNumber: currentReceipt.receiptNumber,
         receiptDate: currentReceipt.receiptDate,
         companyName: currentReceipt.companyName,
@@ -139,7 +138,10 @@ export default function ReimbursementFormPage() {
         receipts,
       });
     } else {
-      const totalAmount = travelReceipts.reduce((sum, r) => sum + r.grossAmount, 0);
+      const totalAmount = travelReceipts.reduce(
+        (sum, r) => sum + r.grossAmount,
+        0
+      );
       await createTravelReimbursement({
         projectId: selectedProjectId,
         amount: totalAmount,

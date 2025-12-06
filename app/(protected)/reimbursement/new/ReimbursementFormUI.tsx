@@ -82,26 +82,24 @@ export function ReimbursementFormUI({
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold">Neue Erstattung</h1>
-        <div className="flex items-center gap-3">
-          <Tabs
-            value={reimbursementType}
+        <Tabs
+          value={reimbursementType}
+          onValueChange={(v) =>
+            setReimbursementType(v as "expense" | "travel")
+          }
+        >
+          <TabsList>
+            <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
+            <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <div className="w-[200px]">
+          <SelectProject
+            value={selectedProjectId || ""}
             onValueChange={(v) =>
-              setReimbursementType(v as "expense" | "travel")
+              setSelectedProjectId(v ? (v as Id<"projects">) : null)
             }
-          >
-            <TabsList>
-              <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
-              <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <div className="w-[200px]">
-            <SelectProject
-              value={selectedProjectId || ""}
-              onValueChange={(v) =>
-                setSelectedProjectId(v ? (v as Id<"projects">) : null)
-              }
-            />
-          </div>
+          />
         </div>
       </div>
 

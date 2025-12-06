@@ -26,8 +26,6 @@ import {
   Plus,
   Trash2,
   X,
-  Car,
-  Receipt,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -46,14 +44,14 @@ export default function ReimbursementPage() {
   const convex = useConvex();
   const currentUser = useQuery(api.users.queries.getCurrentUserProfile);
   const reimbursements = useQuery(
-    api.reimbursements.queries.getAllReimbursements,
+    api.reimbursements.queries.getAllReimbursements
   );
   const markAsPaid = useMutation(api.reimbursements.functions.markAsPaid);
   const rejectReimbursement = useMutation(
-    api.reimbursements.functions.rejectReimbursement,
+    api.reimbursements.functions.rejectReimbursement
   );
   const deleteReimbursement = useMutation(
-    api.reimbursements.functions.deleteReimbursement,
+    api.reimbursements.functions.deleteReimbursement
   );
 
   const [rejectDialog, setRejectDialog] = useState<{
@@ -91,13 +89,13 @@ export default function ReimbursementPage() {
     try {
       const reimbursement = await convex.query(
         api.reimbursements.queries.getReimbursement,
-        { reimbursementId },
+        { reimbursementId }
       );
       if (!reimbursement) return;
 
       const receipts = await convex.query(
         api.reimbursements.queries.getReceipts,
-        { reimbursementId },
+        { reimbursementId }
       );
 
       const receiptsWithUrls = await Promise.all(
@@ -106,12 +104,12 @@ export default function ReimbursementPage() {
           fileUrl: await convex.query(api.reimbursements.queries.getFileUrl, {
             storageId: receipt.fileStorageId,
           }),
-        })),
+        }))
       );
 
       const pdfBlob = await generateReimbursementPDF(
         reimbursement,
-        receiptsWithUrls,
+        receiptsWithUrls
       );
 
       const url = URL.createObjectURL(pdfBlob);
@@ -187,11 +185,6 @@ export default function ReimbursementPage() {
                 >
                   <TableCell className="px-1">
                     <div className="flex items-center justify-center gap-1">
-                      {reimbursement.type === "travel" ? (
-                        <Car className="h-4 w-4 text-blue-600" />
-                      ) : (
-                        <Receipt className="h-4 w-4 text-gray-600" />
-                      )}
                       <StatusDot status={reimbursement.status} />
                     </div>
                   </TableCell>
