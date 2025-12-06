@@ -64,43 +64,47 @@ export const ImportTransactionsUI = ({
       <div className="flex mt-8 justify-center" id="tour-import-progress">
         <Progress className="w-3/4" value={((index + 1) / totalCount) * 100} />
       </div>
-      <div className="flex mt-24 h-full justify-between">
-        <div id="tour-expected-matches">
-          <ExpectedTransactionMatchesUI
-            expectedTransactions={expectedTransactions}
-            selectedMatch={selectedMatch}
-            containerRef={containerRef}
-            onSelect={handleExpectedTransactionSelect}
-          />
-        </div>
-        <div id="tour-import-card">
-          {current && (
-            <ImportTransactionCardUI
-              title={current.counterparty || ""}
-              description={current.description}
-              amount={current.amount}
-              date={new Date(current.date)}
-              currentIndex={index + 1}
-              totalCount={totalCount}
-              projectId={projectId}
-              categoryId={categoryId}
-              donorId={donorId}
-              isExpense={current.amount < 0}
-              isIncome={current.amount > 0}
-              splitIncome={splitIncome}
-              onProjectChange={setProjectId}
-              onCategoryChange={setCategoryId}
-              onDonorChange={setDonorId}
-              onSplitIncomeChange={onSplitIncomeChange}
+      <div className={`flex flex-col mt-12 gap-8 ${expectedTransactions.length > 0 ? "lg:flex-row" : "items-center"}`}>
+        {expectedTransactions.length > 0 && (
+          <div id="tour-expected-matches" className="lg:w-72 shrink-0 order-2 lg:order-1">
+            <ExpectedTransactionMatchesUI
+              expectedTransactions={expectedTransactions}
+              selectedMatch={selectedMatch}
+              containerRef={containerRef}
+              onSelect={handleExpectedTransactionSelect}
             />
-          )}
-        </div>
-        <div className="flex p-6 rounded-lg w-1/4">
+          </div>
+        )}
+        <div className={`flex flex-col items-center gap-8 order-1 lg:order-2 ${expectedTransactions.length > 0 ? "flex-1" : "w-full max-w-xl"}`}>
+          <div id="tour-import-card" className="w-full max-w-xl">
+            {current && (
+              <ImportTransactionCardUI
+                title={current.counterparty || ""}
+                description={current.description}
+                amount={current.amount}
+                date={new Date(current.date)}
+                currentIndex={index + 1}
+                totalCount={totalCount}
+                projectId={projectId}
+                categoryId={categoryId}
+                donorId={donorId}
+                isExpense={current.amount < 0}
+                isIncome={current.amount > 0}
+                splitIncome={splitIncome}
+                onProjectChange={setProjectId}
+                onCategoryChange={setCategoryId}
+                onDonorChange={setDonorId}
+                onSplitIncomeChange={onSplitIncomeChange}
+              />
+            )}
+          </div>
           {splitIncome && current && current.amount > 0 && (
-            <BudgetSplit
-              totalAmount={current.amount}
-              onAllocationsChange={onBudgetAllocationsChange}
-            />
+            <div className="w-full max-w-xl">
+              <BudgetSplit
+                totalAmount={current.amount}
+                onAllocationsChange={onBudgetAllocationsChange}
+              />
+            </div>
           )}
         </div>
       </div>
