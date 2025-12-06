@@ -89,9 +89,17 @@ export function ReceiptUpload({ onUploadComplete, storageId }: Props) {
     );
   }
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
   return (
     <div
       onClick={() => inputRef.current?.click()}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDrop}
       className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition cursor-pointer"
     >
       {isUploading ? (
