@@ -30,8 +30,8 @@ export function RejectReimbursementDialog({
         <DialogHeader>
           <DialogTitle>Erstattung ablehnen</DialogTitle>
           <DialogDescription>
-            Bitte geben Sie einen Grund für die Ablehnung ein. Diese Nachricht
-            wird dem Nutzer angezeigt.
+            Gib bitte einen Grund für die Ablehnung ein. Diese Nachricht wird
+            dem Nutzer angezeigt
           </DialogDescription>
         </DialogHeader>
         <Textarea
