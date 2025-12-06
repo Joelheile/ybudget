@@ -27,7 +27,7 @@ export function RangeCalendarToggle() {
         Datumsbereich wählen
       </Button>
       {open && (
-        <div className="absolute left-0 mt-2 z-10">
+        <div className="absolute right-0 mt-2 z-10">
           <RangeCalendar
             selectedDateRange={selectedDateRange}
             onDateRangeChange={setSelectedDateRange}
