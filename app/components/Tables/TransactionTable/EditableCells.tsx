@@ -36,7 +36,7 @@ export function EditableAmountCell({ value, onSave }: EditableCellProps) {
       type="number"
       value={editValue}
       onChange={handleChange}
-      className="h-8 w-24 text-right"
+      className="h-8 w-24 text-right [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       autoFocus
       step="0.01"
     />
@@ -103,17 +103,9 @@ export function EditableSelectCell({ value, onSave, options }: EditableSelectCel
 }
 
 export function EditableProjectCell({ value, onSave }: EditableCellProps) {
-  return (
-    <div className="w-48">
-      <SelectProject value={value} onValueChange={onSave} />
-    </div>
-  );
+  return <SelectProject value={value} onValueChange={onSave} />;
 }
 
 export function EditableCategoryCell({ value, onSave }: EditableCellProps) {
-  return (
-    <div className="w-64">
-      <SelectCategory value={value} onValueChange={onSave} />
-    </div>
-  );
+  return <SelectCategory value={value} onValueChange={onSave} />;
 }

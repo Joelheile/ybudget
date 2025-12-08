@@ -2,21 +2,14 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { formatDate } from "@/lib/formatDate";
-import { ArrowUpDown, MoreHorizontal, X } from "lucide-react";
+import { ArrowUpDown, Pencil, Trash2, X } from "lucide-react";
 import {
   EditableAmountCell,
   EditableCategoryCell,
   EditableDateCell,
   EditableProjectCell,
-  EditableSelectCell,
   EditableTextareaCell,
 } from "./EditableCells";
 
@@ -36,52 +29,44 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
 
   if (isEditing) {
     return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => table.options.meta?.onStopEditing(rowId)}
-        className="h-8 w-8 p-0"
-      >
-        <X className="h-4 w-4" />
-      </Button>
+      <div className="flex justify-end gap-1">
+        {isPlanned && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => table.options.meta?.onDelete(rowId)}
+            className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => table.options.meta?.onStopEditing(rowId)}
+          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     );
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => table.options.meta?.setEditingRows(
-            (prev: Set<string>) => new Set(prev).add(rowId)
-          )}
-        >
-          Bearbeiten
-        </DropdownMenuItem>
-        {isPlanned && (
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              table.options.meta?.onDelete(rowId);
-            }}
-            onSelect={(e) => e.preventDefault()}
-          >
-            Löschen
-          </DropdownMenuItem>
+    <div className="flex justify-end">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => table.options.meta?.setEditingRows(
+          (prev: Set<string>) => new Set(prev).add(rowId)
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    </div>
   );
 }
-
-const STATUS_OPTIONS = [
-  { value: "expected", label: "Geplant" },
-  { value: "processed", label: "Abgerechnet" },
-];
 
 const baseColumns = [
   {
@@ -209,22 +194,8 @@ const baseColumns = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row, table }: any) => {
-      const rowId = row.original._id;
-      const isPlanned = row.original.status === "expected";
-      const isEditing = table.options.meta?.editingRows?.has(rowId);
+    cell: ({ row }: any) => {
       const status = row.getValue("status");
-
-      if (isPlanned && isEditing) {
-        return (
-          <EditableSelectCell
-            value={status}
-            onSave={(value) => table.options.meta?.onUpdate(rowId, "status", value)}
-            options={STATUS_OPTIONS}
-          />
-        );
-      }
-
       return (
         <Badge variant={status === "processed" ? "default" : "secondary"}>
           {status === "processed" ? "Abgerechnet" : "Geplant"}

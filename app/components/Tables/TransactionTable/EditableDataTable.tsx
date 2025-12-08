@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -40,10 +50,15 @@ export function EditableDataTable<T extends { _id: string }>({
   const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
   const [isUpdating, setIsUpdating] = useState(false);
+  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLTableRowElement>(null);
 
   const hasNextPage = paginationStatus === "CanLoadMore";
   const isLoading = paginationStatus === "LoadingMore" || paginationStatus === "LoadingFirstPage";
+
+  const startEditing = (rowId: string) => {
+    setEditingRows((prev) => new Set(prev).add(rowId));
+  };
 
   const stopEditing = (rowId: string) => {
     setEditingRows((prev) => {
@@ -65,17 +80,18 @@ export function EditableDataTable<T extends { _id: string }>({
     }
   };
 
-  const handleDelete = async (rowId: string) => {
-    if (!onDelete) return;
+  const handleDelete = async () => {
+    if (!onDelete || !deleteRowId) return;
     setIsUpdating(true);
     try {
-      await onDelete(rowId);
-      stopEditing(rowId);
-      toast.success("Transaktion erfolgreich gelöscht");
+      await onDelete(deleteRowId);
+      stopEditing(deleteRowId);
+      toast.success("Transaktion gelöscht");
     } catch {
-      toast.error("Fehler beim Löschen der Transaktion");
+      toast.error("Fehler beim Löschen");
     } finally {
       setIsUpdating(false);
+      setDeleteRowId(null);
     }
   };
 
@@ -91,7 +107,7 @@ export function EditableDataTable<T extends { _id: string }>({
       setEditingRows,
       onUpdate: handleUpdate,
       onStopEditing: stopEditing,
-      onDelete: handleDelete,
+      onDelete: setDeleteRowId,
       isUpdating,
     },
   });
@@ -110,30 +126,51 @@ export function EditableDataTable<T extends { _id: string }>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div className="rounded-md border overflow-x-auto w-full">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          <TableContent
-            rows={rows}
-            columns={columns}
-            isLoading={isLoading}
-            hasNextPage={hasNextPage}
-            scrollRef={scrollRef}
-          />
-        </TableBody>
-      </Table>
-    </div>
+    <>
+      <div className="rounded-md border overflow-x-auto w-full">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            <TableContent
+              rows={rows}
+              columns={columns}
+              isLoading={isLoading}
+              hasNextPage={hasNextPage}
+              scrollRef={scrollRef}
+              editingRows={editingRows}
+              onStartEditing={startEditing}
+            />
+          </TableBody>
+        </Table>
+      </div>
+
+      <AlertDialog open={!!deleteRowId} onOpenChange={(open) => !open && setDeleteRowId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Transaktion löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -143,25 +180,38 @@ function TableContent({
   isLoading,
   hasNextPage,
   scrollRef,
+  editingRows,
+  onStartEditing,
 }: {
   rows: any[];
   columns: any[];
   isLoading: boolean;
   hasNextPage: boolean;
   scrollRef: React.RefObject<HTMLTableRowElement | null>;
+  editingRows: Set<string>;
+  onStartEditing: (rowId: string) => void;
 }) {
   if (rows.length > 0) {
     return (
       <>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            {row.getVisibleCells().map((cell: any) => (
-              <TableCell key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
+        {rows.map((row) => {
+          const rowId = row.original._id;
+          const isEditing = editingRows.has(rowId);
+
+          return (
+            <TableRow
+              key={row.id}
+              onDoubleClick={() => !isEditing && onStartEditing(rowId)}
+              className={isEditing ? "" : "cursor-pointer"}
+            >
+              {row.getVisibleCells().map((cell: any) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          );
+        })}
         {hasNextPage && (
           <TableRow ref={scrollRef}>
             <TableCell colSpan={columns.length} className="h-16 text-center">
