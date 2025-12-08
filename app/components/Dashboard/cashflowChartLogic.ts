@@ -71,15 +71,10 @@ export function calculateStartBalance(
 }
 
 function getTickInterval(maxValue: number): number {
-  if (maxValue <= 100) return 50;
-  if (maxValue <= 500) return 100;
-  if (maxValue <= 1000) return 200;
-  if (maxValue <= 5000) return 1000;
-  if (maxValue <= 10000) return 2000;
-  if (maxValue <= 50000) return 5000;
-  if (maxValue <= 100000) return 10000;
-  if (maxValue <= 500000) return 50000;
-  return 100000;
+  const thresholds = [100, 500, 1000, 5000, 10000, 50000, 100000, 500000];
+  const intervals = [50, 100, 200, 1000, 2000, 5000, 10000, 50000, 100000];
+  const index = thresholds.findIndex((t) => maxValue <= t);
+  return intervals[index === -1 ? intervals.length - 1 : index];
 }
 
 export function calculateAxisConfig(

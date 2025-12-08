@@ -44,27 +44,42 @@ import {
 } from "recharts";
 
 const chartConfig = {
-  actualIncome: {
-    label: "Einnahmen",
-    color: "#10b981",
-  },
-  expectedIncome: {
-    label: "Geplante Einnahmen",
-    color: "#86efac",
-  },
-  actualExpenses: {
-    label: "Ausgaben",
-    color: "#ef4444",
-  },
-  expectedExpenses: {
-    label: "Geplante Ausgaben",
-    color: "#fb923c",
-  },
-  balance: {
-    label: "voraussichtlicher Kontostand",
-    color: "#4b5563",
-  },
+  actualIncome: { label: "Einnahmen", color: "#10b981" },
+  expectedIncome: { label: "Geplante Einnahmen", color: "#86efac" },
+  actualExpenses: { label: "Ausgaben", color: "#ef4444" },
+  expectedExpenses: { label: "Geplante Ausgaben", color: "#fb923c" },
+  balance: { label: "voraussichtlicher Kontostand", color: "#4b5563" },
 } satisfies ChartConfig;
+
+function formatTooltipLabel(value: string, payload: any[]) {
+  if (!payload?.[0]?.payload?.timestamp) return value;
+  const date = new Date(payload[0].payload.timestamp);
+  return `${format(date, "EEEE", { locale: de })}, ${format(date, "d. MMMM", { locale: de })}`;
+}
+
+function TooltipItem({ value, name }: { value: number; name: string }) {
+  if (value === 0) return null;
+  const config = chartConfig[name as keyof typeof chartConfig];
+  const formatted = new Intl.NumberFormat("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+
+  return (
+    <div className="flex w-full items-center gap-3">
+      <div
+        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+        style={{ backgroundColor: config?.color || "hsl(0 0% 50%)" }}
+      />
+      <div className="flex flex-1 items-center justify-between gap-4">
+        <span className="text-muted-foreground">{config?.label || name}</span>
+        <span className="text-foreground font-mono font-medium tabular-nums">
+          {formatted} €
+        </span>
+      </div>
+    </div>
+  );
+}
 
 interface CashflowChartUIProps {
   transactions?: Doc<"transactions">[];
@@ -198,50 +213,11 @@ export function CashflowChartUI({
                 content={
                   <ChartTooltipContent
                     className="!gap-2.5 px-3 py-2.5 [&>div]:!gap-2.5"
-                    labelFormatter={(value, payload) => {
-                      if (!payload || payload.length === 0) return value;
-                      const dataPoint = payload[0]
-                        ?.payload as CashflowDataPoint;
-                      if (!dataPoint?.timestamp) return value;
-                      const date = new Date(dataPoint.timestamp);
-                      const weekday = format(date, "EEEE", { locale: de });
-                      const dayMonth = format(date, "d. MMMM", { locale: de });
-                      return `${weekday}, ${dayMonth}`;
-                    }}
+                    labelFormatter={formatTooltipLabel}
                     labelClassName="font-bold"
-                    formatter={(value, name, props) => {
-                      const numValue = value as number;
-                      if (numValue === 0) return null;
-
-                      const formattedNumber = new Intl.NumberFormat("de-DE", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      }).format(numValue);
-                      const formattedValue = `${formattedNumber} €`;
-
-                      const itemConfig =
-                        chartConfig[name as keyof typeof chartConfig];
-
-                      return (
-                        <div className="flex w-full items-center gap-3">
-                          <div
-                            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                            style={{
-                              backgroundColor:
-                                itemConfig?.color || "hsl(0 0% 50%)",
-                            }}
-                          />
-                          <div className="flex flex-1 items-center justify-between gap-4">
-                            <span className="text-muted-foreground">
-                              {itemConfig?.label || name}
-                            </span>
-                            <span className="text-foreground font-mono font-medium tabular-nums">
-                              {formattedValue}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }}
+                    formatter={(value, name) => (
+                      <TooltipItem value={value as number} name={name as string} />
+                    )}
                     filterNull={true}
                   />
                 }
