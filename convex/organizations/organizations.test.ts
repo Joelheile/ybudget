@@ -13,9 +13,9 @@ test("get organization name", async () => {
 
 test("get user organization", async () => {
   const test = convexTest(schema, modules);
-  const { orgId, userId } = await setupTestData(test);
+  const { organizationId, userId } = await setupTestData(test);
   const org = await test.withIdentity({ subject: userId }).query(api.organizations.queries.getUserOrganization, {});
-  expect(org?._id).toBe(orgId);
+  expect(org?._id).toBe(organizationId);
   expect(org?.domain).toBe("test.com");
 });
 

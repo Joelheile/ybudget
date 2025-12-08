@@ -3,8 +3,9 @@ import type { convexTest } from "convex-test";
 export const modules = import.meta.glob("./**/*.ts");
 
 export async function setupTestData(test: ReturnType<typeof convexTest>) {
+  // convex insert returns the id of the inserted document
   return await test.run(async (ctx) => {
-    const orgId = await ctx.db.insert("organizations", {
+    const organizationId = await ctx.db.insert("organizations", {
       name: "Test Organization",
       domain: "test.com",
       createdBy: "system",
@@ -12,13 +13,13 @@ export async function setupTestData(test: ReturnType<typeof convexTest>) {
     
     const userId = await ctx.db.insert("users", {
       email: "test@test.com",
-      organizationId: orgId,
+      organizationId,
       role: "admin",
     });
     
     const projectId = await ctx.db.insert("projects", {
       name: "Test Project",
-      organizationId: orgId,
+      organizationId,
       isArchived: false,
       createdBy: userId,
     });
@@ -29,7 +30,7 @@ export async function setupTestData(test: ReturnType<typeof convexTest>) {
       approved: true,
     });
     
-    return { orgId, userId, projectId, categoryId };
+    return { organizationId, userId, projectId, categoryId };
   });
 }
 
