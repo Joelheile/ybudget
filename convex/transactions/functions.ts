@@ -1,32 +1,26 @@
 import { v } from "convex/values";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
 import { type MutationCtx, mutation } from "../_generated/server";
 import { addLog } from "../logs/functions";
 import { canAccessProject } from "../teams/permissions";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
 
-async function ensureReservesDepartment(
-  ctx: MutationCtx,
-  organizationId: Id<"organizations">,
-) {
+async function getOrCreateReserves(ctx: MutationCtx, organizationId: Id<"organizations">) {
   const existing = await ctx.db
     .query("projects")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
-    .filter((q) =>
-      q.and(
-        q.eq(q.field("name"), "Reserves"),
-        q.eq(q.field("parentId"), undefined),
-      ),
-    )
+    .filter((q) => q.and(
+      q.eq(q.field("name"), "Reserves"),
+      q.eq(q.field("parentId"), undefined),
+    ))
     .first();
 
   if (existing) return existing._id;
 
   const user = await getCurrentUser(ctx);
-  return await ctx.db.insert("projects", {
+  return ctx.db.insert("projects", {
     name: "Reserves",
-    parentId: undefined,
     organizationId,
     isArchived: false,
     createdBy: user._id,
@@ -164,97 +158,48 @@ export const updateTransaction = mutation({
 export const splitTransaction = mutation({
   args: {
     transactionId: v.id("transactions"),
-    splits: v.array(
-      v.object({
-        projectId: v.id("projects"),
-        amount: v.number(),
-      }),
-    ),
+    splits: v.array(v.object({
+      projectId: v.id("projects"),
+      amount: v.number(),
+    })),
   },
   handler: async (ctx, args) => {
     await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
-
     const original = await ctx.db.get(args.transactionId);
-    if (
-      !original ||
-      original.organizationId !== user.organizationId ||
-      original.status !== "processed" ||
-      original.isArchived
-    ) {
+
+    if (!original || original.organizationId !== user.organizationId) {
       throw new Error("Access denied");
     }
 
-    const total = args.splits.reduce((sum, split) => sum + split.amount, 0);
-    if (
-      args.splits.length === 0 ||
-      args.splits.some((s) => s.amount <= 0) ||
-      total > original.amount
-    ) {
-      throw new Error("Invalid split amounts");
-    }
-
-    for (const split of args.splits) {
-      if (!(await canAccessProject(ctx, user._id, split.projectId))) {
-        throw new Error("Access denied");
-      }
-    }
-
-    const remainder = original.amount - total;
-    const reservesId = await ensureReservesDepartment(
-      ctx,
-      original.organizationId,
-    );
-
     await ctx.db.patch(args.transactionId, { isArchived: true });
 
-    const baseTransaction = {
-      organizationId: original.organizationId,
-      date: original.date,
-      counterparty: original.counterparty,
-      status: "processed" as const,
-      importedBy: original.importedBy,
-      categoryId: original.categoryId,
-      donorId: original.donorId,
-      accountName: original.accountName,
-      importedTransactionId: original.importedTransactionId,
-      importSource: original.importSource,
-      splitFromTransactionId: args.transactionId,
-      isArchived: false,
-    };
+    const total = args.splits.reduce((sum, s) => sum + s.amount, 0);
+    const remainder = original.amount - total;
 
-    const createdIds: Id<"transactions">[] = [];
+    const allSplits = remainder > 0
+      ? [...args.splits, { projectId: await getOrCreateReserves(ctx, original.organizationId), amount: remainder }]
+      : args.splits;
 
-    for (const split of args.splits) {
-      const newId = await ctx.db.insert("transactions", {
-        ...baseTransaction,
-        description: `${original.description} (Split)`,
-        amount: split.amount,
+    for (const split of allSplits) {
+      await ctx.db.insert("transactions", {
+        organizationId: original.organizationId,
+        date: original.date,
+        counterparty: original.counterparty,
+        status: "processed",
+        importedBy: original.importedBy,
+        categoryId: original.categoryId,
+        donorId: original.donorId,
+        accountName: original.accountName,
+        importedTransactionId: original.importedTransactionId,
+        importSource: original.importSource,
+        splitFromTransactionId: args.transactionId,
+        isArchived: false,
         projectId: split.projectId,
+        amount: split.amount,
+        description: `${original.description} (Split)`,
       });
-      createdIds.push(newId);
     }
-
-    if (remainder > 0) {
-      const reservesTransactionId = await ctx.db.insert("transactions", {
-        ...baseTransaction,
-        description: `${original.description} (Rest → Rücklagen)`,
-        amount: remainder,
-        projectId: reservesId,
-      });
-      createdIds.push(reservesTransactionId);
-    }
-
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "transaction.split",
-      args.transactionId,
-      `${original.description} → ${args.splits.length} parts`,
-    );
-
-    return createdIds;
   },
 });
 

@@ -17,7 +17,7 @@ export default function BudgetSplit({
   onBudgetsChange,
 }: BudgetSplitProps) {
   const [budgetInputs, setBudgetInputs] = useState<Record<string, string>>({});
-  const departments = useQuery(api.budgets.queries.getDepartmentProjects);
+  const departments = useQuery(api.projects.queries.getDepartmentProjects);
 
   const total = Object.values(budgetInputs).reduce(
     (sum, value) => sum + (parseFloat(value) || 0),

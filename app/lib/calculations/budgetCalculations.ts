@@ -1,9 +1,6 @@
 import type { Doc } from "@/convex/_generated/dataModel";
 
-export const calculateBudget = (
-  transactions: Doc<"transactions">[],
-  budgets: Doc<"budgets">[] = [],
-) => {
+export const calculateBudget = (transactions: Doc<"transactions">[]) => {
   let currentBalance = 0;
   let expectedIncome = 0;
   let expectedExpenses = 0;
@@ -19,12 +16,6 @@ export const calculateBudget = (
     }
   }
 
-  const totalBudgeted = budgets.reduce(
-    (sum, budget) => sum + budget.amount,
-    0,
-  );
-  currentBalance += totalBudgeted;
-
   const availableBudget =
     currentBalance + expectedIncome + expectedExpenses > 0
       ? currentBalance + expectedIncome + expectedExpenses
@@ -35,7 +26,6 @@ export const calculateBudget = (
     expectedIncome,
     expectedExpenses: Math.abs(expectedExpenses),
     availableBudget,
-    totalBudgeted,
   };
 };
 

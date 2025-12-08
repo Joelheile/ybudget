@@ -25,7 +25,6 @@ export async function setupTestData(test: ReturnType<typeof convexTest>) {
     
     const categoryId = await ctx.db.insert("categories", {
       name: "Test Category",
-      description: "Test",
       taxsphere: "non-profit",
       approved: true,
     });
