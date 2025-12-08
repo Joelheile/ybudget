@@ -2,8 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/formatCurrency";
-import { formatDate } from "@/lib/formatDate";
+import { formatCurrency } from "@/lib/formatters/formatCurrency";
+import { formatDate } from "@/lib/formatters/formatDate";
 import { ArrowUpDown, Pencil, Trash2, X } from "lucide-react";
 import {
   EditableAmountCell,
