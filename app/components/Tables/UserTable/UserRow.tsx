@@ -8,12 +8,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { UserRole } from "@/convex/users/permissions";
 import { getInitials } from "@/lib/getInitials";
+import { useMutation, useQuery } from "convex/react";
 import { Shield } from "lucide-react";
+import { toast } from "react-hot-toast";
 
-interface UserRowUIProps {
+interface UserRowProps {
   user: {
     _id: Id<"users">;
     name?: string;
@@ -23,32 +26,39 @@ interface UserRowUIProps {
   };
   onRoleChange: (userId: Id<"users">, role: UserRole) => void;
   isAdmin: boolean;
-  allTeams: Array<{ _id: Id<"teams">; name: string }>;
-  assignedTeamIds: Set<Id<"teams">>;
-  handleToggleTeam: (teamId: Id<"teams">) => void;
 }
 
-export default function UserRowUI({
-  user,
-  onRoleChange,
-  isAdmin,
-  allTeams,
-  assignedTeamIds,
-  handleToggleTeam,
-}: UserRowUIProps) {
+export default function UserRow({ user, onRoleChange, isAdmin }: UserRowProps) {
+  const allTeams = useQuery(api.teams.queries.getAllTeams);
+  const userTeams = useQuery(api.teams.queries.getUserTeams, { userId: user._id });
+  const addTeamMember = useMutation(api.teams.functions.addTeamMember);
+  const removeTeamMember = useMutation(api.teams.functions.removeTeamMember);
+
+  const assignedTeamIds = new Set(userTeams?.map((t) => t.teamId));
+
+  const handleToggleTeam = async (teamId: Id<"teams">) => {
+    try {
+      if (assignedTeamIds.has(teamId)) {
+        await removeTeamMember({ teamId, userId: user._id });
+        toast.success("Aus Team entfernt");
+      } else {
+        await addTeamMember({ teamId, userId: user._id });
+        toast.success("Zum Team hinzugefügt");
+      }
+    } catch {
+      toast.error("Fehler beim Ändern der Team-Zugehörigkeit");
+    }
+  };
+
   return (
     <TableRow>
       <TableCell className="pl-6">
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage src={user.image} />
-            <AvatarFallback>
-              {getInitials(user.name, user.email)}
-            </AvatarFallback>
+            <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
           </Avatar>
-          <span className="font-medium">
-            {user.name || "Unbekannter Benutzer"}
-          </span>
+          <span className="font-medium">{user.name || "Unbekannter Benutzer"}</span>
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground">
@@ -77,7 +87,7 @@ export default function UserRowUI({
       </TableCell>
       <TableCell className="pr-6">
         <div className="flex flex-wrap gap-2">
-          {allTeams.length > 0 ? (
+          {allTeams?.length ? (
             allTeams.map((team) => (
               <Badge
                 key={team._id}

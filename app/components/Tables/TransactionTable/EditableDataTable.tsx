@@ -25,12 +25,7 @@ interface EditableDataTableProps<T> {
   data: T[];
   onUpdate?: (rowId: string, field: string, value: any) => Promise<void>;
   onDelete?: (rowId: string) => Promise<void>;
-  paginationStatus?:
-    | "Loading"
-    | "LoadingMore"
-    | "CanLoadMore"
-    | "Exhausted"
-    | "LoadingFirstPage";
+  paginationStatus?: "Loading" | "LoadingMore" | "CanLoadMore" | "Exhausted" | "LoadingFirstPage";
   loadMore?: () => void;
 }
 
@@ -42,34 +37,15 @@ export function EditableDataTable<T extends { _id: string }>({
   paginationStatus,
   loadMore,
 }: EditableDataTableProps<T>) {
-  const hasNextPage = paginationStatus === "CanLoadMore";
-  const isLoading =
-    paginationStatus === "LoadingMore" ||
-    paginationStatus === "LoadingFirstPage";
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "date", desc: true },
-  ]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
-  const [editingCell, setEditingCell] = useState<string | null>(null);
-  const [pendingChanges, setPendingChanges] = useState<
-    Record<string, Record<string, any>>
-  >({});
   const [isUpdating, setIsUpdating] = useState(false);
   const scrollRef = useRef<HTMLTableRowElement>(null);
 
-  const updatePendingChanges = (rowId: string, field: string, value: any) => {
-    setPendingChanges((prev) => ({
-      ...prev,
-      [rowId]: { ...prev[rowId], [field]: value },
-    }));
-  };
+  const hasNextPage = paginationStatus === "CanLoadMore";
+  const isLoading = paginationStatus === "LoadingMore" || paginationStatus === "LoadingFirstPage";
 
-  const clearRowState = (rowId: string) => {
-    setPendingChanges((prev) => {
-      const updated = { ...prev };
-      delete updated[rowId];
-      return updated;
-    });
+  const stopEditing = (rowId: string) => {
     setEditingRows((prev) => {
       const updated = new Set(prev);
       updated.delete(rowId);
@@ -77,17 +53,11 @@ export function EditableDataTable<T extends { _id: string }>({
     });
   };
 
-  const saveRow = async (rowId: string) => {
-    const changes = pendingChanges[rowId];
-    if (!changes || Object.keys(changes).length === 0) return;
+  const handleUpdate = async (rowId: string, field: string, value: any) => {
     if (!onUpdate) return;
-
     setIsUpdating(true);
     try {
-      for (const [field, value] of Object.entries(changes)) {
-        await onUpdate(rowId, field, value);
-      }
-      clearRowState(rowId);
+      await onUpdate(rowId, field, value);
     } catch (error) {
       console.error("Update failed:", error);
     } finally {
@@ -95,19 +65,14 @@ export function EditableDataTable<T extends { _id: string }>({
     }
   };
 
-  const cancelRow = (rowId: string) => {
-    clearRowState(rowId);
-  };
-
-  const deleteRow = async (rowId: string) => {
+  const handleDelete = async (rowId: string) => {
     if (!onDelete) return;
-
     setIsUpdating(true);
     try {
       await onDelete(rowId);
-      clearRowState(rowId);
+      stopEditing(rowId);
       toast.success("Transaktion erfolgreich gelöscht");
-    } catch (error) {
+    } catch {
       toast.error("Fehler beim Löschen der Transaktion");
     } finally {
       setIsUpdating(false);
@@ -124,48 +89,23 @@ export function EditableDataTable<T extends { _id: string }>({
     meta: {
       editingRows,
       setEditingRows,
-      editingCell,
-      setEditingCell,
-      pendingChanges,
-      setPendingChanges,
-      onUpdate: updatePendingChanges,
-      onSaveRow: saveRow,
-      onCancelRow: cancelRow,
-      onDelete: deleteRow,
+      onUpdate: handleUpdate,
+      onStopEditing: stopEditing,
+      onDelete: handleDelete,
       isUpdating,
     },
   });
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage && !isLoading && loadMore) {
-        loadMore();
-      }
-    });
+    if (!scrollRef.current || !hasNextPage || isLoading || !loadMore) return;
 
-    if (scrollRef.current) {
-      observer.observe(scrollRef.current);
-    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) loadMore();
+    });
+    observer.observe(scrollRef.current);
 
     return () => observer.disconnect();
   }, [hasNextPage, isLoading, loadMore]);
-
-  useEffect(() => {
-    const hasUnsavedChanges = Object.keys(pendingChanges).length > 0;
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [pendingChanges]);
 
   const rows = table.getRowModel().rows;
 
@@ -177,62 +117,83 @@ export function EditableDataTable<T extends { _id: string }>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
+                  {flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
-          {rows.length > 0 ? (
-            <>
-              {rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-              {hasNextPage && (
-                <TableRow ref={scrollRef}>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-16 text-center"
-                  >
-                    {isLoading ? "Lade mehr..." : ""}
-                  </TableCell>
-                </TableRow>
-              )}
-            </>
-          ) : isLoading ? (
-            <>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <TableRow key={i}>
-                  {columns.map((_, j) => (
-                    <TableCell key={j}>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </>
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                Keine Ergebnisse
-              </TableCell>
-            </TableRow>
-          )}
+          <TableContent
+            rows={rows}
+            columns={columns}
+            isLoading={isLoading}
+            hasNextPage={hasNextPage}
+            scrollRef={scrollRef}
+          />
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+function TableContent({
+  rows,
+  columns,
+  isLoading,
+  hasNextPage,
+  scrollRef,
+}: {
+  rows: any[];
+  columns: any[];
+  isLoading: boolean;
+  hasNextPage: boolean;
+  scrollRef: React.RefObject<HTMLTableRowElement | null>;
+}) {
+  if (rows.length > 0) {
+    return (
+      <>
+        {rows.map((row) => (
+          <TableRow key={row.id}>
+            {row.getVisibleCells().map((cell: any) => (
+              <TableCell key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+        {hasNextPage && (
+          <TableRow ref={scrollRef}>
+            <TableCell colSpan={columns.length} className="h-16 text-center">
+              {isLoading ? "Lade mehr..." : ""}
+            </TableCell>
+          </TableRow>
+        )}
+      </>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <TableRow key={i}>
+            {columns.map((_, j) => (
+              <TableCell key={j}>
+                <Skeleton className="h-4 w-full" />
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <TableRow>
+      <TableCell colSpan={columns.length} className="h-24 text-center">
+        Keine Ergebnisse
+      </TableCell>
+    </TableRow>
   );
 }

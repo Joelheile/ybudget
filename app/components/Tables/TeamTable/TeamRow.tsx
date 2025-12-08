@@ -1,10 +1,12 @@
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex-helpers/react/cache";
 import { useMutation } from "convex/react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import TeamRowUI from "./TeamRowUI";
 
 export default function TeamRow({ team }: { team: Doc<"teams"> }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -41,7 +43,7 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
       toast.success("Team umbenannt");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Fehler beim Umbenennen",
+        error instanceof Error ? error.message : "Fehler beim Umbenennen"
       );
       setEditedName(team.name);
     } finally {
@@ -50,25 +52,53 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSave();
-    } else if (e.key === "Escape") {
+    if (e.key === "Enter") handleSave();
+    if (e.key === "Escape") {
       setEditedName(team.name);
       setIsEditing(false);
     }
   };
 
   return (
-    <TeamRowUI
-      team={team}
-      isEditing={isEditing}
-      editedName={editedName}
-      setEditedName={setEditedName}
-      startEditing={() => setIsEditing(true)}
-      handleSave={handleSave}
-      handleKeyDown={handleKeyDown}
-      allProjects={allProjects || []}
-      handleToggleProject={handleToggleProject}
-    />
+    <TableRow>
+      <TableCell className="pl-6" onDoubleClick={() => setIsEditing(true)}>
+        {isEditing ? (
+          <Input
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+        ) : (
+          <span className="font-medium cursor-pointer hover:text-primary transition-colors">
+            {team.name}
+          </span>
+        )}
+      </TableCell>
+      <TableCell>
+        <Badge variant="secondary">
+          {team.memberIds?.length || 0} Mitglieder
+        </Badge>
+      </TableCell>
+      <TableCell className="pr-6">
+        <div className="flex flex-wrap gap-2">
+          {allProjects?.length ? (
+            allProjects.map((project) => (
+              <Badge
+                key={project._id}
+                variant={team.projectIds?.includes(project._id) ? "default" : "outline"}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => handleToggleProject(project._id)}
+              >
+                {project.name}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">Keine Projekte</span>
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
