@@ -23,7 +23,6 @@ export default function DonorCSVExport({
     { label: "Beschreibung", key: "description" },
     { label: "Begünstigter/Zahlungspflichtiger", key: "counterparty" },
     { label: "Auftragskonto", key: "accountName" },
-    { label: "Verwendungszweck", key: "description" },
     { label: "Status", key: "status" },
   ];
 
