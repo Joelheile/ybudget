@@ -38,7 +38,10 @@ export default function TeamsPage() {
           <p className="text-muted-foreground">
             Verwalte Teams und deren Projekt-Zugriffe
           </p>
-          <Button onClick={() => setCreateTeamDialogOpen(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setCreateTeamDialogOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Neues Team
           </Button>
