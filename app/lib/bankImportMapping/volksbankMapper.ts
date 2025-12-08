@@ -1,7 +1,8 @@
 import { createImportId } from "./createImportId";
 import { TransactionData } from "./csvMappers";
+import { parseAmount } from "./parseAmount";
+
 import { parseVolksbankDate } from "./parseDate";
-import { parseGermanAmount } from "./parseGermanAmount";
 
 const SENSITIVE_DATA_PATTERN = /(?:CRED|IBAN|BIC|MREF):\s*[A-Z0-9]+/gi;
 
@@ -20,7 +21,7 @@ export function mapVolksbankCSV(row: Record<string, string>): TransactionData {
 
   return {
     date: buchungstag ? parseVolksbankDate(buchungstag) : Date.now(),
-    amount: parseGermanAmount(row["Betrag"] || "0"),
+    amount: parseAmount(row["Betrag"] || "0"),
     description: cleanedDescription,
     counterparty: row["Name Zahlungsbeteiligter"] || "",
     importedTransactionId: createImportId(

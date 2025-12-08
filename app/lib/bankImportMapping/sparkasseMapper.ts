@@ -1,7 +1,7 @@
 import { createImportId } from "./createImportId";
 import { TransactionData } from "./csvMappers";
+import { parseAmount } from "./parseAmount";
 import { parseSparkasseDate } from "./parseDate";
-import { parseGermanAmount } from "./parseGermanAmount";
 
 const DATE_TIME_PATTERN = /DATUM\s+\d{2}\.\d{2}\.\d{4},\s+\d{2}\.\d{2}\s+UHR/gi;
 
@@ -18,7 +18,7 @@ export function mapSparkasseCSV(row: Record<string, string>): TransactionData {
 
   return {
     date: buchungstag ? parseSparkasseDate(buchungstag) : Date.now(),
-    amount: parseGermanAmount(row["Betrag"] || "0"),
+    amount: parseAmount(row["Betrag"] || "0"),
     description: cleanedDescription,
     counterparty: row["Beguenstigter/Zahlungspflichtiger"] || "",
     importedTransactionId: createImportId(
