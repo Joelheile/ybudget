@@ -16,7 +16,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { UserRole } from "@/convex/users/permissions";
-import { useIsAdmin } from "@/hooks/useCurrentUserRole";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useMutation, useQuery } from "convex/react";
 import { Plus, Users } from "lucide-react";
 import { useState } from "react";
@@ -36,7 +36,7 @@ export default function UsersPage() {
       toast.success("Rolle erfolgreich aktualisiert");
     } catch (error) {
       toast.error(
-        "Fehler beim Aktualisieren der Rolle. Mindestens ein Admin ist erforderlich.",
+        "Fehler beim Aktualisieren der Rolle. Mindestens ein Admin ist erforderlich."
       );
     }
   };

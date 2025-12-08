@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { useCanEdit } from "@/hooks/useCurrentUserRole";
+import { useCanEdit } from "@/lib/hooks/useCurrentUserRole";
 import { ProjectNavUI, type ProjectItem } from "./ProjectNavUI";
 
 export function ProjectNav({ id }: { id?: string }) {

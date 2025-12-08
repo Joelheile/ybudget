@@ -5,6 +5,7 @@ import {
   calculateAxisConfig,
   calculateStartBalance,
 } from "@/components/Dashboard/CashflowChartLogic";
+
 import {
   Card,
   CardContent,
@@ -20,9 +21,9 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { useDateRange } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { useDateRange } from "@/lib/contexts/DateRangeContext";
 import { formatCurrency } from "@/lib/formatCurrency";
 import {
   filterTransactionsBeforeDate,
@@ -93,10 +94,19 @@ export function CashflowChartUI({
   const startBalance = calculateStartBalance(pastTransactions);
 
   const dataPoints = transactions
-    ? buildCashflowData(transactions, startBalance, selectedDateRange.from, selectedDateRange.to)
+    ? buildCashflowData(
+        transactions,
+        startBalance,
+        selectedDateRange.from,
+        selectedDateRange.to
+      )
     : [];
 
-  const axisConfig = calculateAxisConfig(dataPoints, selectedDateRange.from, selectedDateRange.to);
+  const axisConfig = calculateAxisConfig(
+    dataPoints,
+    selectedDateRange.from,
+    selectedDateRange.to
+  );
 
   const dateRangeText = `${format(selectedDateRange.from, "d. MMM yyyy", { locale: de })} - ${format(selectedDateRange.to, "d. MMM yyyy", { locale: de })}`;
 
@@ -130,9 +140,23 @@ export function CashflowChartUI({
                 axisLine={false}
                 tickMargin={8}
                 interval={axisConfig.xAxisInterval}
-                angle={axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot ? -45 : 0}
-                textAnchor={axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot ? "end" : "middle"}
-                height={axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot ? 60 : axisConfig.isLongTimeSlot ? 20 : 30}
+                angle={
+                  axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot
+                    ? -45
+                    : 0
+                }
+                textAnchor={
+                  axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot
+                    ? "end"
+                    : "middle"
+                }
+                height={
+                  axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot
+                    ? 60
+                    : axisConfig.isLongTimeSlot
+                      ? 20
+                      : 30
+                }
               />
               <YAxis
                 tickLine={false}

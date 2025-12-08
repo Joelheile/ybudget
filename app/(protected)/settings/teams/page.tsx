@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
-import { useIsAdmin } from "@/hooks/useCurrentUserRole";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useQuery } from "convex/react";
 import { Plus, Users } from "lucide-react";
 import { useState } from "react";

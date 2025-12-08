@@ -3,10 +3,10 @@
 import ProjectDashboardSkeleton from "@/(protected)/projects/[projectId]/ProjectDashboardSkeleton";
 import ProjectDashboardUI from "@/(protected)/projects/[projectId]/ProjectDashboardUI";
 import TransferDialog from "@/components/Dialogs/TransferDialog";
-import { useDateRange } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { calculateBudget } from "@/lib/budgetCalculations";
+import { useDateRange } from "@/lib/contexts/DateRangeContext";
 import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
 import { useQuery } from "convex-helpers/react/cache";
 import { useMutation, usePaginatedQuery } from "convex/react";
@@ -30,24 +30,24 @@ export default function ProjectDetail() {
   } = usePaginatedQuery(
     api.transactions.queries.getPaginatedTransactions,
     { projectId: projectId as Id<"projects"> },
-    { initialNumItems: 50 },
+    { initialNumItems: 50 }
   );
 
   const filteredTransactions = useMemo(
     () => filterTransactionsByDateRange(allTransactions, selectedDateRange),
-    [allTransactions, selectedDateRange],
+    [allTransactions, selectedDateRange]
   );
 
   const budgets = useMemo(
     () => calculateBudget(allTransactions ?? []),
-    [allTransactions],
+    [allTransactions]
   );
 
   const updateTransaction = useMutation(
-    api.transactions.functions.updateTransaction,
+    api.transactions.functions.updateTransaction
   );
   const deleteTransaction = useMutation(
-    api.transactions.functions.deleteExpectedTransaction,
+    api.transactions.functions.deleteExpectedTransaction
   );
 
   const archiveProject = useMutation(api.projects.functions.archiveProject);
@@ -55,7 +55,7 @@ export default function ProjectDetail() {
   const handleUpdateTransaction = async (
     transactionId: string,
     field: string,
-    value: any,
+    value: any
   ) => {
     try {
       await updateTransaction({

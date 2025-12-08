@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import RangeCalendar from "@/components/RangeCalendar/RangeCalendar";
 import { Button } from "@/components/ui/button";
-import { useDateRange } from "@/contexts/DateRangeContext";
+import { useDateRange } from "@/lib/contexts/DateRangeContext";
 
 export function RangeCalendarToggle() {
   const [open, setOpen] = useState(false);

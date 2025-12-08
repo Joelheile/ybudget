@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { useIsAdmin } from "@/hooks/useCurrentUserRole";
 import { formatDate } from "@/lib/formatDate";
 import { generateReimbursementPDF } from "@/lib/generateReimbursementPDF";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { Check, Download, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,10 @@ const STATUS_COLORS: Record<string, string> = {
 
 const STATUS_BADGES: Record<
   string,
-  { variant: "default" | "destructive" | "secondary" | "outline"; label: string }
+  {
+    variant: "default" | "destructive" | "secondary" | "outline";
+    label: string;
+  }
 > = {
   paid: { variant: "default", label: "Bezahlt" },
   approved: { variant: "default", label: "Genehmigt" },
@@ -41,10 +44,16 @@ export default function ReimbursementPage() {
   const isAdmin = useIsAdmin();
   const router = useRouter();
   const convex = useConvex();
-  const reimbursements = useQuery(api.reimbursements.queries.getAllReimbursements);
+  const reimbursements = useQuery(
+    api.reimbursements.queries.getAllReimbursements
+  );
   const markAsPaid = useMutation(api.reimbursements.functions.markAsPaid);
-  const rejectReimbursement = useMutation(api.reimbursements.functions.rejectReimbursement);
-  const deleteReimbursement = useMutation(api.reimbursements.functions.deleteReimbursement);
+  const rejectReimbursement = useMutation(
+    api.reimbursements.functions.rejectReimbursement
+  );
+  const deleteReimbursement = useMutation(
+    api.reimbursements.functions.deleteReimbursement
+  );
 
   const [rejectDialog, setRejectDialog] = useState<{
     open: boolean;
@@ -68,9 +77,12 @@ export default function ReimbursementPage() {
     );
     if (!reimbursement) return;
 
-    const receipts = await convex.query(api.reimbursements.queries.getReceipts, {
-      reimbursementId,
-    });
+    const receipts = await convex.query(
+      api.reimbursements.queries.getReceipts,
+      {
+        reimbursementId,
+      }
+    );
 
     const receiptsWithUrls = await Promise.all(
       receipts.map(async (receipt) => ({
@@ -81,7 +93,10 @@ export default function ReimbursementPage() {
       }))
     );
 
-    const pdfBlob = await generateReimbursementPDF(reimbursement, receiptsWithUrls);
+    const pdfBlob = await generateReimbursementPDF(
+      reimbursement,
+      receiptsWithUrls
+    );
     const url = URL.createObjectURL(pdfBlob);
     const a = document.createElement("a");
     a.href = url;
@@ -95,7 +110,10 @@ export default function ReimbursementPage() {
       <PageHeader title="Erstattungen" />
 
       <div className="flex justify-end mb-4">
-        <Button variant="secondary" onClick={() => router.push("/reimbursement/new")}>
+        <Button
+          variant="secondary"
+          onClick={() => router.push("/reimbursement/new")}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Neue Erstattung
         </Button>
@@ -110,7 +128,9 @@ export default function ReimbursementPage() {
           </div>
         ) : reimbursements.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Keine Erstattungen gefunden.</p>
+            <p className="text-muted-foreground">
+              Keine Erstattungen gefunden.
+            </p>
           </div>
         ) : (
           <Table>
@@ -131,7 +151,9 @@ export default function ReimbursementPage() {
                 <TableRow
                   key={reimbursement._id}
                   className="cursor-pointer px-2"
-                  onClick={() => router.push(`/reimbursement/${reimbursement._id}`)}
+                  onClick={() =>
+                    router.push(`/reimbursement/${reimbursement._id}`)
+                  }
                 >
                   <TableCell className="px-1">
                     <div className="flex items-center justify-center">
@@ -157,22 +179,33 @@ export default function ReimbursementPage() {
                     ) : (
                       "Auslagenerstattung"
                     )}
-                    {reimbursement.adminNote && reimbursement.status === "rejected" && (
-                      <span className="block text-xs text-red-600">
-                        Ablehnung: {reimbursement.adminNote}
-                      </span>
-                    )}
+                    {reimbursement.adminNote &&
+                      reimbursement.status === "rejected" && (
+                        <span className="block text-xs text-red-600">
+                          Ablehnung: {reimbursement.adminNote}
+                        </span>
+                      )}
                   </TableCell>
-                  {isAdmin && <TableCell>{reimbursement.creatorName}</TableCell>}
+                  {isAdmin && (
+                    <TableCell>{reimbursement.creatorName}</TableCell>
+                  )}
                   <TableCell className="text-right font-medium">
                     {reimbursement.amount.toFixed(2)} €
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_BADGES[reimbursement.status]?.variant || "outline"}>
+                    <Badge
+                      variant={
+                        STATUS_BADGES[reimbursement.status]?.variant ||
+                        "outline"
+                      }
+                    >
                       {STATUS_BADGES[reimbursement.status]?.label || "Entwurf"}
                     </Badge>
                   </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()} className="w-fit">
+                  <TableCell
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-fit"
+                  >
                     <div className="flex items-center justify-end gap-0.5">
                       {isAdmin && (
                         <>
@@ -180,7 +213,9 @@ export default function ReimbursementPage() {
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
-                            onClick={() => markAsPaid({ reimbursementId: reimbursement._id })}
+                            onClick={() =>
+                              markAsPaid({ reimbursementId: reimbursement._id })
+                            }
                             disabled={reimbursement.status === "paid"}
                             title="Als bezahlt markieren"
                           >
@@ -218,7 +253,11 @@ export default function ReimbursementPage() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          onClick={() => deleteReimbursement({ reimbursementId: reimbursement._id })}
+                          onClick={() =>
+                            deleteReimbursement({
+                              reimbursementId: reimbursement._id,
+                            })
+                          }
                           title="Löschen"
                         >
                           <Trash2 className="h-4 w-4" />

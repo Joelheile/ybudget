@@ -8,7 +8,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCanEdit, useIsAdmin } from "@/hooks/useCurrentUserRole";
+import { useCanEdit, useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 
 export function DashboardDropdown({
   onOpenExpense,
