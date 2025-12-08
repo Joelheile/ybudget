@@ -11,7 +11,7 @@ async function getOrCreateReserves(ctx: MutationCtx, organizationId: Id<"organiz
     .query("projects")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
     .filter((q) => q.and(
-      q.eq(q.field("name"), "Reserves"),
+      q.eq(q.field("name"), "Rücklagen"),
       q.eq(q.field("parentId"), undefined),
     ))
     .first();
@@ -20,7 +20,7 @@ async function getOrCreateReserves(ctx: MutationCtx, organizationId: Id<"organiz
 
   const user = await getCurrentUser(ctx);
   return ctx.db.insert("projects", {
-    name: "Reserves",
+    name: "Rücklagen",
     organizationId,
     isArchived: false,
     createdBy: user._id,

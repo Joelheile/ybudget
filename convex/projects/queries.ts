@@ -88,3 +88,16 @@ export const getProjectById = query({
     return await ctx.db.get(projectId);
   },
 });
+
+export const getDepartments = query({
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    return ctx.db
+      .query("projects")
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
+      .filter((q) => q.eq(q.field("parentId"), undefined))
+      .collect();
+  },
+});
