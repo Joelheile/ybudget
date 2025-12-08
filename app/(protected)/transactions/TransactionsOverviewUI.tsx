@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { EditableDataTable } from "@/components/Tables/TransactionTable/EditableDataTable";
-import { editableColumns } from "@/components/Tables/TransactionTable/editableColumns";
+import { editableColumns } from "@/components/Tables/TransactionTable/EditableColumns";
 import { formatDate } from "@/lib/formatDate";
 import type { EnrichedTransaction } from "@/lib/transactionFilters";
 import type { PaginationStatus } from "convex/react";

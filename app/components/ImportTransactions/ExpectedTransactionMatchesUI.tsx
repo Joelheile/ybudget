@@ -12,20 +12,18 @@ interface ExpectedTransaction {
 interface ExpectedTransactionMatchesUIProps {
   expectedTransactions: ExpectedTransaction[];
   selectedMatch: string | null;
-  containerRef: React.RefObject<HTMLDivElement | null>;
   onSelect: (id: string) => void;
 }
 
 export const ExpectedTransactionMatchesUI = ({
   expectedTransactions,
   selectedMatch,
-  containerRef,
   onSelect,
 }: ExpectedTransactionMatchesUIProps) => {
   const hasTransactions = expectedTransactions.length > 0;
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div>
       <h3 className="text-xl font-semibold mb-6">Geplante Ausgabe matchen:</h3>
       {!hasTransactions && (
         <p className="text-sm text-muted-foreground">

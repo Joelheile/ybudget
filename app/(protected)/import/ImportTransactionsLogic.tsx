@@ -5,7 +5,7 @@ import { ImportTransactionsUI } from "@/(protected)/import/ImportTransactionsUI"
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export const ImportTransactionsLogic = () => {
@@ -18,7 +18,6 @@ export const ImportTransactionsLogic = () => {
   const [budgets, setBudgets] = useState<
     Array<{ projectId: string; amount: number }>
   >([]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const transactions = useQuery(
     api.transactions.queries.getUnassignedProcessedTransactions
@@ -60,25 +59,7 @@ export const ImportTransactionsLogic = () => {
     setSelectedMatch(current.matchedTransactionId || null);
     setSplitIncome(false);
     setBudgets([]);
-  }, [current]);
-
-  useEffect(() => {
-    if (!transactions) return;
-    if (index >= transactions.length) setIndex(0);
-  }, [transactions, index]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setSelectedMatch(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [current?._id]);
 
   const handleNext = () => {
     if (!transactions || index >= transactions.length - 1) return;
@@ -154,6 +135,11 @@ export const ImportTransactionsLogic = () => {
     }
   };
 
+  const handleSplitIncomeChange = (newSplitIncome: boolean) => {
+    setSplitIncome(newSplitIncome);
+    if (!newSplitIncome) setBudgets([]);
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
@@ -173,11 +159,6 @@ export const ImportTransactionsLogic = () => {
     return () => window.removeEventListener("keydown", handler);
   });
 
-  const handleSplitIncomeChange = (newSplitIncome: boolean) => {
-    setSplitIncome(newSplitIncome);
-    if (!newSplitIncome) setBudgets([]);
-  };
-
   if (!transactions) {
     return <ImportTransactionsSkeleton />;
   }
@@ -193,7 +174,6 @@ export const ImportTransactionsLogic = () => {
       selectedMatch={selectedMatch}
       splitIncome={splitIncome}
       expectedTransactions={expectedTransactions}
-      containerRef={containerRef}
       setProjectId={setProjectId}
       setCategoryId={setCategoryId}
       setDonorId={setDonorId}

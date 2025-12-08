@@ -15,7 +15,6 @@ interface ImportTransactionsUIProps {
   selectedMatch: string | null;
   splitIncome: boolean;
   expectedTransactions: Doc<"transactions">[];
-  containerRef: React.RefObject<HTMLDivElement | null>;
   setProjectId: (value: string) => void;
   setCategoryId: (value: string) => void;
   setDonorId: (value: string) => void;
@@ -36,7 +35,6 @@ export const ImportTransactionsUI = ({
   selectedMatch,
   splitIncome,
   expectedTransactions,
-  containerRef,
   setProjectId,
   setCategoryId,
   setDonorId,
@@ -70,7 +68,6 @@ export const ImportTransactionsUI = ({
             <ExpectedTransactionMatchesUI
               expectedTransactions={expectedTransactions}
               selectedMatch={selectedMatch}
-              containerRef={containerRef}
               onSelect={handleExpectedTransactionSelect}
             />
           </div>
