@@ -1,5 +1,19 @@
 "use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  ChevronsUpDown,
+  CreditCard,
+  Handshake,
+  LogOut,
+  ScrollText,
+  Users,
+} from "lucide-react";
+import { useAction, useQuery } from "convex/react";
+
 import { SignOut } from "@/components/Auth/LogoutButton";
+import { Paywall } from "@/components/Payment/Paywall";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -19,32 +33,18 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { useAction, useQuery } from "convex/react";
-import {
-  ChevronsUpDown,
-  CreditCard,
-  Handshake,
-  LogOut,
-  ScrollText,
-  Users,
-} from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { Paywall } from "../Payment/Paywall";
 
 export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
   const [paywallOpen, setPaywallOpen] = useState(false);
-  const { isMobile } = useSidebar();
-  const isAdmin = user?.role === "admin";
-
-  const isCustomer = Boolean(useQuery(api.payments.queries.getActivePayment));
-
-  const createPortalSession = useAction(api.stripe.createCustomerPortalSession);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const { isMobile } = useSidebar();
+
+  const isAdmin = user?.role === "admin";
+  const isCustomer = Boolean(useQuery(api.payments.queries.getActivePayment));
+  const createPortalSession = useAction(api.stripe.createCustomerPortalSession);
 
   const handleBillingClick = async () => {
     if (isLoadingPortal) return;
-
     setIsLoadingPortal(true);
     try {
       const portalUrl = await createPortalSession();
@@ -53,10 +53,6 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
       setIsLoadingPortal(false);
       console.error("Failed to create portal session: " + err);
     }
-  };
-
-  const openPaywall = () => {
-    setPaywallOpen(!paywallOpen);
   };
 
   if (!user) {
@@ -129,45 +125,44 @@ export function NavUser({ user }: { user: Doc<"users"> | null | undefined }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {isAdmin && (
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings/users">
-                      <Users />
-                      Benutzer
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings/teams">
-                      <Handshake />
-                      Teams
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings/logs">
-                      <ScrollText />
-                      Logs
-                    </Link>
-                  </DropdownMenuItem>
-                  {isCustomer && (
-                    <DropdownMenuItem
-                      onClick={handleBillingClick}
-                      disabled={isLoadingPortal}
-                    >
-                      <CreditCard />
-                      {isLoadingPortal ? "Laden..." : "Abrechnung"}
-                    </DropdownMenuItem>
-                  )}
-                  {!isCustomer && (
+                <>
+                  <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                      <button onClick={openPaywall}>
+                      <Link href="/settings/users">
+                        <Users />
+                        Benutzer
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/teams">
+                        <Handshake />
+                        Teams
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/logs">
+                        <ScrollText />
+                        Logs
+                      </Link>
+                    </DropdownMenuItem>
+                    {isCustomer ? (
+                      <DropdownMenuItem
+                        onClick={handleBillingClick}
+                        disabled={isLoadingPortal}
+                      >
+                        <CreditCard />
+                        {isLoadingPortal ? "Laden..." : "Abrechnung"}
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={() => setPaywallOpen(true)}>
                         <CreditCard />
                         YBudget Premium
-                      </button>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuGroup>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                </>
               )}
-              {isAdmin && <DropdownMenuSeparator />}
               <DropdownMenuItem>
                 <LogOut />
                 <SignOut>Abmelden</SignOut>

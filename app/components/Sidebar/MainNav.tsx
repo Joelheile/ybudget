@@ -10,21 +10,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export function MainNav({
-  mainNav,
-  id,
-}: {
-  mainNav: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
-  id?: string;
-}) {
+type NavItem = {
+  name: string;
+  url: string;
+  icon: LucideIcon;
+};
+
+export function MainNav({ items, id }: { items: NavItem[]; id?: string }) {
   return (
     <SidebarGroup id={id}>
       <SidebarMenu>
-        {mainNav.map((item) => (
+        {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild tooltip={item.name}>
               <Link href={item.url}>

@@ -1,15 +1,36 @@
 "use client";
 
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex-helpers/react/cache";
-import { useMutation } from "convex/react";
+import { ChevronRight, Plus } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { CreateProjectDialog } from "@/components/Dialogs/CreateProjectDialog";
+import { Paywall } from "@/components/Payment/Paywall";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import {
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useCanEdit } from "@/lib/hooks/useCurrentUserRole";
-import { ProjectNavUI, type ProjectItem } from "./ProjectNavUI";
+import { useQuery } from "convex-helpers/react/cache";
+import { useMutation } from "convex/react";
 
 export function ProjectNav({ id }: { id?: string }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -34,53 +55,152 @@ export function ProjectNav({ id }: { id?: string }) {
     }
   };
 
-  const handleEdit = (projectId: Id<"projects">, name: string) => {
+  const startEdit = (projectId: Id<"projects">, name: string) => {
     if (!canEdit) return;
     setEditingId(projectId);
     setEditValue(name);
   };
 
-  const items: ProjectItem[] = projects
-    ? projects
-        .filter((p) => !p.parentId)
-        .map((project) => ({
-          id: project._id,
-          name: project.name,
-          url: `/projects/${project._id}`,
-          isActive: pathname === `/projects/${project._id}`,
-          children: projects
-            .filter((p) => p.parentId === project._id)
-            .map((child) => ({
-              id: child._id,
-              name: child.name,
-              url: `/projects/${child._id}`,
-            })),
-        }))
-    : [];
+  if (!projects) {
+    return (
+      <SidebarGroup id={id}>
+        <SidebarGroupLabel>Projekte</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="px-2 py-1 text-sm text-muted-foreground">
+              Laden...
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    );
+  }
 
+  const parentProjects = projects.filter((p) => !p.parentId);
   const countText =
     projectLimits && !projectLimits.isPremium
       ? `(${projectLimits.currentProjects}/${projectLimits.maxProjects})`
       : "";
 
   return (
-    <ProjectNavUI
-      id={id}
-      dialogOpen={dialogOpen}
-      setDialogOpen={setDialogOpen}
-      paywallOpen={paywallOpen}
-      setPaywallOpen={setPaywallOpen}
-      editingId={editingId}
-      setEditingId={setEditingId}
-      editValue={editValue}
-      setEditValue={setEditValue}
-      projectLimits={projectLimits}
-      canEdit={canEdit}
-      items={items}
-      countText={countText}
-      saveEdit={handleSave}
-      startEdit={handleEdit}
-      isLoading={!projects}
-    />
+    <SidebarGroup id={id}>
+      <div className="flex items-center justify-between ">
+        <SidebarGroupLabel className="font-bold text-sm text-foreground">
+          Departments / Projekte
+        </SidebarGroupLabel>
+        {canEdit && countText && (
+          <span className="text-xs pr-5 text-muted-foreground">{countText}</span>
+        )}
+      </div>
+      {canEdit && (
+        <SidebarGroupAction
+          onClick={() =>
+            projectLimits?.canCreateMore
+              ? setDialogOpen(true)
+              : setPaywallOpen(true)
+          }
+        >
+          <Plus />
+          <span className="sr-only">Projekt hinzufügen</span>
+        </SidebarGroupAction>
+      )}
+      <SidebarMenu>
+        {parentProjects.map((project) => {
+          const children = projects.filter((p) => p.parentId === project._id);
+          const isActive = pathname === `/projects/${project._id}`;
+          const isEditing = editingId === project._id;
+
+          return (
+            <Collapsible key={project._id} asChild defaultOpen>
+              <SidebarMenuItem>
+                {isEditing ? (
+                  <div className="px-2 py-1.5">
+                    <Input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSave();
+                        if (e.key === "Escape") setEditingId(null);
+                      }}
+                      onBlur={handleSave}
+                      autoFocus
+                    />
+                  </div>
+                ) : (
+                  <SidebarMenuButton asChild tooltip={project.name} isActive={isActive}>
+                    <Link href={`/projects/${project._id}`}>
+                      <span
+                        className={children.length ? "font-medium" : undefined}
+                        onDoubleClick={(e) => {
+                          e.preventDefault();
+                          startEdit(project._id, project.name);
+                        }}
+                      >
+                        {project.name}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
+                {children.length > 0 && (
+                  <>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuAction className="data-[state=open]:rotate-90 w-6 h-6">
+                        <ChevronRight />
+                        <span className="sr-only">Toggle</span>
+                      </SidebarMenuAction>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {children.map((child) => {
+                          const isChildEditing = editingId === child._id;
+
+                          return (
+                            <SidebarMenuSubItem key={child._id}>
+                              {isChildEditing ? (
+                                <div className="px-2 py-1.5">
+                                  <Input
+                                    value={editValue}
+                                    onChange={(e) => setEditValue(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") handleSave();
+                                      if (e.key === "Escape") setEditingId(null);
+                                    }}
+                                    onBlur={handleSave}
+                                    autoFocus
+                                  />
+                                </div>
+                              ) : (
+                                <SidebarMenuSubButton asChild>
+                                  <Link href={`/projects/${child._id}`}>
+                                    <span
+                                      onDoubleClick={(e) => {
+                                        e.preventDefault();
+                                        startEdit(child._id, child.name);
+                                      }}
+                                    >
+                                      {child.name}
+                                    </span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              )}
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </>
+                )}
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        })}
+      </SidebarMenu>
+      {canEdit && (
+        <>
+          <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+          <Paywall open={paywallOpen} onOpenChange={setPaywallOpen} />
+        </>
+      )}
+    </SidebarGroup>
   );
 }

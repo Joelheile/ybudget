@@ -11,7 +11,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { UserRole } from "@/convex/users/permissions";
-import { getInitials } from "@/lib/getInitials";
+import { getInitials } from "@/lib/formatters/getInitials";
 import { useMutation, useQuery } from "convex/react";
 import { Shield } from "lucide-react";
 import { toast } from "react-hot-toast";
