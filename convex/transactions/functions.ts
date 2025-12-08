@@ -5,7 +5,6 @@ import { addLog } from "../logs/functions";
 import { canAccessProject } from "../teams/permissions";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
-import { validateDonorCategory } from "./validateDonorCategory";
 
 async function ensureReservesDepartment(
   ctx: MutationCtx,
@@ -52,13 +51,6 @@ export const createExpectedTransaction = mutation({
     if (!(await canAccessProject(ctx, user._id, args.projectId))) {
       throw new Error("Access denied");
     }
-
-    await validateDonorCategory(
-      ctx,
-      args.donorId,
-      args.categoryId,
-      user.organizationId,
-    );
 
     const transactionId = await ctx.db.insert("transactions", {
       ...args,
@@ -156,13 +148,6 @@ export const updateTransaction = mutation({
     ) {
       throw new Error("Access denied");
     }
-
-    await validateDonorCategory(
-      ctx,
-      updates.donorId ?? transaction.donorId,
-      updates.categoryId ?? transaction.categoryId,
-      user.organizationId,
-    );
 
     await ctx.db.patch(transactionId, updates);
     await addLog(

@@ -35,7 +35,6 @@ import type * as teams_permissions from "../teams/permissions.js";
 import type * as teams_queries from "../teams/queries.js";
 import type * as transactions_functions from "../transactions/functions.js";
 import type * as transactions_queries from "../transactions/queries.js";
-import type * as transactions_validateDonorCategory from "../transactions/validateDonorCategory.js";
 import type * as users_functions from "../users/functions.js";
 import type * as users_getCurrentUser from "../users/getCurrentUser.js";
 import type * as users_permissions from "../users/permissions.js";
@@ -76,7 +75,6 @@ declare const fullApi: ApiFromModules<{
   "teams/queries": typeof teams_queries;
   "transactions/functions": typeof transactions_functions;
   "transactions/queries": typeof transactions_queries;
-  "transactions/validateDonorCategory": typeof transactions_validateDonorCategory;
   "users/functions": typeof users_functions;
   "users/getCurrentUser": typeof users_getCurrentUser;
   "users/permissions": typeof users_permissions;
