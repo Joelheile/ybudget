@@ -84,15 +84,7 @@ export default function ProjectDetail() {
     setIsTransferOpen(true);
   };
 
-  const handleArchive = () => {
-    try {
-      archiveProject({ projectId: projectId as Id<"projects"> });
-      toast.success("Projekt archiviert");
-    } catch (error) {
-      toast.error("Fehler beim Archivieren des Projekts");
-      throw error;
-    }
-  };
+ 
 
   if (!project) {
     return <ProjectDashboardSkeleton />;
@@ -109,7 +101,7 @@ export default function ProjectDetail() {
         onUpdate={handleUpdateTransaction}
         onDelete={handleDeleteTransaction}
         openTransfer={handleOpenTransfer}
-        onArchive={handleArchive}
+
       />
       <TransferDialog open={isTransferOpen} onOpenChange={setIsTransferOpen} />
     </>

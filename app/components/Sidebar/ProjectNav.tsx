@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Plus } from "lucide-react";
+import { Archive, ChevronRight, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +13,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import {
   SidebarGroup,
@@ -43,6 +49,7 @@ export function ProjectNav({ id }: { id?: string }) {
   const projectLimits = useQuery(api.subscriptions.queries.getProjectLimits);
   const canEdit = useCanEdit();
   const renameProject = useMutation(api.projects.functions.renameProject);
+  const archiveProject = useMutation(api.projects.functions.archiveProject);
 
   const handleSave = async () => {
     if (!editingId || !editValue.trim()) return;
@@ -59,6 +66,15 @@ export function ProjectNav({ id }: { id?: string }) {
     if (!canEdit) return;
     setEditingId(projectId);
     setEditValue(name);
+  };
+
+  const handleArchive = async (projectId: Id<"projects">) => {
+    try {
+      await archiveProject({ projectId });
+      toast.success("Projekt archiviert");
+    } catch {
+      toast.error("Fehler beim Archivieren");
+    }
   };
 
   if (!projects) {
@@ -127,19 +143,35 @@ export function ProjectNav({ id }: { id?: string }) {
                     />
                   </div>
                 ) : (
-                  <SidebarMenuButton asChild tooltip={project.name} isActive={isActive}>
-                    <Link href={`/projects/${project._id}`}>
-                      <span
-                        className={children.length ? "font-medium" : undefined}
-                        onDoubleClick={(e) => {
-                          e.preventDefault();
-                          startEdit(project._id, project.name);
-                        }}
-                      >
-                        {project.name}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
+                      <SidebarMenuButton asChild tooltip={project.name} isActive={isActive}>
+                        <Link href={`/projects/${project._id}`}>
+                          <span
+                            className={children.length ? "font-medium" : undefined}
+                            onDoubleClick={(e) => {
+                              e.preventDefault();
+                              startEdit(project._id, project.name);
+                            }}
+                          >
+                            {project.name}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </ContextMenuTrigger>
+                    {canEdit && (
+                      <ContextMenuContent>
+                        <ContextMenuItem onClick={() => startEdit(project._id, project.name)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Umbenennen
+                        </ContextMenuItem>
+                        <ContextMenuItem onClick={() => handleArchive(project._id)}>
+                          <Archive className="mr-2 h-4 w-4" />
+                          Archivieren
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    )}
+                  </ContextMenu>
                 )}
                 {children.length > 0 && (
                   <>
@@ -170,18 +202,34 @@ export function ProjectNav({ id }: { id?: string }) {
                                   />
                                 </div>
                               ) : (
-                                <SidebarMenuSubButton asChild>
-                                  <Link href={`/projects/${child._id}`}>
-                                    <span
-                                      onDoubleClick={(e) => {
-                                        e.preventDefault();
-                                        startEdit(child._id, child.name);
-                                      }}
-                                    >
-                                      {child.name}
-                                    </span>
-                                  </Link>
-                                </SidebarMenuSubButton>
+                                <ContextMenu>
+                                  <ContextMenuTrigger asChild>
+                                    <SidebarMenuSubButton asChild>
+                                      <Link href={`/projects/${child._id}`}>
+                                        <span
+                                          onDoubleClick={(e) => {
+                                            e.preventDefault();
+                                            startEdit(child._id, child.name);
+                                          }}
+                                        >
+                                          {child.name}
+                                        </span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </ContextMenuTrigger>
+                                  {canEdit && (
+                                    <ContextMenuContent>
+                                      <ContextMenuItem onClick={() => startEdit(child._id, child.name)}>
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Umbenennen
+                                      </ContextMenuItem>
+                                      <ContextMenuItem onClick={() => handleArchive(child._id)}>
+                                        <Archive className="mr-2 h-4 w-4" />
+                                        Archivieren
+                                      </ContextMenuItem>
+                                    </ContextMenuContent>
+                                  )}
+                                </ContextMenu>
                               )}
                             </SidebarMenuSubItem>
                           );

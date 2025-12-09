@@ -9,11 +9,11 @@ import { useState } from "react";
 
 export default function TestAuthPage() {
   const { signIn } = useAuthActions();
+  const router = useRouter();
   const [email, setEmail] = useState("user@test.com");
   const [name, setName] = useState("Test User");
   const [status, setStatus] = useState("");
 
-  const router = useRouter();
   const handleSubmit = () => {
     setStatus("Authenticating...");
     signIn("testing", { email, name })
