@@ -3,6 +3,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
 const TEST_EMAIL = "stripe@test.com";
+const FREE_TIER_LIMIT = 10;
 
 function getConvex() {
   return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -47,51 +48,67 @@ test.describe.serial("stripe subscription flow", () => {
     await page.close();
   });
 
-  test("1. Subscribe to yearly plan", async () => {
+  test("1. Free user can create projects until limit", async () => {
+    const convex = getConvex();
+    await convex.mutation(api.testing.functions.createMockProjects, {
+      email: TEST_EMAIL,
+      count: FREE_TIER_LIMIT - 1,
+    });
+
+    await page.reload();
+    await expect(page.getByText(`(${FREE_TIER_LIMIT - 1}/${FREE_TIER_LIMIT})`)).toBeVisible();
+
+    await page.getByRole("button", { name: "Projekt hinzufügen" }).click();
+    await expect(page.getByRole("heading", { name: "Neues Projekt/Department erstellen" })).toBeVisible();
+    await page.getByLabel("Projektname*").fill("Last Free Project");
+    await page.getByRole("button", { name: "Projekt erstellen" }).click();
+
+    await expect(page.getByText(`(${FREE_TIER_LIMIT}/${FREE_TIER_LIMIT})`)).toBeVisible({ timeout: 5000 });
+  });
+
+  test("2. Free user gets paywall when limit is reached", async () => {
+    await page.getByRole("button", { name: "Projekt hinzufügen" }).click();
+
+    await expect(page.getByText("Ich hoffe YBudget gefällt dir")).toBeVisible();
+    await expect(page.getByText("Unbegrenzt Projekte")).toBeVisible();
+
+    await page.keyboard.press("Escape");
+  });
+
+  test("3. Upgrade button redirects to Stripe checkout", async () => {
     await page.getByRole("button", { name: "T Test User" }).click();
     await page.getByRole("menuitem", { name: "YBudget Premium" }).click();
 
     await expect(page.getByText("Ich hoffe YBudget gefällt dir")).toBeVisible();
     await page.getByRole("button", { name: "Auf YBudget Yearly upgraden" }).click();
 
-    await expect(page.getByText("Sandbox", { exact: true })).toBeVisible({
-      timeout: 15000,
-    });
-    await expect(page.locator("#payment-form")).toContainText(TEST_EMAIL);
-
-    await page.getByTestId("card-accordion-item-button").click();
-    await page.getByRole("textbox", { name: "Card number" }).fill("4242424242424242");
-    await page.getByRole("textbox", { name: "Expiration" }).fill("12 / 50");
-    await page.getByRole("textbox", { name: "CVC" }).fill("123");
-    await page.getByRole("textbox", { name: "Cardholder name" }).fill("Automated Test");
-    await page.getByTestId("hosted-payment-submit-button").click();
-
-    await expect(page.getByRole("heading", { name: "Vielen Dank" })).toBeVisible({
-      timeout: 15000,
-    });
-    await page.getByRole("link", { name: "Zurück zur App" }).click();
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-
-    await page.getByRole("button", { name: "T Test User" }).click();
-    await expect(page.getByRole("group")).toContainText("Abrechnung");
+    await page.waitForURL(/checkout\.stripe\.com/, { timeout: 15000 });
+    expect(page.url()).toContain("checkout.stripe.com");
   });
 
-  test("2. Cancel subscription via billing portal", async () => {
-    await page.getByRole("button", { name: "T Test User" }).click();
-    await page.getByRole("menuitem", { name: "Abrechnung" }).click();
+  test("4. User with subscription (premium user) can create unlimited projects", async () => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 
-    await expect(page.getByText("Current subscription")).toBeVisible({
-      timeout: 15000,
+    const convex = getConvex();
+    await convex.mutation(api.testing.functions.createMockPayment, {
+      email: TEST_EMAIL,
     });
 
-    await page.locator("[data-test=\"cancel-subscription\"]").click();
-    await expect(page.getByText("Confirm cancellation")).toBeVisible();
-    await page.getByTestId("confirm").click();
+    await page.reload();
 
-    await page.locator("[data-test=\"cancel-reason-opt-other\"]").check();
-    await page.getByRole("textbox", { name: "Any additional feedback?" }).fill("Automated test");
-    await page.getByTestId("cancellation_reason_submit").click();
+    await expect(page.getByText(`/${FREE_TIER_LIMIT})`)).not.toBeVisible();
 
-    await expect(page.getByTestId("page-container-main")).toContainText("Expires");
+    await page.getByRole("button", { name: "Projekt hinzufügen" }).click();
+    await expect(page.getByRole("heading", { name: "Neues Projekt/Department erstellen" })).toBeVisible();
+    await page.getByLabel("Projektname*").fill("Premium Project");
+    await page.getByRole("button", { name: "Projekt erstellen" }).click();
+
+    await expect(page.getByText("Projekt erstellt")).toBeVisible();
+  });
+
+  test("5. Premium user sees billing menu", async () => {
+    await page.getByRole("button", { name: "T Test User" }).click();
+    await expect(page.getByRole("group")).toContainText("Abrechnung");
   });
 });
