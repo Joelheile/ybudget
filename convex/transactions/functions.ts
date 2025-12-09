@@ -246,6 +246,7 @@ export const transferMoney = mutation({
     const receivingProject = await ctx.db.get(args.receivingProjectId);
 
     const description = `Budgetübertrag von ${sendingProject?.name} zu ${receivingProject?.name}`;
+    const transferId = crypto.randomUUID();
 
     const debitId = await ctx.db.insert("transactions", {
       date: Date.now(),
@@ -256,6 +257,7 @@ export const transferMoney = mutation({
       status: "processed",
       amount: -args.amount,
       projectId: args.sendingProjectId,
+      transferId,
     });
 
     await ctx.db.insert("transactions", {
@@ -267,6 +269,7 @@ export const transferMoney = mutation({
       status: "processed",
       amount: args.amount,
       projectId: args.receivingProjectId,
+      transferId,
     });
 
     await addLog(
