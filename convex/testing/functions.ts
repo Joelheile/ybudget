@@ -2,7 +2,7 @@ import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials"
 import { createAccount } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
-import { mutation, type MutationCtx } from "../_generated/server";
+import { internalQuery, mutation, type MutationCtx } from "../_generated/server";
 
 export const TestingCredentials = ConvexCredentials({
   id: "testing",
@@ -114,5 +114,24 @@ export const clearTestData = mutation({
     }
 
     await ctx.db.delete(user._id);
+  },
+});
+
+export const getSubscriptionIdByEmail = internalQuery({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .unique();
+    if (!user?.organizationId) return null;
+
+    const organizationId = user.organizationId;
+    const payment = await ctx.db
+      .query("payments")
+      .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+      .first();
+
+    return payment?.stripeSubscriptionId ?? null;
   },
 });
