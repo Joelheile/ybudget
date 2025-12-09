@@ -41,16 +41,8 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps
 
-      - name: Wait for Vercel deployment
-        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
-        id: vercel
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 300
-
       - name: Run Playwright tests
         run: pnpm exec playwright test --reporter=list
         env:
           NEXT_PUBLIC_CONVEX_URL: ${{ secrets.CONVEX_URL }}
           IS_TEST: "true"
-          SITE_URL: ${{ steps.vercel.outputs.url }}
