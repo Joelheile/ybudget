@@ -5,9 +5,12 @@ import Stripe from "stripe";
 import { internal } from "../_generated/api";
 import { action, internalQuery } from "../_generated/server";
 
-const stripe = new Stripe(process.env.STRIPE_KEY!, {
-  apiVersion: "2025-10-29.clover",
-});
+function getStripe() {
+  if (!process.env.STRIPE_KEY) return null;
+  return new Stripe(process.env.STRIPE_KEY, {
+    apiVersion: "2025-10-29.clover",
+  });
+}
 
 export const getSubscriptionIdByEmail = internalQuery({
   args: { email: v.string() },
@@ -32,6 +35,9 @@ export const cancelTestSubscription = action({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     if (!process.env.IS_TEST) return;
+
+    const stripe = getStripe();
+    if (!stripe) return;
 
     const subscriptionId = await ctx.runQuery(
       internal.testing.stripe.getSubscriptionIdByEmail,
