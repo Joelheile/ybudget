@@ -1,8 +1,8 @@
 import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
 import { createAccount } from "@convex-dev/auth/server";
+import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { mutation, type MutationCtx } from "../_generated/server";
-import { ConvexError, v } from "convex/values";
 
 export const TestingCredentials = ConvexCredentials({
   id: "testing",
@@ -33,7 +33,7 @@ export const TestingCredentials = ConvexCredentials({
 
 async function deleteByOrganization(
   ctx: MutationCtx,
-  table: "transactions" | "projects" | "donors" | "logs",
+  table: "transactions" | "projects" | "donors" | "logs" | "payments",
   organizationId: Id<"organizations">,
 ) {
   const docs = await ctx.db
@@ -88,6 +88,7 @@ export const clearTestData = mutation({
       await deleteByOrganization(ctx, "projects", user.organizationId);
       await deleteByOrganization(ctx, "donors", user.organizationId);
       await deleteByOrganization(ctx, "logs", user.organizationId);
+      await deleteByOrganization(ctx, "payments", user.organizationId);
       const org = await ctx.db.get(user.organizationId);
       if (org) await ctx.db.delete(user.organizationId);
     }

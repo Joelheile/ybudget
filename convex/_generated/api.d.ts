@@ -33,6 +33,7 @@ import type * as teams_permissions from "../teams/permissions.js";
 import type * as teams_queries from "../teams/queries.js";
 import type * as testing_functions from "../testing/functions.js";
 import type * as testing_seed from "../testing/seed.js";
+import type * as testing_stripe from "../testing/stripe.js";
 import type * as transactions_functions from "../transactions/functions.js";
 import type * as transactions_queries from "../transactions/queries.js";
 import type * as users_functions from "../users/functions.js";
@@ -73,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   "teams/queries": typeof teams_queries;
   "testing/functions": typeof testing_functions;
   "testing/seed": typeof testing_seed;
+  "testing/stripe": typeof testing_stripe;
   "transactions/functions": typeof transactions_functions;
   "transactions/queries": typeof transactions_queries;
   "users/functions": typeof users_functions;
