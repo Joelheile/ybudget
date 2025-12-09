@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm vitest run
+
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm exec playwright test
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+          IS_TEST: "true"
