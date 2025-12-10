@@ -16,10 +16,8 @@ export function LandingPage() {
       <HeroSection />
       <ProblemSection />
       <SolutionSection />
-      {/* <SocialProofSection /> */}
       <HowItWorksSection />
       <PricingSection />
-      {/* <FAQSection /> */}
       <FinalCTASection />
       <Footer />
     </main>
