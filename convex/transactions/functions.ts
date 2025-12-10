@@ -6,32 +6,6 @@ import { canAccessProject } from "../teams/permissions";
 import { getCurrentUser } from "../users/getCurrentUser";
 import { requireRole } from "../users/permissions";
 
-async function getOrCreateReserves(
-  ctx: MutationCtx,
-  organizationId: Id<"organizations">,
-) {
-  const existing = await ctx.db
-    .query("projects")
-    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
-    .filter((q) =>
-      q.and(
-        q.eq(q.field("name"), "Rücklagen"),
-        q.eq(q.field("parentId"), undefined),
-      ),
-    )
-    .first();
-
-  if (existing) return existing._id;
-
-  const user = await getCurrentUser(ctx);
-  return ctx.db.insert("projects", {
-    name: "Rücklagen",
-    organizationId,
-    isArchived: false,
-    createdBy: user._id,
-  });
-}
-
 export const createExpectedTransaction = mutation({
   args: {
     projectId: v.id("projects"),
@@ -104,9 +78,6 @@ export const createImportedTransaction = mutation({
       organizationId: user.organizationId,
       importedBy: user._id,
       status: "processed",
-      projectId: undefined,
-      categoryId: undefined,
-      donorId: undefined,
     });
 
     return { inserted: true };
@@ -160,6 +131,35 @@ export const updateTransaction = mutation({
   },
 });
 
+export const deleteExpectedTransaction = mutation({
+  args: {
+    transactionId: v.id("transactions"),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "lead");
+    const user = await getCurrentUser(ctx);
+
+    const transaction = await ctx.db.get(args.transactionId);
+    if (
+      !transaction ||
+      transaction.organizationId !== user.organizationId ||
+      transaction.status !== "expected"
+    ) {
+      throw new Error("Access denied");
+    }
+
+    await ctx.db.delete(args.transactionId);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "transaction.delete",
+      args.transactionId,
+      `${transaction.description} (${transaction.amount}€)`,
+    );
+  },
+});
+
 export const splitTransaction = mutation({
   args: {
     transactionId: v.id("transactions"),
@@ -189,7 +189,7 @@ export const splitTransaction = mutation({
         ? [
             ...args.splits,
             {
-              projectId: await getOrCreateReserves(
+              projectId: await getReservesProjectId(
                 ctx,
                 original.organizationId,
               ),
@@ -220,34 +220,24 @@ export const splitTransaction = mutation({
   },
 });
 
-export const deleteExpectedTransaction = mutation({
-  args: {
-    transactionId: v.id("transactions"),
-  },
-  handler: async (ctx, args) => {
-    await requireRole(ctx, "lead");
-    const user = await getCurrentUser(ctx);
+async function getReservesProjectId(
+  ctx: MutationCtx,
+  organizationId: Id<"organizations">,
+) {
+  const reserves = await ctx.db
+    .query("projects")
+    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+    .filter((q) =>
+      q.and(
+        q.eq(q.field("name"), "Rücklagen"),
+        q.eq(q.field("parentId"), undefined),
+      ),
+    )
+    .first();
 
-    const transaction = await ctx.db.get(args.transactionId);
-    if (
-      !transaction ||
-      transaction.organizationId !== user.organizationId ||
-      transaction.status !== "expected"
-    ) {
-      throw new Error("Access denied");
-    }
-
-    await ctx.db.delete(args.transactionId);
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "transaction.delete",
-      args.transactionId,
-      `${transaction.description} (${transaction.amount}€)`,
-    );
-  },
-});
+  if (!reserves) throw new Error("Rücklagen project not found");
+  return reserves._id;
+}
 
 export const transferMoney = mutation({
   args: {
@@ -264,29 +254,26 @@ export const transferMoney = mutation({
 
     const description = `Budgetübertrag von ${sendingProject?.name} zu ${receivingProject?.name}`;
     const transferId = crypto.randomUUID();
-
-    const debitId = await ctx.db.insert("transactions", {
+    const base = {
       date: Date.now(),
       importedBy: user._id,
       organizationId: user.organizationId,
       description,
       counterparty: "Internal Transfer",
-      status: "processed",
+      status: "processed" as const,
+      transferId,
+    };
+
+    const sendingId = await ctx.db.insert("transactions", {
+      ...base,
       amount: -args.amount,
       projectId: args.sendingProjectId,
-      transferId,
     });
 
     await ctx.db.insert("transactions", {
-      date: Date.now(),
-      importedBy: user._id,
-      organizationId: user.organizationId,
-      description,
-      counterparty: "Internal Transfer",
-      status: "processed",
+      ...base,
       amount: args.amount,
       projectId: args.receivingProjectId,
-      transferId,
     });
 
     await addLog(
@@ -294,7 +281,7 @@ export const transferMoney = mutation({
       user.organizationId,
       user._id,
       "transaction.transfer",
-      debitId,
+      sendingId,
       `${args.amount}€: ${sendingProject?.name} → ${receivingProject?.name}`,
     );
   },

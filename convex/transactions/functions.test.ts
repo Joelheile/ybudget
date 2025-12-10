@@ -1,0 +1,388 @@
+import { convexTest } from "convex-test";
+import { expect, test } from "vitest";
+import { api } from "../_generated/api";
+import schema from "../schema";
+import { modules, setupTestData } from "../test.setup";
+
+test("create expected transaction", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId, categoryId } = await setupTestData(t);
+
+  const id = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.createExpectedTransaction, {
+      projectId,
+      date: Date.now(),
+      amount: -500,
+      description: "Test",
+      counterparty: "Test",
+      categoryId,
+      status: "expected",
+    });
+
+  const transaction = await t.run((ctx) => ctx.db.get(id));
+  expect(transaction?.status).toBe("expected");
+});
+
+test("delete expected transaction", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId, categoryId } = await setupTestData(t);
+
+  const id = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId,
+      projectId,
+      categoryId,
+      date: Date.now(),
+      amount: -100,
+      description: "Test",
+      counterparty: "Test",
+      status: "expected",
+      importedBy: userId,
+    }),
+  );
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.deleteExpectedTransaction, { transactionId: id });
+
+  const deleted = await t.run((ctx) => ctx.db.get(id));
+  expect(deleted).toBeNull();
+});
+
+test("transfer money between projects", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const receivingProjectId = await t.run((ctx) =>
+    ctx.db.insert("projects", {
+      name: "Receiver",
+      organizationId,
+      isArchived: false,
+      createdBy: userId,
+    }),
+  );
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.transferMoney, {
+      amount: 500,
+      sendingProjectId: projectId,
+      receivingProjectId,
+    });
+
+  const transactions = await t.run((ctx) =>
+    ctx.db.query("transactions").collect(),
+  );
+  expect(transactions).toHaveLength(2);
+});
+
+test("split transaction", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const originalId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId,
+      date: Date.now(),
+      amount: 1000,
+      description: "Original",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: userId,
+    }),
+  );
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.splitTransaction, {
+      transactionId: originalId,
+      splits: [{ projectId, amount: 400 }],
+    });
+
+  const original = await t.run((ctx) => ctx.db.get(originalId));
+  expect(original?.isArchived).toBe(true);
+});
+
+test("imported transaction skips duplicates", async () => {
+  const t = convexTest(schema, modules);
+  const { userId } = await setupTestData(t);
+
+  const result1 = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.createImportedTransaction, {
+      date: Date.now(),
+      importedTransactionId: "tx123",
+      importSource: "sparkasse",
+      amount: 100,
+      description: "Test",
+      counterparty: "Test",
+    });
+  expect(result1).toEqual({ inserted: true });
+
+  const result2 = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.createImportedTransaction, {
+      date: Date.now(),
+      importedTransactionId: "tx123",
+      importSource: "sparkasse",
+      amount: 100,
+      description: "Test",
+      counterparty: "Test",
+    });
+  expect(result2).toEqual({ skipped: true });
+});
+
+test("create expected transaction throws error if user has no project access", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, projectId, categoryId } = await setupTestData(t);
+
+  const memberUserId = await t.run((ctx) =>
+    ctx.db.insert("users", {
+      email: "member@test.com",
+      organizationId,
+      role: "lead",
+    }),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: memberUserId })
+      .mutation(api.transactions.functions.createExpectedTransaction, {
+        projectId,
+        date: Date.now(),
+        amount: -100,
+        description: "Test",
+        counterparty: "Test",
+        categoryId,
+        status: "expected",
+      }),
+  ).rejects.toThrow("Access denied");
+});
+
+test("update transaction", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const transactionId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId,
+      projectId,
+      date: Date.now(),
+      amount: 100,
+      description: "Original",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: userId,
+    }),
+  );
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.transactions.functions.updateTransaction, {
+      transactionId,
+      description: "Updated",
+    });
+
+  const transaction = await t.run((ctx) => ctx.db.get(transactionId));
+  expect(transaction?.description).toBe("Updated");
+});
+
+test("update transaction throws error if not in user organization", async () => {
+  const t = convexTest(schema, modules);
+  const { userId } = await setupTestData(t);
+
+  const otherOrgId = await t.run((ctx) =>
+    ctx.db.insert("organizations", {
+      name: "Other",
+      domain: "other.com",
+      createdBy: "system",
+    }),
+  );
+
+  const otherUserId = await t.run((ctx) =>
+    ctx.db.insert("users", {
+      email: "other@other.com",
+      organizationId: otherOrgId,
+      role: "admin",
+    }),
+  );
+
+  const transactionId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId: otherOrgId,
+      date: Date.now(),
+      amount: 100,
+      description: "Other",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: otherUserId,
+    }),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.transactions.functions.updateTransaction, {
+        transactionId,
+        description: "Hacked",
+      }),
+  ).rejects.toThrow("Access denied");
+});
+
+test("update transaction throws error when no access to current project", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const leadUserId = await t.run((ctx) =>
+    ctx.db.insert("users", {
+      email: "lead@test.com",
+      organizationId,
+      role: "lead",
+    }),
+  );
+
+  const transactionId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId,
+      projectId,
+      date: Date.now(),
+      amount: 100,
+      description: "Test",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: userId,
+    }),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: leadUserId })
+      .mutation(api.transactions.functions.updateTransaction, {
+        transactionId,
+        description: "Updated",
+      }),
+  ).rejects.toThrow("Access denied");
+});
+
+test("update transaction throws error when no access to new project", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const otherProjectId = await t.run((ctx) =>
+    ctx.db.insert("projects", {
+      name: "Other",
+      organizationId,
+      isArchived: false,
+      createdBy: userId,
+    }),
+  );
+
+  const leadUserId = await t.run((ctx) =>
+    ctx.db.insert("users", {
+      email: "lead@test.com",
+      organizationId,
+      role: "lead",
+    }),
+  );
+
+  await t.run((ctx) =>
+    ctx.db.insert("teams", {
+      name: "Team",
+      organizationId,
+      memberIds: [leadUserId],
+      projectIds: [projectId],
+      createdBy: userId,
+    }),
+  );
+
+  const transactionId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId,
+      projectId,
+      date: Date.now(),
+      amount: 100,
+      description: "Test",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: userId,
+    }),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: leadUserId })
+      .mutation(api.transactions.functions.updateTransaction, {
+        transactionId,
+        projectId: otherProjectId,
+      }),
+  ).rejects.toThrow("Access denied");
+});
+
+test("split transaction throws error for splitting transactions in wrong organization", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  const otherOrgId = await t.run((ctx) =>
+    ctx.db.insert("organizations", {
+      name: "Other",
+      domain: "other.com",
+      createdBy: "system",
+    }),
+  );
+
+  const otherUserId = await t.run((ctx) =>
+    ctx.db.insert("users", {
+      email: "other@other.com",
+      organizationId: otherOrgId,
+      role: "admin",
+    }),
+  );
+
+  const transactionId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId: otherOrgId,
+      date: Date.now(),
+      amount: 1000,
+      description: "Other",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: otherUserId,
+    }),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.transactions.functions.splitTransaction, {
+        transactionId,
+        splits: [{ projectId, amount: 500 }],
+      }),
+  ).rejects.toThrow("Access denied");
+});
+
+test("throw error if trying to delete expected transaction without having permission", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const transactionId = await t.run((ctx) =>
+    ctx.db.insert("transactions", {
+      organizationId,
+      projectId,
+      date: Date.now(),
+      amount: 100,
+      description: "Processed",
+      counterparty: "Test",
+      status: "processed",
+      importedBy: userId,
+    }),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.transactions.functions.deleteExpectedTransaction, {
+        transactionId,
+      }),
+  ).rejects.toThrow("Access denied");
+});
