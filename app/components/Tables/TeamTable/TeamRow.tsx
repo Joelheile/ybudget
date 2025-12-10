@@ -12,7 +12,9 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(team.name);
 
-  const allProjects = useQuery(api.projects.queries.getAllOrganizationProjects);
+  const allProjects = useQuery(api.projects.queries.getAllProjects, {
+    includeArchived: true,
+  });
   const assignProject = useMutation(api.teams.functions.assignProjectToTeam);
   const removeProject = useMutation(api.teams.functions.removeProjectFromTeam);
   const renameTeam = useMutation(api.teams.functions.renameTeam);
