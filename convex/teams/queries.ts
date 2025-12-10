@@ -7,18 +7,14 @@ export const getAllTeams = query({
     const user = await getCurrentUser(ctx);
     return ctx.db
       .query("teams")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId),
-      )
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
       .collect();
   },
 });
 
 export const getTeam = query({
   args: { teamId: v.id("teams") },
-  handler: async (ctx, args) => {
-    return ctx.db.get(args.teamId);
-  },
+  handler: async (ctx, args) => ctx.db.get(args.teamId),
 });
 
 export const getUserTeams = query({
@@ -27,17 +23,11 @@ export const getUserTeams = query({
     const user = await getCurrentUser(ctx);
     const teams = await ctx.db
       .query("teams")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId),
-      )
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
       .collect();
 
     return teams
       .filter((team) => team.memberIds.includes(args.userId))
-      .map((team) => ({
-        teamId: team._id,
-        teamName: team.name,
-        projectCount: team.projectIds.length,
-      }));
+      .map((team) => ({ teamId: team._id, teamName: team.name, projectCount: team.projectIds.length }));
   },
 });
