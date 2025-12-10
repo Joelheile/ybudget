@@ -17,6 +17,13 @@ export async function setupTestData(test: ReturnType<typeof convexTest>) {
       role: "admin",
     });
 
+    await ctx.db.insert("projects", {
+      name: "Rücklagen",
+      organizationId,
+      isArchived: false,
+      createdBy: userId,
+    });
+
     const projectId = await ctx.db.insert("projects", {
       name: "Test Project",
       organizationId,

@@ -92,6 +92,10 @@ export const archiveProject = mutation({
     const user = await getCurrentUser(ctx);
     const project = await ctx.db.get(args.projectId);
 
+    if (project?.name === "Rücklagen" && !project.parentId) {
+      throw new Error("Rücklagen kann nicht archiviert werden");
+    }
+
     await ctx.db.patch(args.projectId, { isArchived: true });
     await addLog(
       ctx,
