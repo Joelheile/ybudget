@@ -16,19 +16,6 @@ test("create project", async () => {
   expect(project?.name).toBe("New Project");
 });
 
-test("archive project", async () => {
-  const t = convexTest(schema, modules);
-  const { userId, projectId } = await setupTestData(t);
-
-  await t
-    .withIdentity({ subject: userId })
-    .mutation(api.projects.functions.archiveProject, { projectId });
-
-  const project = await t.run((ctx) => ctx.db.get(projectId));
-  expect(project?.isArchived).toBe(true);
-});
-
-
 test("rename project", async () => {
   const t = convexTest(schema, modules);
   const { userId, projectId } = await setupTestData(t);
@@ -39,6 +26,18 @@ test("rename project", async () => {
 
   const project = await t.run((ctx) => ctx.db.get(projectId));
   expect(project?.name).toBe("Renamed");
+});
+
+test("archive project", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.archiveProject, { projectId });
+
+  const project = await t.run((ctx) => ctx.db.get(projectId));
+  expect(project?.isArchived).toBe(true);
 });
 
 test("create project throws error if free tier limit is reached", async () => {
@@ -57,13 +56,11 @@ test("create project throws error if free tier limit is reached", async () => {
   }
 
   await expect(
-    t
-      .withIdentity({ subject: userId })
-      .mutation(api.projects.functions.createProject, { name: "Eleventh" }),
+    t.withIdentity({ subject: userId }).mutation(api.projects.functions.createProject, { name: "Eleventh" }),
   ).rejects.toThrow("Limit");
 });
 
-test("create project works if user has premium", async () => {
+test("create project goes over limit if user has premium", async () => {
   const t = convexTest(schema, modules);
   const { organizationId, userId } = await setupTestData(t);
 
@@ -94,59 +91,48 @@ test("create project works if user has premium", async () => {
   expect(projectId).toBeDefined();
 });
 
-test("rename project throws error when project is not found", async () => {
+test("rename project throws error if project is not found", async () => {
   const t = convexTest(schema, modules);
-  const { organizationId, userId } = await setupTestData(t);
+  const { userId, projectId } = await setupTestData(t);
 
-  const fakeProjectId = await t.run(async (ctx) => {
-    const id = await ctx.db.insert("projects", {
-      name: "Temp",
-      organizationId,
-      isArchived: false,
-      createdBy: userId,
-    });
-    await ctx.db.delete(id);
-    return id;
-  });
+  await t.run((ctx) => ctx.db.delete(projectId));
 
   await expect(
-    t
-      .withIdentity({ subject: userId })
-      .mutation(api.projects.functions.renameProject, {
-        projectId: fakeProjectId,
-        name: "New",
-      }),
-  ).rejects.toThrow("Project not found");
+    t.withIdentity({ subject: userId }).mutation(api.projects.functions.renameProject, { projectId, name: "New" }),
+  ).rejects.toThrow("not found");
 });
 
-test("rename project throws error if project is not in user organization", async () => {
+test("rename project throws for wrong organization", async () => {
   const t = convexTest(schema, modules);
   const { userId } = await setupTestData(t);
 
   const otherOrgId = await t.run((ctx) =>
-    ctx.db.insert("organizations", {
-      name: "Other Org",
-      domain: "other.com",
-      createdBy: "system",
-    }),
+    ctx.db.insert("organizations", { name: "Other", domain: "other.com", createdBy: "system" }),
   );
 
   const otherProjectId = await t.run((ctx) =>
-    ctx.db.insert("projects", {
-      name: "Other Project",
-      organizationId: otherOrgId,
-      isArchived: false,
-      createdBy: userId,
-    }),
+    ctx.db.insert("projects", { name: "Other", organizationId: otherOrgId, isArchived: false, createdBy: userId }),
   );
 
   await expect(
-    t
-      .withIdentity({ subject: userId })
-      .mutation(api.projects.functions.renameProject, {
-        projectId: otherProjectId,
-        name: "New",
-      }),
-  ).rejects.toThrow("Access denied");
+    t.withIdentity({ subject: userId }).mutation(api.projects.functions.renameProject, { projectId: otherProjectId, name: "New" }),
+  ).rejects.toThrow("denied");
 });
 
+test("cannot archive reserves project", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId } = await setupTestData(t);
+
+  const ruecklagenId = await t.run((ctx) =>
+    ctx.db
+      .query("projects")
+      .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+      .filter((q) => q.eq(q.field("name"), "Rücklagen"))
+      .first()
+      .then((p) => p!._id),
+  );
+
+  await expect(
+    t.withIdentity({ subject: userId }).mutation(api.projects.functions.archiveProject, { projectId: ruecklagenId }),
+  ).rejects.toThrow("Rücklagen");
+});

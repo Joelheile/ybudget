@@ -18,26 +18,18 @@ export const createProject = mutation({
 
     const activePayment = await ctx.db
       .query("payments")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId),
-      )
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
       .filter((q) => q.eq(q.field("status"), "completed"))
       .first();
 
-    const isPremium = activePayment !== null;
-
-    if (!isPremium) {
-      const existingProjects = await ctx.db
+    if (!activePayment) {
+      const projects = await ctx.db
         .query("projects")
-        .withIndex("by_organization", (q) =>
-          q.eq("organizationId", user.organizationId),
-        )
+        .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
         .collect();
 
-      if (existingProjects.length >= FREE_TIER_LIMIT) {
-        throw new Error(
-          `Du hast das Limit von ${FREE_TIER_LIMIT} Projekten erreicht. Bitte upgrade auf Premium.`,
-        );
+      if (projects.length >= FREE_TIER_LIMIT) {
+        throw new Error(`Du hast das Limit von ${FREE_TIER_LIMIT} Projekten erreicht. Bitte upgrade auf Premium.`);
       }
     }
 
@@ -50,15 +42,7 @@ export const createProject = mutation({
       createdBy: user._id,
     });
 
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "project.create",
-      projectId,
-      args.name,
-    );
-
+    await addLog(ctx, user.organizationId, user._id, "project.create", projectId, args.name);
     return projectId;
   },
 });
@@ -69,19 +53,12 @@ export const renameProject = mutation({
     await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.organizationId !== user.organizationId) {
-      throw new Error(!project ? "Project not found" : "Access denied");
-    }
+
+    if (!project) throw new Error("Project not found");
+    if (project.organizationId !== user.organizationId) throw new Error("Access denied");
 
     await ctx.db.patch(args.projectId, { name: args.name });
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "project.rename",
-      args.projectId,
-      `${project.name} → ${args.name}`,
-    );
+    await addLog(ctx, user.organizationId, user._id, "project.rename", args.projectId, `${project.name} → ${args.name}`);
   },
 });
 
@@ -97,13 +74,6 @@ export const archiveProject = mutation({
     }
 
     await ctx.db.patch(args.projectId, { isArchived: true });
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "project.archive",
-      args.projectId,
-      project?.name,
-    );
+    await addLog(ctx, user.organizationId, user._id, "project.archive", args.projectId, project?.name);
   },
 });
