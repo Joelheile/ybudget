@@ -20,7 +20,7 @@ export default function ProjectDetail() {
   const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const project = useQuery(api.projects.queries.getProjectById, {
-    projectId,
+    projectId: projectId as Id<"projects">,
   });
 
   const {

@@ -60,8 +60,7 @@ export function TravelReimbursementFormUI({
     api.users.functions.updateBankDetails
   );
 
-  const [selectedProjectId, setSelectedProjectId] =
-    useState<Id<"projects"> | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [bankDetails, setBankDetails] =
     useState<BankDetails>(defaultBankDetails);
   const [editingBank, setEditingBank] = useState(false);
@@ -132,7 +131,7 @@ export function TravelReimbursementFormUI({
       return;
     }
     await createTravelReimbursement({
-      projectId: selectedProjectId,
+      projectId: selectedProjectId as Id<"projects">,
       amount: totalAmount,
       ...bankDetails,
       ...travelInfo,
@@ -145,10 +144,8 @@ export function TravelReimbursementFormUI({
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="w-[200px]">
         <SelectProject
-          value={selectedProjectId || ""}
-          onValueChange={(value) =>
-            setSelectedProjectId(value ? (value as Id<"projects">) : null)
-          }
+          value={selectedProjectId}
+          onValueChange={setSelectedProjectId}
         />
       </div>
 
