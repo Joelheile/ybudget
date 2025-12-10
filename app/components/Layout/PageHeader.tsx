@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardDropdown } from "@/components/Dashboard/DashboardDropdown";
 import { AddDonorDialog } from "@/components/Dialogs/AddDonorDialog";
 import { CreateCategoryDialog } from "@/components/Dialogs/CreateCategoryDialog";
 import { CreateProjectDialog } from "@/components/Dialogs/CreateProjectDialog";
@@ -8,9 +7,19 @@ import { RangeCalendarToggle } from "@/components/RangeCalendar/RangeCalendarTog
 import { ImportTransactionsSheet } from "@/components/Sheets/ImportTransactionsSheet";
 import { TransactionSheet } from "@/components/Sheets/TransactionSheet";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -31,6 +40,7 @@ export function PageHeader({
   showRangeCalendar = false,
 }: PageHeaderProps) {
   const router = useRouter();
+  const isAdmin = useIsAdmin();
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
   const [isIncomeOpen, setIsIncomeOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -108,16 +118,43 @@ export function PageHeader({
             <div className="flex flex-row gap-4">
               {showRangeCalendar && <RangeCalendarToggle />}
 
-              <div id="tour-add-dropdown">
-                <DashboardDropdown
-                  onOpenExpense={() => setIsExpenseOpen(true)}
-                  onOpenIncome={() => setIsIncomeOpen(true)}
-                  onOpenImport={() => setIsImportOpen(true)}
-                  onOpenDonor={() => setIsDonorOpen(true)}
-                  onOpenCategory={() => setIsCategoryOpen(true)}
-                  onOpenProject={() => setIsProjectOpen(true)}
-                />
-              </div>
+              {isAdmin && (
+                <div id="tour-add-dropdown">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="default">Hinzufügen</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-auto mr-4" align="start">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem onSelect={() => setIsExpenseOpen(true)}>
+                          <span className="font-semibold"> Ausgabe planen</span>
+                          <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setIsIncomeOpen(true)}>
+                          <span className="font-semibold"> Einnahme planen</span>
+                          <DropdownMenuShortcut>⌘I</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => setIsProjectOpen(true)}>
+                          <span> Projekt erstellen</span>
+                          <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setIsDonorOpen(true)}>
+                          <span> Förderer hinzufügen</span>
+                          <DropdownMenuShortcut>⇧⌘F</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setIsCategoryOpen(true)}>
+                          <span> Kategorie hinzufügen</span>
+                          <DropdownMenuShortcut>⇧⌘K</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setIsImportOpen(true)}>
+                          CSV importieren
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           </div>
         </div>
