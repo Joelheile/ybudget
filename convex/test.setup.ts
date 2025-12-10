@@ -30,6 +30,14 @@ export async function setupTestData(test: ReturnType<typeof convexTest>) {
       approved: true,
     });
 
-    return { organizationId, userId, projectId, categoryId };
+    const donorId = await ctx.db.insert("donors", {
+      name: "Test Donor",
+      type: "donation",
+      allowedTaxSpheres: ["non-profit"],
+      organizationId,
+      createdBy: userId,
+    });
+
+    return { organizationId, userId, projectId, categoryId, donorId };
   });
 }
