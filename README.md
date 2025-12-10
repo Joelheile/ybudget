@@ -12,11 +12,15 @@ Simple, affordable, intuitive and open-source.
 
 ## Features
 
-- 📊 **Budget Planning:** Organize projects by donors and already mark expected income and expenses
-- 💳 **Transaction Import:** Import CSV from Sparkasse, Volksbank, & Moss and use smart matching to match expected expenses with the actual bank ones
+- 📊 **Dashboard & Charts:** Visualize cashflow with income, expenses, and balance trends
+- 💳 **Transaction Import:** Import CSV from Sparkasse, Volksbank, & Moss
+- 🔄 **Budget Transfers:** Move budgets between projects when plans change
 - 🎯 **Project Organization:** Assign expenses to projects, see remaining budgets at a glance
 - 🧾 **Reimbursements:** Submit expense and travel reimbursements with receipt uploads
 - 👥 **Team Management:** Organize members into teams with project access control
+- 📤 **Donor Export:** Export transactions by donor to CSV
+- ✉️ **Email Invitations:** Invite team members via email (powered by Resend)
+- 🎓 **Guided Onboarding:** Interactive tour for new users
 - 📝 **Audit Logs:** Track all actions for transparency and compliance
 
 ## Tech Stack
@@ -27,6 +31,17 @@ Simple, affordable, intuitive and open-source.
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
+
+## Architecture
+
+YBudget uses Next.js 15 App Router with protected and public routes:
+
+- `app/(public)/` → Login and public pages
+- `app/(protected)/` → Authenticated dashboard with sidebar navigation
+
+Data flows through Convex for real-time sync. Every query is scoped by `organizationId` for data isolation.
+
+**[Database Schema](docs/schema.md)** - Full ER diagram with all tables and relationships
 
 ## Self-Hosting
 
@@ -71,8 +86,18 @@ We're building a tool to support NGOs on their mission by making budgeting as ea
 5. Push to your fork (`git push origin feat/amazing-feature`)
 6. Open a Pull Request
 
-**Ideas, feedback, or questions?**  
+**Ideas, feedback, or questions?**
 📧 [team@ybudget.de](mailto:team@ybudget.de) | 🐛 [Open an issue](https://github.com/joelheile/ybudget/issues)
+
+## Testing
+
+```bash
+pnpm vitest run              # Unit & integration tests
+pnpm vitest run --coverage   # Get test coverage report
+pnpm exec playwright test    # E2E tests
+```
+
+GitHub Actions runs both test suites on every push and PR.
 
 ## Security
 
