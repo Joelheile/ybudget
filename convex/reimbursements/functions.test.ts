@@ -50,7 +50,9 @@ test("create travel reimbursement", async () => {
   const travelDetails = await t.run((ctx) =>
     ctx.db
       .query("travelDetails")
-      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", reimbursementId))
+      .withIndex("by_reimbursement", (q) =>
+        q.eq("reimbursementId", reimbursementId),
+      )
       .first(),
   );
   expect(travelDetails?.destination).toBe("Berlin");
@@ -62,7 +64,9 @@ test("delete reimbursement", async () => {
 
   await t
     .withIdentity({ subject: userId })
-    .mutation(api.reimbursements.functions.deleteReimbursement, { reimbursementId });
+    .mutation(api.reimbursements.functions.deleteReimbursement, {
+      reimbursementId,
+    });
 
   const deleted = await t.run((ctx) => ctx.db.get(reimbursementId));
   expect(deleted).toBeNull();
@@ -112,12 +116,16 @@ test("delete travel reimbursement deletes travel details", async () => {
 
   await t
     .withIdentity({ subject: userId })
-    .mutation(api.reimbursements.functions.deleteReimbursement, { reimbursementId: travelReimbursementId });
+    .mutation(api.reimbursements.functions.deleteReimbursement, {
+      reimbursementId: travelReimbursementId,
+    });
 
   const details = await t.run((ctx) =>
     ctx.db
       .query("travelDetails")
-      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", travelReimbursementId))
+      .withIndex("by_reimbursement", (q) =>
+        q.eq("reimbursementId", travelReimbursementId),
+      )
       .first(),
   );
   expect(details).toBeNull();

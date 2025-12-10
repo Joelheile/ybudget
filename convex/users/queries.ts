@@ -28,7 +28,9 @@ export const listOrganizationUsers = query({
     const user = await getCurrentUser(ctx);
     return ctx.db
       .query("users")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .collect();
   },
 });

@@ -16,7 +16,6 @@ test("return existing organization when user already has one", async () => {
   expect(result.isNew).toBe(false);
 });
 
-
 test("add user to existing organization by domain", async () => {
   const t = convexTest(schema, modules);
   const { organizationId } = await setupTestData(t);
@@ -34,7 +33,6 @@ test("add user to existing organization by domain", async () => {
   const user = await t.run((ctx) => ctx.db.get(newUserId));
   expect(user?.role).toBe("member");
 });
-
 
 test("create new organization with reserves project", async () => {
   const t = convexTest(schema, modules);
@@ -57,12 +55,13 @@ test("create new organization with reserves project", async () => {
   const project = await t.run((ctx) =>
     ctx.db
       .query("projects")
-      .withIndex("by_organization", (q) => q.eq("organizationId", result.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", result.organizationId),
+      )
       .first(),
   );
   expect(project?.name).toBe("Rücklagen");
 });
-
 
 test("throw error when email has no @ (can't split domain)", async () => {
   const t = convexTest(schema, modules);

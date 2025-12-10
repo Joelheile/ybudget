@@ -16,7 +16,6 @@ test("get all donors", async () => {
 });
 
 test("get donors by project", async () => {
-
   const t = convexTest(schema, modules);
   const { organizationId, userId, projectId, donorId } = await setupTestData(t);
 

@@ -11,14 +11,22 @@ export const getAllProjects = query({
     if (!userId) return [];
 
     const user = await getCurrentUser(ctx);
-    const accessibleIds = await getUserAccessibleProjectIds(ctx, user._id, user.organizationId);
+    const accessibleIds = await getUserAccessibleProjectIds(
+      ctx,
+      user._id,
+      user.organizationId,
+    );
 
     const projects = await ctx.db
       .query("projects")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .collect();
 
-    return projects.filter((p) => !p.isArchived && accessibleIds.includes(p._id));
+    return projects.filter(
+      (p) => !p.isArchived && accessibleIds.includes(p._id),
+    );
   },
 });
 
@@ -29,7 +37,11 @@ export const getProjectById = query({
     if (!userId) return null;
 
     const user = await getCurrentUser(ctx);
-    const accessibleIds = await getUserAccessibleProjectIds(ctx, user._id, user.organizationId);
+    const accessibleIds = await getUserAccessibleProjectIds(
+      ctx,
+      user._id,
+      user.organizationId,
+    );
 
     if (!accessibleIds.includes(args.projectId)) throw new Error("No access");
 
@@ -42,7 +54,9 @@ export const getDepartments = query({
     const user = await getCurrentUser(ctx);
     return ctx.db
       .query("projects")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .filter((q) => q.eq(q.field("parentId"), undefined))
       .collect();
   },

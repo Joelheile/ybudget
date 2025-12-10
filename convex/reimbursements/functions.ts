@@ -42,7 +42,14 @@ export const createReimbursement = mutation({
       await ctx.db.insert("receipts", { reimbursementId, ...receipt });
     }
 
-    await addLog(ctx, user.organizationId, user._id, "reimbursement.create", reimbursementId, `${args.amount}€`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "reimbursement.create",
+      reimbursementId,
+      `${args.amount}€`,
+    );
     return reimbursementId;
   },
 });
@@ -113,7 +120,14 @@ export const createTravelReimbursement = mutation({
       await ctx.db.insert("receipts", { reimbursementId, ...receipt });
     }
 
-    await addLog(ctx, user.organizationId, user._id, "reimbursement.create", reimbursementId, `Travel ${args.amount}€`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "reimbursement.create",
+      reimbursementId,
+      `Travel ${args.amount}€`,
+    );
     return reimbursementId;
   },
 });
@@ -134,7 +148,9 @@ export const deleteReimbursement = mutation({
 
     const receipts = await ctx.db
       .query("receipts")
-      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))
+      .withIndex("by_reimbursement", (q) =>
+        q.eq("reimbursementId", args.reimbursementId),
+      )
       .collect();
     for (const receipt of receipts) {
       await ctx.storage.delete(receipt.fileStorageId);
@@ -144,13 +160,22 @@ export const deleteReimbursement = mutation({
     if (reimbursement.type === "travel") {
       const travelDetails = await ctx.db
         .query("travelDetails")
-        .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", args.reimbursementId))
+        .withIndex("by_reimbursement", (q) =>
+          q.eq("reimbursementId", args.reimbursementId),
+        )
         .first();
       if (travelDetails) await ctx.db.delete(travelDetails._id);
     }
 
     await ctx.db.delete(args.reimbursementId);
-    await addLog(ctx, user.organizationId, user._id, "reimbursement.delete", args.reimbursementId, `${reimbursement.amount}€`);
+    await addLog(
+      ctx,
+      user.organizationId,
+      user._id,
+      "reimbursement.delete",
+      args.reimbursementId,
+      `${reimbursement.amount}€`,
+    );
   },
 });
 
@@ -213,4 +238,3 @@ export const rejectReimbursement = mutation({
     );
   },
 });
-

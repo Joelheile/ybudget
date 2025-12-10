@@ -97,7 +97,6 @@ test("parses moss date with correct format (DD/MM/YYYY)", () => {
   expect(new Date(result.date).getDate()).toBe(31);
 });
 
-
 test("creates new import id for sparkassen imports", () => {
   const result = mapCSVRow(
     { Buchungstag: "", Betrag: "100", Verwendungszweck: "" },

@@ -58,7 +58,9 @@ test("get project by id returns null for unauthenticated user", async () => {
   const t = convexTest(schema, modules);
   const { projectId } = await setupTestData(t);
 
-  const project = await t.query(api.projects.queries.getProjectById, { projectId });
+  const project = await t.query(api.projects.queries.getProjectById, {
+    projectId,
+  });
   expect(project).toBeNull();
 });
 
@@ -67,15 +69,28 @@ test("get project by id throws when no access", async () => {
   const { userId } = await setupTestData(t);
 
   const otherOrgId = await t.run((ctx) =>
-    ctx.db.insert("organizations", { name: "Other", domain: "other.com", createdBy: "system" }),
+    ctx.db.insert("organizations", {
+      name: "Other",
+      domain: "other.com",
+      createdBy: "system",
+    }),
   );
 
   const otherProjectId = await t.run((ctx) =>
-    ctx.db.insert("projects", { name: "Other", organizationId: otherOrgId, isArchived: false, createdBy: userId }),
+    ctx.db.insert("projects", {
+      name: "Other",
+      organizationId: otherOrgId,
+      isArchived: false,
+      createdBy: userId,
+    }),
   );
 
   await expect(
-    t.withIdentity({ subject: userId }).query(api.projects.queries.getProjectById, { projectId: otherProjectId }),
+    t
+      .withIdentity({ subject: userId })
+      .query(api.projects.queries.getProjectById, {
+        projectId: otherProjectId,
+      }),
   ).rejects.toThrow("access");
 });
 

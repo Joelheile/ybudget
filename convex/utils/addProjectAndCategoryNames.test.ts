@@ -6,7 +6,8 @@ import { modules, setupTestData } from "../test.setup";
 
 test("adds project and category names", async () => {
   const t = convexTest(schema, modules);
-  const { organizationId, userId, projectId, categoryId } = await setupTestData(t);
+  const { organizationId, userId, projectId, categoryId } =
+    await setupTestData(t);
 
   await t.run((ctx) =>
     ctx.db.insert("transactions", {

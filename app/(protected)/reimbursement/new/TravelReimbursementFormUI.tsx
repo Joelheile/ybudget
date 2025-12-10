@@ -54,10 +54,10 @@ export function TravelReimbursementFormUI({
 }) {
   const router = useRouter();
   const createTravelReimbursement = useMutation(
-    api.reimbursements.functions.createTravelReimbursement
+    api.reimbursements.functions.createTravelReimbursement,
   );
   const updateUserBankDetails = useMutation(
-    api.users.functions.updateBankDetails
+    api.users.functions.updateBankDetails,
   );
 
   const [selectedProjectId, setSelectedProjectId] = useState("");
@@ -94,7 +94,7 @@ export function TravelReimbursementFormUI({
 
   const updateReceipt = (type: CostType, updates: Partial<TravelReceipt>) => {
     setReceipts(
-      receipts.map((r) => (r.costType === type ? { ...r, ...updates } : r))
+      receipts.map((r) => (r.costType === type ? { ...r, ...updates } : r)),
     );
   };
 
@@ -109,7 +109,7 @@ export function TravelReimbursementFormUI({
     (travelInfo.mealAllowanceDailyBudget || 0);
   const totalAmount = receiptsTotal + mealAllowanceTotal;
   const allReceiptsComplete = receipts.every(
-    (r) => r.grossAmount > 0 && r.fileStorageId && r.companyName
+    (r) => r.grossAmount > 0 && r.fileStorageId && r.companyName,
   );
   const hasExpenses = receipts.length > 0 || mealAllowanceTotal > 0;
   const canSubmit =
@@ -275,7 +275,7 @@ export function TravelReimbursementFormUI({
                         onChange={(e) => {
                           const km = Math.max(
                             0,
-                            Math.floor(parseFloat(e.target.value) || 0)
+                            Math.floor(parseFloat(e.target.value) || 0),
                           );
                           updateReceipt(receipt.costType, {
                             kilometers: km,
@@ -306,7 +306,7 @@ export function TravelReimbursementFormUI({
                       onChange={(e) => {
                         const amount = Math.max(
                           0,
-                          parseFloat(e.target.value) || 0
+                          parseFloat(e.target.value) || 0,
                         );
                         updateReceipt(receipt.costType, {
                           grossAmount: amount,

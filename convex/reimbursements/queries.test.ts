@@ -51,7 +51,9 @@ test("get travel reimbursement with details", async () => {
 
   const reimbursement = await t
     .withIdentity({ subject: userId })
-    .query(api.reimbursements.queries.getReimbursement, { reimbursementId: travelReimbursementId });
+    .query(api.reimbursements.queries.getReimbursement, {
+      reimbursementId: travelReimbursementId,
+    });
 
   expect(reimbursement?.type).toBe("travel");
 });

@@ -53,11 +53,12 @@ export const getUnassignedProcessedTransactions = query({
       )
       .collect();
 
-    const unassigned = allTransactions.filter((t) =>
-      !t.isArchived &&
-      t.status === "processed" &&
-      !t.splitFromTransactionId &&
-      (!t.projectId || !t.categoryId || (t.amount > 0 && !t.donorId))
+    const unassigned = allTransactions.filter(
+      (t) =>
+        !t.isArchived &&
+        t.status === "processed" &&
+        !t.splitFromTransactionId &&
+        (!t.projectId || !t.categoryId || (t.amount > 0 && !t.donorId)),
     );
 
     return unassigned.sort((first, second) => second.date - first.date);

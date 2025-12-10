@@ -22,7 +22,10 @@ export const initializeOrganization = mutation({
       .first();
 
     if (existingOrg) {
-      await ctx.db.patch(user._id, { organizationId: existingOrg._id, role: "member" });
+      await ctx.db.patch(user._id, {
+        organizationId: existingOrg._id,
+        role: "member",
+      });
       return { organizationId: existingOrg._id, isNew: false };
     }
 

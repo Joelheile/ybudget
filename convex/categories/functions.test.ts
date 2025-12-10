@@ -8,9 +8,11 @@ test("get all categories", async () => {
   const t = convexTest(schema, modules);
   const { categoryId } = await setupTestData(t);
 
-  const categories = await t.query(api.categories.functions.getAllCategories, {});
+  const categories = await t.query(
+    api.categories.functions.getAllCategories,
+    {},
+  );
 
   expect(categories).toHaveLength(1);
   expect(categories[0]._id).toBe(categoryId);
 });
-

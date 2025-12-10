@@ -7,7 +7,9 @@ export const getAllTeams = query({
     const user = await getCurrentUser(ctx);
     return ctx.db
       .query("teams")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .collect();
   },
 });
@@ -23,11 +25,17 @@ export const getUserTeams = query({
     const user = await getCurrentUser(ctx);
     const teams = await ctx.db
       .query("teams")
-      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
       .collect();
 
     return teams
       .filter((team) => team.memberIds.includes(args.userId))
-      .map((team) => ({ teamId: team._id, teamName: team.name, projectCount: team.projectIds.length }));
+      .map((team) => ({
+        teamId: team._id,
+        teamName: team.name,
+        projectCount: team.projectIds.length,
+      }));
   },
 });

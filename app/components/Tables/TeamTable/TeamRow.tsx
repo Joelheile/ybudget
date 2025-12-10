@@ -43,7 +43,7 @@ export default function TeamRow({ team }: { team: Doc<"teams"> }) {
       toast.success("Team umbenannt");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Fehler beim Umbenennen"
+        error instanceof Error ? error.message : "Fehler beim Umbenennen",
       );
       setEditedName(team.name);
     } finally {

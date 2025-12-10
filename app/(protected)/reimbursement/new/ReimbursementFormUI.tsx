@@ -23,19 +23,35 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { ReceiptUpload } from "./ReceiptUpload";
 
-type BankDetails = Pick<Doc<"reimbursements">, "iban" | "bic" | "accountHolder">;
-type Receipt = Omit<Doc<"receipts">, "_id" | "_creationTime" | "reimbursementId" | "costType" | "kilometers">;
+type BankDetails = Pick<
+  Doc<"reimbursements">,
+  "iban" | "bic" | "accountHolder"
+>;
+type Receipt = Omit<
+  Doc<"receipts">,
+  "_id" | "_creationTime" | "reimbursementId" | "costType" | "kilometers"
+>;
 
 const calculateNet = (gross: number, taxRate: number) =>
   gross / (1 + taxRate / 100);
 
-export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails: BankDetails }) {
+export function ReimbursementFormUI({
+  defaultBankDetails,
+}: {
+  defaultBankDetails: BankDetails;
+}) {
   const router = useRouter();
-  const createReimbursement = useMutation(api.reimbursements.functions.createReimbursement);
-  const updateUserBankDetails = useMutation(api.users.functions.updateBankDetails);
+  const createReimbursement = useMutation(
+    api.reimbursements.functions.createReimbursement,
+  );
+  const updateUserBankDetails = useMutation(
+    api.users.functions.updateBankDetails,
+  );
 
-  const [selectedProjectId, setSelectedProjectId] = useState<Id<"projects"> | null>(null);
-  const [bankDetails, setBankDetails] = useState<BankDetails>(defaultBankDetails);
+  const [selectedProjectId, setSelectedProjectId] =
+    useState<Id<"projects"> | null>(null);
+  const [bankDetails, setBankDetails] =
+    useState<BankDetails>(defaultBankDetails);
   const [editingBank, setEditingBank] = useState(false);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [draft, setDraft] = useState<Partial<Receipt>>({ taxRate: 19 });
@@ -61,7 +77,13 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
   };
 
   const handleAddReceipt = () => {
-    if (!draft.receiptNumber || !draft.companyName || !draft.grossAmount || !draft.fileStorageId || !draft.receiptDate) {
+    if (
+      !draft.receiptNumber ||
+      !draft.companyName ||
+      !draft.grossAmount ||
+      !draft.fileStorageId ||
+      !draft.receiptDate
+    ) {
       toast.error("Bitte Pflichtfelder ausfüllen");
       return;
     }
@@ -102,7 +124,9 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
       <div className="w-[200px]">
         <SelectProject
           value={selectedProjectId || ""}
-          onValueChange={(value) => setSelectedProjectId(value ? (value as Id<"projects">) : null)}
+          onValueChange={(value) =>
+            setSelectedProjectId(value ? (value as Id<"projects">) : null)
+          }
         />
       </div>
 
@@ -113,7 +137,9 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
             <Label>Name/Firma *</Label>
             <Input
               value={draft.companyName || ""}
-              onChange={(e) => setDraft({ ...draft, companyName: e.target.value })}
+              onChange={(e) =>
+                setDraft({ ...draft, companyName: e.target.value })
+              }
               placeholder="z.B. Amazon, Deutsche Bahn"
             />
           </div>
@@ -121,7 +147,9 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
             <Label>Beleg-Nr. *</Label>
             <Input
               value={draft.receiptNumber || ""}
-              onChange={(e) => setDraft({ ...draft, receiptNumber: e.target.value })}
+              onChange={(e) =>
+                setDraft({ ...draft, receiptNumber: e.target.value })
+              }
               placeholder="z.B. INV-2024-001"
             />
           </div>
@@ -131,7 +159,9 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
           <Label>Beschreibung</Label>
           <Textarea
             value={draft.description || ""}
-            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+            onChange={(e) =>
+              setDraft({ ...draft, description: e.target.value })
+            }
             placeholder="z.B. Büromaterial für Q1"
             rows={2}
             className="resize-none"
@@ -152,7 +182,12 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
               type="number"
               step="0.01"
               value={draft.grossAmount || ""}
-              onChange={(e) => setDraft({ ...draft, grossAmount: parseFloat(e.target.value) || 0 })}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  grossAmount: parseFloat(e.target.value) || 0,
+                })
+              }
               placeholder="119,95"
             />
           </div>
@@ -160,7 +195,9 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
             <Label>Wie viel MwSt.?</Label>
             <Select
               value={String(draft.taxRate || 19)}
-              onValueChange={(value) => setDraft({ ...draft, taxRate: parseInt(value) })}
+              onValueChange={(value) =>
+                setDraft({ ...draft, taxRate: parseInt(value) })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -191,7 +228,12 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
           />
         </div>
 
-        <Button onClick={handleAddReceipt} className="w-full" variant="outline" size="lg">
+        <Button
+          onClick={handleAddReceipt}
+          className="w-full"
+          variant="outline"
+          size="lg"
+        >
           <Plus className="size-5 mr-2" />
           Beleg hinzufügen
         </Button>
@@ -202,44 +244,69 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
           <h2 className="text-2xl font-bold">Zusammenfassung</h2>
 
           <div className="flex items-end gap-4">
-            <div className="grid gap-4 flex-1" style={{ gridTemplateColumns: "1fr 2fr 1fr" }}>
+            <div
+              className="grid gap-4 flex-1"
+              style={{ gridTemplateColumns: "1fr 2fr 1fr" }}
+            >
               <div>
-                <Label className="text-xs text-muted-foreground uppercase">Kontoinhaber</Label>
+                <Label className="text-xs text-muted-foreground uppercase">
+                  Kontoinhaber
+                </Label>
                 <Input
                   value={bankDetails.accountHolder}
-                  onChange={(e) => setBankDetails({ ...bankDetails, accountHolder: e.target.value })}
+                  onChange={(e) =>
+                    setBankDetails({
+                      ...bankDetails,
+                      accountHolder: e.target.value,
+                    })
+                  }
                   disabled={!editingBank}
                 />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground uppercase">IBAN</Label>
+                <Label className="text-xs text-muted-foreground uppercase">
+                  IBAN
+                </Label>
                 <Input
                   value={bankDetails.iban}
-                  onChange={(e) => setBankDetails({ ...bankDetails, iban: e.target.value })}
+                  onChange={(e) =>
+                    setBankDetails({ ...bankDetails, iban: e.target.value })
+                  }
                   disabled={!editingBank}
                   placeholder="DE89 3704 0044 0532 0130 00"
                   className="font-mono"
                 />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground uppercase">BIC</Label>
+                <Label className="text-xs text-muted-foreground uppercase">
+                  BIC
+                </Label>
                 <Input
                   value={bankDetails.bic}
-                  onChange={(e) => setBankDetails({ ...bankDetails, bic: e.target.value })}
+                  onChange={(e) =>
+                    setBankDetails({ ...bankDetails, bic: e.target.value })
+                  }
                   disabled={!editingBank}
                   placeholder="COBADEFFXXX"
                   className="font-mono"
                 />
               </div>
             </div>
-            <Button variant={editingBank ? "default" : "outline"} size="sm" onClick={handleBankToggle}>
+            <Button
+              variant={editingBank ? "default" : "outline"}
+              size="sm"
+              onClick={handleBankToggle}
+            >
               {editingBank ? "Speichern" : <Pencil className="size-4" />}
             </Button>
           </div>
 
           <div className="space-y-3">
             {receipts.map((receipt, i) => (
-              <div key={i} className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
+              <div
+                key={i}
+                className="flex items-center justify-between px-3 bg-gray-50 border rounded-md"
+              >
                 <div className="flex items-center gap-8 flex-1">
                   <span className="font-semibold">{receipt.companyName}</span>
                   <span className="text-sm text-muted-foreground">
@@ -247,11 +314,15 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-semibold">{receipt.grossAmount.toFixed(2)} €</span>
+                  <span className="font-semibold">
+                    {receipt.grossAmount.toFixed(2)} €
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setReceipts(receipts.filter((_, j) => j !== i))}
+                    onClick={() =>
+                      setReceipts(receipts.filter((_, j) => j !== i))
+                    }
                     className="hover:bg-destructive/10 hover:text-destructive"
                   >
                     <Trash2 className="size-4" />
@@ -285,7 +356,11 @@ export function ReimbursementFormUI({ defaultBankDetails }: { defaultBankDetails
             </div>
           </div>
 
-          <Button onClick={handleSubmit} className="w-full h-14 font-semibold mt-8" size="lg">
+          <Button
+            onClick={handleSubmit}
+            className="w-full h-14 font-semibold mt-8"
+            size="lg"
+          >
             Zur Genehmigung einreichen
           </Button>
         </div>

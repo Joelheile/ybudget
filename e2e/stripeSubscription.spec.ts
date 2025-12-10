@@ -56,14 +56,20 @@ test.describe.serial("stripe subscription flow", () => {
     });
 
     await page.reload();
-    await expect(page.getByText(`(${FREE_TIER_LIMIT - 1}/${FREE_TIER_LIMIT})`)).toBeVisible();
+    await expect(
+      page.getByText(`(${FREE_TIER_LIMIT - 1}/${FREE_TIER_LIMIT})`),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Projekt hinzufügen" }).click();
-    await expect(page.getByRole("heading", { name: "Neues Projekt/Department erstellen" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Neues Projekt/Department erstellen" }),
+    ).toBeVisible();
     await page.getByLabel("Projektname*").fill("Last Free Project");
     await page.getByRole("button", { name: "Projekt erstellen" }).click();
 
-    await expect(page.getByText(`(${FREE_TIER_LIMIT}/${FREE_TIER_LIMIT})`)).toBeVisible({ timeout: 5000 });
+    await expect(
+      page.getByText(`(${FREE_TIER_LIMIT}/${FREE_TIER_LIMIT})`),
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test("2. Free user gets paywall when limit is reached", async () => {
@@ -80,7 +86,9 @@ test.describe.serial("stripe subscription flow", () => {
     await page.getByRole("menuitem", { name: "YBudget Premium" }).click();
 
     await expect(page.getByText("Ich hoffe YBudget gefällt dir")).toBeVisible();
-    await page.getByRole("button", { name: "Auf YBudget Yearly upgraden" }).click();
+    await page
+      .getByRole("button", { name: "Auf YBudget Yearly upgraden" })
+      .click();
 
     await page.waitForURL(/checkout\.stripe\.com/, { timeout: 15000 });
     expect(page.url()).toContain("checkout.stripe.com");
@@ -88,7 +96,9 @@ test.describe.serial("stripe subscription flow", () => {
 
   test("4. User with subscription (premium user) can create unlimited projects", async () => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Dashboard" }),
+    ).toBeVisible();
 
     const convex = getConvex();
     await convex.mutation(api.testing.functions.createMockPayment, {
@@ -100,7 +110,9 @@ test.describe.serial("stripe subscription flow", () => {
     await expect(page.getByText(`/${FREE_TIER_LIMIT})`)).not.toBeVisible();
 
     await page.getByRole("button", { name: "Projekt hinzufügen" }).click();
-    await expect(page.getByRole("heading", { name: "Neues Projekt/Department erstellen" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Neues Projekt/Department erstellen" }),
+    ).toBeVisible();
     await page.getByLabel("Projektname*").fill("Premium Project");
     await page.getByRole("button", { name: "Projekt erstellen" }).click();
 

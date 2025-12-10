@@ -84,7 +84,10 @@ test("remove team member", async () => {
 
   await t
     .withIdentity({ subject: userId })
-    .mutation(api.teams.functions.removeTeamMember, { teamId, userId: memberUserId });
+    .mutation(api.teams.functions.removeTeamMember, {
+      teamId,
+      userId: memberUserId,
+    });
 
   const team = await t.run((ctx) => ctx.db.get(teamId));
   expect(team?.memberIds).not.toContain(memberUserId);

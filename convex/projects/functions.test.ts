@@ -22,7 +22,10 @@ test("rename project", async () => {
 
   await t
     .withIdentity({ subject: userId })
-    .mutation(api.projects.functions.renameProject, { projectId, name: "Renamed" });
+    .mutation(api.projects.functions.renameProject, {
+      projectId,
+      name: "Renamed",
+    });
 
   const project = await t.run((ctx) => ctx.db.get(projectId));
   expect(project?.name).toBe("Renamed");
@@ -56,7 +59,9 @@ test("create project throws error if free tier limit is reached", async () => {
   }
 
   await expect(
-    t.withIdentity({ subject: userId }).mutation(api.projects.functions.createProject, { name: "Eleventh" }),
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.createProject, { name: "Eleventh" }),
   ).rejects.toThrow("Limit");
 });
 
@@ -98,7 +103,12 @@ test("rename project throws error if project is not found", async () => {
   await t.run((ctx) => ctx.db.delete(projectId));
 
   await expect(
-    t.withIdentity({ subject: userId }).mutation(api.projects.functions.renameProject, { projectId, name: "New" }),
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.renameProject, {
+        projectId,
+        name: "New",
+      }),
   ).rejects.toThrow("not found");
 });
 
@@ -107,15 +117,29 @@ test("rename project throws for wrong organization", async () => {
   const { userId } = await setupTestData(t);
 
   const otherOrgId = await t.run((ctx) =>
-    ctx.db.insert("organizations", { name: "Other", domain: "other.com", createdBy: "system" }),
+    ctx.db.insert("organizations", {
+      name: "Other",
+      domain: "other.com",
+      createdBy: "system",
+    }),
   );
 
   const otherProjectId = await t.run((ctx) =>
-    ctx.db.insert("projects", { name: "Other", organizationId: otherOrgId, isArchived: false, createdBy: userId }),
+    ctx.db.insert("projects", {
+      name: "Other",
+      organizationId: otherOrgId,
+      isArchived: false,
+      createdBy: userId,
+    }),
   );
 
   await expect(
-    t.withIdentity({ subject: userId }).mutation(api.projects.functions.renameProject, { projectId: otherProjectId, name: "New" }),
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.renameProject, {
+        projectId: otherProjectId,
+        name: "New",
+      }),
   ).rejects.toThrow("denied");
 });
 
@@ -126,13 +150,19 @@ test("cannot archive reserves project", async () => {
   const ruecklagenId = await t.run((ctx) =>
     ctx.db
       .query("projects")
-      .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", organizationId),
+      )
       .filter((q) => q.eq(q.field("name"), "Rücklagen"))
       .first()
       .then((p) => p!._id),
   );
 
   await expect(
-    t.withIdentity({ subject: userId }).mutation(api.projects.functions.archiveProject, { projectId: ruecklagenId }),
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.archiveProject, {
+        projectId: ruecklagenId,
+      }),
   ).rejects.toThrow("Rücklagen");
 });

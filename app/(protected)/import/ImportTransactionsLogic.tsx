@@ -20,14 +20,14 @@ export const ImportTransactionsLogic = () => {
   >([]);
 
   const transactions = useQuery(
-    api.transactions.queries.getUnassignedProcessedTransactions
+    api.transactions.queries.getUnassignedProcessedTransactions,
   );
 
   const updateTransaction = useMutation(
-    api.transactions.functions.updateTransaction
+    api.transactions.functions.updateTransaction,
   );
   const splitTransaction = useMutation(
-    api.transactions.functions.splitTransaction
+    api.transactions.functions.splitTransaction,
   );
 
   const current = transactions?.[index] || null;
@@ -37,7 +37,7 @@ export const ImportTransactionsLogic = () => {
       api.transactions.queries.getMatchingRecommendations,
       current
         ? { projectId: projectId ? (projectId as Id<"projects">) : undefined }
-        : "skip"
+        : "skip",
     ) || [];
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export const ImportTransactionsLogic = () => {
   const handleExpectedTransactionSelect = (expectedTransactionId: string) => {
     setSelectedMatch(expectedTransactionId);
     const expected = expectedTransactions.find(
-      (transaction) => transaction._id === expectedTransactionId
+      (transaction) => transaction._id === expectedTransactionId,
     );
     if (expected) {
       if (expected.projectId) setProjectId(expected.projectId);

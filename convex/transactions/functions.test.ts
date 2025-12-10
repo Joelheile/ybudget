@@ -26,7 +26,8 @@ test("create expected transaction", async () => {
 
 test("delete expected transaction", async () => {
   const t = convexTest(schema, modules);
-  const { organizationId, userId, projectId, categoryId } = await setupTestData(t);
+  const { organizationId, userId, projectId, categoryId } =
+    await setupTestData(t);
 
   const id = await t.run((ctx) =>
     ctx.db.insert("transactions", {
@@ -44,7 +45,9 @@ test("delete expected transaction", async () => {
 
   await t
     .withIdentity({ subject: userId })
-    .mutation(api.transactions.functions.deleteExpectedTransaction, { transactionId: id });
+    .mutation(api.transactions.functions.deleteExpectedTransaction, {
+      transactionId: id,
+    });
 
   const deleted = await t.run((ctx) => ctx.db.get(id));
   expect(deleted).toBeNull();
