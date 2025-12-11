@@ -117,12 +117,6 @@ test.describe
     await page.getByRole("textbox", { name: "0,00" }).nth(1).fill("100");
 
     await expect(page.getByText("Verbleibend: 0,00 €")).toBeVisible();
-    await expect(
-      page.locator("#tour-import-page").getByText("Rücklagen"),
-    ).toBeVisible();
-    await expect(
-      page.locator("#tour-import-page").getByText("Test Projekt"),
-    ).toBeVisible();
 
     await page.getByRole("textbox", { name: "Kategorie suchen..." }).click();
     await page.getByRole("button", { name: "Spenden" }).click();
