@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
-const TEST_EMAIL = "importtransactions@test.com";
+const TEST_EMAIL = "import@test.com";
 
 function getConvex() {
   return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);

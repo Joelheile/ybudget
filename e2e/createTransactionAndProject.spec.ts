@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
-const TEST_EMAIL = "user@test.com";
+const TEST_EMAIL = "transaction@test.com";
 
 function getConvex() {
   return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -32,6 +32,7 @@ test("create and delete transaction", async ({ page, context }) => {
   await expect(
     page.getByRole("heading", { name: "Test Authentication" }),
   ).toBeVisible();
+  await page.getByTestId("test-auth-email").fill(TEST_EMAIL);
   await page.getByTestId("test-auth-submit").click();
   await expect(page.getByText("Willkommen bei YBudget :)")).toBeVisible({
     timeout: 10000,

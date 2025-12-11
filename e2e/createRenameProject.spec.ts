@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
-const TEST_EMAIL = "user@test.com";
+const TEST_EMAIL = "project@test.com";
 
 function getConvex() {
   return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -21,6 +21,7 @@ test("create, rename and archive project", async ({ page, context }) => {
   await context.clearCookies();
   await page.goto("/test-auth");
   await page.evaluate(() => localStorage.clear());
+  await page.getByTestId("test-auth-email").fill(TEST_EMAIL);
   await page.getByTestId("test-auth-submit").click();
   await expect(page.getByText("Wie heißt dein Verein?")).toBeVisible({
     timeout: 10000,
