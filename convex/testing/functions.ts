@@ -35,16 +35,73 @@ export const TestingCredentials = ConvexCredentials({
   },
 });
 
-async function deleteByOrganization(
+async function deleteUserAuth(ctx: MutationCtx, userId: Id<"users">) {
+  const sessions = await ctx.db
+    .query("authSessions")
+    .withIndex("userId", (q) => q.eq("userId", userId))
+    .collect();
+  for (const s of sessions) await ctx.db.delete(s._id);
+
+  const accounts = await ctx.db
+    .query("authAccounts")
+    .withIndex("userIdAndProvider", (q) => q.eq("userId", userId))
+    .collect();
+  for (const a of accounts) await ctx.db.delete(a._id);
+}
+
+async function deleteOrganization(
   ctx: MutationCtx,
-  table: "transactions" | "projects" | "donors" | "logs" | "payments",
   organizationId: Id<"organizations">,
 ) {
-  const docs = await ctx.db
-    .query(table)
+  const reimbursements = await ctx.db
+    .query("reimbursements")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
     .collect();
-  for (const doc of docs) await ctx.db.delete(doc._id);
+
+  for (const r of reimbursements) {
+    const receipts = await ctx.db
+      .query("receipts")
+      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", r._id))
+      .collect();
+    for (const receipt of receipts) {
+      if (receipt.fileStorageId) await ctx.storage.delete(receipt.fileStorageId);
+      await ctx.db.delete(receipt._id);
+    }
+
+    const details = await ctx.db
+      .query("travelDetails")
+      .withIndex("by_reimbursement", (q) => q.eq("reimbursementId", r._id))
+      .collect();
+    for (const d of details) await ctx.db.delete(d._id);
+
+    await ctx.db.delete(r._id);
+  }
+
+  for (const table of [
+    "transactions",
+    "projects",
+    "donors",
+    "logs",
+    "payments",
+    "teams",
+  ] as const) {
+    const docs = await ctx.db
+      .query(table)
+      .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+      .collect();
+    for (const doc of docs) await ctx.db.delete(doc._id);
+  }
+
+  const users = await ctx.db
+    .query("users")
+    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+    .collect();
+  for (const user of users) {
+    await deleteUserAuth(ctx, user._id);
+    await ctx.db.delete(user._id);
+  }
+
+  await ctx.db.delete(organizationId);
 }
 
 export const clearTestData = mutation({
@@ -53,72 +110,22 @@ export const clearTestData = mutation({
     if (!process.env.IS_TEST)
       throw new ConvexError("Only available in test environment");
 
-    const deletedIds = {
-      accounts: new Set<string>(),
-      sessions: new Set<string>(),
-    };
+    const org = await ctx.db
+      .query("organizations")
+      .withIndex("by_domain", (q) => q.eq("domain", email.split("@")[1]))
+      .first();
 
-    const accounts = await ctx.db
-      .query("authAccounts")
-      .withIndex("providerAndAccountId", (q) =>
-        q.eq("provider", "testing").eq("providerAccountId", email),
-      )
-      .collect();
-    for (const account of accounts) {
-      const sessions = await ctx.db
-        .query("authSessions")
-        .withIndex("userId", (q) => q.eq("userId", account.userId))
-        .collect();
-      for (const session of sessions) {
-        if (!deletedIds.sessions.has(session._id)) {
-          await ctx.db.delete(session._id);
-          deletedIds.sessions.add(session._id);
-        }
-      }
-      await ctx.db.delete(account._id);
-      deletedIds.accounts.add(account._id);
-    }
+    if (org) await deleteOrganization(ctx, org._id);
 
     const user = await ctx.db
       .query("users")
       .withIndex("email", (q) => q.eq("email", email))
       .unique();
-    if (!user) return;
 
-    const organizationId = user.organizationId;
-    if (organizationId) {
-      for (const table of [
-        "transactions",
-        "projects",
-        "donors",
-        "logs",
-        "payments",
-      ] as const) {
-        await deleteByOrganization(ctx, table, organizationId);
-      }
-      const org = await ctx.db.get(organizationId);
-      if (org) await ctx.db.delete(organizationId);
+    if (user) {
+      await deleteUserAuth(ctx, user._id);
+      await ctx.db.delete(user._id);
     }
-
-    const sessions = await ctx.db
-      .query("authSessions")
-      .withIndex("userId", (q) => q.eq("userId", user._id))
-      .collect();
-    for (const session of sessions) {
-      if (!deletedIds.sessions.has(session._id))
-        await ctx.db.delete(session._id);
-    }
-
-    const userAccounts = await ctx.db
-      .query("authAccounts")
-      .withIndex("userIdAndProvider", (q) => q.eq("userId", user._id))
-      .collect();
-    for (const account of userAccounts) {
-      if (!deletedIds.accounts.has(account._id))
-        await ctx.db.delete(account._id);
-    }
-
-    await ctx.db.delete(user._id);
   },
 });
 
