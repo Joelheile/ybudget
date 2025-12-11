@@ -19,12 +19,20 @@ function formatDisplayDate(iso: string): string {
 }
 
 function parseToIso(display: string): string {
-  const digits = display.replace(/\D/g, "");
-  if (digits.length < 8) return "";
+  const parts = display.split(".");
+  if (parts.length !== 3) return "";
 
-  const day = digits.slice(0, 2);
-  const month = digits.slice(2, 4);
-  const year = digits.slice(4, 8);
+  let [dayStr, monthStr, yearStr] = parts;
+  if (!dayStr || !monthStr || !yearStr) return "";
+
+  const day = dayStr.padStart(2, "0");
+  const month = monthStr.padStart(2, "0");
+  let year = yearStr;
+
+  if (yearStr.length === 2) {
+    const twoDigit = parseInt(yearStr, 10);
+    year = twoDigit <= 50 ? `20${yearStr.padStart(2, "0")}` : `19${yearStr}`;
+  }
 
   const d = parseInt(day, 10);
   const m = parseInt(month, 10);
@@ -38,24 +46,7 @@ function parseToIso(display: string): string {
 }
 
 function formatAsUserTypes(input: string): string {
-  const digits = input.replace(/\D/g, "");
-
-  let day = digits.slice(0, 2);
-  let month = digits.slice(2, 4);
-  let year = digits.slice(4, 8);
-
-  if (day.length === 2 && parseInt(day, 10) > 31) day = "31";
-  if (month.length === 2 && parseInt(month, 10) > 12) month = "12";
-  if (year.length === 4) {
-    const y = parseInt(year, 10);
-    const currentYear = new Date().getFullYear();
-    if (y < 2000) year = "2000";
-    if (y > currentYear) year = String(currentYear);
-  }
-
-  if (digits.length <= 2) return day;
-  if (digits.length <= 4) return `${day}.${month}`;
-  return `${day}.${month}.${year}`;
+  return input.replace(/[^\d.]/g, "");
 }
 
 export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -76,11 +67,7 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       const formatted = formatAsUserTypes(raw);
       setDisplayValue(formatted);
 
-      const digits = raw.replace(/\D/g, "");
-      if (digits.length === 8) {
-        const iso = parseToIso(raw);
-        if (iso) onChange(iso);
-      } else if (digits.length === 0) {
+      if (raw === "") {
         onChange("");
       }
     };
