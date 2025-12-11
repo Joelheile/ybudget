@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
@@ -37,6 +44,15 @@ const costTypeLabels: Record<CostType, string> = {
   taxi: "Taxi",
   bus: "Bus",
   accommodation: "Unterkunft",
+};
+
+const costTypePlaceholders: Record<CostType, string> = {
+  car: "Eigenfahrt, Miles, Sixt, etc.",
+  train: "Deutsche Bahn, Flix, etc.",
+  flight: "Lufthansa, Ryanair, etc.",
+  taxi: "Uber, Bolt, etc.",
+  bus: "Flixbus, etc.",
+  accommodation: "Hotel, Airbnb, etc.",
 };
 
 const EMPTY_TRAVEL_INFO: TravelInfo = {
@@ -257,11 +273,7 @@ export function TravelReimbursementFormUI({
                         companyName: e.target.value,
                       })
                     }
-                    placeholder={
-                      receipt.costType === "car"
-                        ? "Eigenfahrt"
-                        : "z.B. Deutsche Bahn"
-                    }
+                    placeholder={costTypePlaceholders[receipt.costType]}
                   />
                 </div>
                 {receipt.costType === "car" ? (
@@ -355,24 +367,23 @@ export function TravelReimbursementFormUI({
               </div>
               <div>
                 <Label>Tagessatz (€)</Label>
-                <Input
-                  type="number"
-                  step="1"
-                  min={0}
-                  value={travelInfo.mealAllowanceDailyBudget || ""}
-                  onChange={(e) =>
+                <Select
+                  value={travelInfo.mealAllowanceDailyBudget?.toString() || ""}
+                  onValueChange={(value) =>
                     setTravelInfo({
                       ...travelInfo,
-                      mealAllowanceDailyBudget:
-                        parseFloat(e.target.value) || undefined,
+                      mealAllowanceDailyBudget: parseFloat(value) || undefined,
                     })
                   }
-                  placeholder={
-                    travelInfo.isInternational
-                      ? "Auslandspauschale"
-                      : "14 oder 28"
-                  }
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="14">14 € (8-24h)</SelectItem>
+                    <SelectItem value="28">28 € (24h+)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-muted-foreground">Betrag</Label>

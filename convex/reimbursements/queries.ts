@@ -63,6 +63,7 @@ export const getAllReimbursements = query({
           .withIndex("by_organization", (q) =>
             q.eq("organizationId", user.organizationId),
           )
+          .order("desc")
           .collect()
       : await ctx.db
           .query("reimbursements")
@@ -71,6 +72,7 @@ export const getAllReimbursements = query({
               .eq("organizationId", user.organizationId)
               .eq("createdBy", user._id),
           )
+          .order("desc")
           .collect();
 
     return await Promise.all(

@@ -29,6 +29,7 @@ import { useConvex, useMutation, useQuery } from "convex/react";
 import { Check, Download, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const STATUS_COLORS: Record<string, string> = {
   paid: "bg-green-500",
@@ -76,6 +77,17 @@ export default function ReimbursementPage() {
       adminNote: rejectDialog.note,
     });
     setRejectDialog({ open: false, reimbursementId: null, note: "" });
+    toast.success("Erstattung abgelehnt");
+  };
+
+  const handleMarkAsPaid = async (reimbursementId: Id<"reimbursements">) => {
+    await markAsPaid({ reimbursementId });
+    toast.success("Erstattung als bezahlt markiert");
+  };
+
+  const handleDelete = async (reimbursementId: Id<"reimbursements">) => {
+    await deleteReimbursement({ reimbursementId });
+    toast.success("Erstattung gelöscht");
   };
 
   const handleDownloadPDF = async (reimbursementId: Id<"reimbursements">) => {
@@ -215,16 +227,13 @@ export default function ReimbursementPage() {
                     className="w-fit"
                   >
                     <div className="flex items-center justify-end gap-0.5">
-                      {isAdmin && (
+                      {isAdmin && reimbursement.status !== "paid" && (
                         <>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
-                            onClick={() =>
-                              markAsPaid({ reimbursementId: reimbursement._id })
-                            }
-                            disabled={reimbursement.status === "paid"}
+                            onClick={() => handleMarkAsPaid(reimbursement._id)}
                             title="Als bezahlt markieren"
                           >
                             <Check className="h-4 w-4" />
@@ -256,16 +265,12 @@ export default function ReimbursementPage() {
                       >
                         <Download className="h-4 w-4" />
                       </Button>
-                      {isAdmin && (
+                      {isAdmin && reimbursement.status !== "paid" && (
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          onClick={() =>
-                            deleteReimbursement({
-                              reimbursementId: reimbursement._id,
-                            })
-                          }
+                          onClick={() => handleDelete(reimbursement._id)}
                           title="Löschen"
                         >
                           <Trash2 className="h-4 w-4" />
