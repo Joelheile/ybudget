@@ -69,7 +69,9 @@ test("create and delete transaction", async ({ page, context }) => {
     .fill("Test Beschreibung");
   await page.getByRole("textbox", { name: "Projekt suchen..." }).click();
   await page.getByRole("button", { name: "Test Projekt" }).click();
-  await page.getByRole("button", { name: "Spenden" }).click();
+  await page.getByRole("textbox", { name: "Kategorie suchen..." }).fill("Spenden");
+  await page.getByRole("textbox", { name: "Kategorie suchen..." }).press("Enter");
+  await page.getByRole("textbox", { name: "Förderer suchen..." }).click();
   await page.getByRole("button", { name: "Test Fördererdonation" }).click();
   await page.getByRole("button", { name: "Ausgabe planen" }).click();
   await expect(page.getByText("Ausgabe gespeichert!")).toBeVisible();
@@ -87,14 +89,16 @@ test("create and delete transaction", async ({ page, context }) => {
     page.locator("#tour-transactions-table").getByText("Geplant"),
   ).toBeVisible();
   await page
-    .locator("#tour-transactions-table")
+    .locator("#tour-transactions-table tbody tr")
+    .first()
     .getByRole("button")
-    .filter({ hasText: /^$/ })
     .click();
-  await expect(
-    page.getByRole("button").filter({ hasText: /^$/ }).nth(1),
-  ).toBeVisible();
-  await page.getByRole("button").filter({ hasText: /^$/ }).nth(1).click();
+  await page
+    .locator("#tour-transactions-table tbody tr")
+    .first()
+    .getByRole("button")
+    .last()
+    .click();
   await expect(
     page.getByRole("heading", { name: "Transaktion löschen?" }),
   ).toBeVisible();

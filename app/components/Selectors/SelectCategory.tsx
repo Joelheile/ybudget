@@ -210,7 +210,7 @@ export const SelectCategory = forwardRef<HTMLInputElement, SelectCategoryProps>(
           createPortal(
             <div
               ref={dropdownRef}
-              className="fixed bg-background border rounded-md shadow-lg z-50 flex w-fit"
+              className="fixed bg-background border rounded-md shadow-lg z-60 flex w-fit"
               style={{
                 top: dropdownPosition.top,
                 left: dropdownPosition.left,

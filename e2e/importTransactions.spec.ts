@@ -59,14 +59,9 @@ test.describe
     await expect(page.getByText("1 / 3")).toBeVisible();
 
     await page.getByRole("textbox", { name: "Projekt suchen..." }).click();
-    await page
-      .locator(".absolute.mt-1")
-      .getByRole("button", { name: "Test Projekt" })
-      .click();
-    await page
-      .getByRole("textbox", { name: "Kategorie suchen..." })
-      .fill("Spende");
-    await page.locator(".absolute.mt-1").getByText("Spenden").click();
+    await page.getByRole("button", { name: "Test Projekt" }).click();
+    await page.getByRole("textbox", { name: "Kategorie suchen..." }).fill("Spende");
+    await page.locator("body > div").last().getByText("Spenden").click();
     await page
       .getByRole("textbox", { name: "Förderer suchen..." })
       .press("ControlOrMeta+Enter");
@@ -82,14 +77,9 @@ test.describe
     await expect(page.getByText("Processed 2")).toBeVisible();
 
     await page.getByRole("textbox", { name: "Projekt suchen..." }).click();
-    await page
-      .locator(".absolute.mt-1")
-      .getByRole("button", { name: "Test Projekt" })
-      .click();
-    await page
-      .getByRole("textbox", { name: "Kategorie suchen..." })
-      .fill("Spende");
-    await page.locator(".absolute.mt-1").getByText("Spenden").click();
+    await page.getByRole("button", { name: "Test Projekt" }).click();
+    await page.getByRole("textbox", { name: "Kategorie suchen..." }).fill("Spende");
+    await page.locator("body > div").last().getByText("Spenden").click();
     await page
       .getByRole("textbox", { name: "Förderer suchen..." })
       .press("ControlOrMeta+Enter");

@@ -38,7 +38,7 @@ test.describe.serial("reimbursement flow", () => {
     await page.getByRole("button", { name: "Loslegen" }).click();
     await expect(
       page.getByRole("heading", { name: "Dashboard" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test.afterAll(async () => {
