@@ -84,9 +84,15 @@ export function EditableDataTable<T extends { _id: string }>({
       await onUpdate(rowId, field, value);
     } catch (error) {
       console.error("Update failed:", error);
+      toast.error("Fehler beim Speichern");
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleSave = (rowId: string) => {
+    stopEditing(rowId);
+    toast.success("Gespeichert");
   };
 
   const handleDelete = async () => {
@@ -115,6 +121,7 @@ export function EditableDataTable<T extends { _id: string }>({
       editingRows,
       setEditingRows,
       onUpdate: handleUpdate,
+      onSave: handleSave,
       onStopEditing: stopEditing,
       onDelete: setDeleteRowId,
       isUpdating,

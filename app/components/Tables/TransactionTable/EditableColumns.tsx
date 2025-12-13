@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/formatters/formatCurrency";
 import { formatDate } from "@/lib/formatters/formatDate";
-import { ArrowUpDown, Pencil, Trash2, X } from "lucide-react";
+import { ArrowUpDown, Check, Pencil, Trash2, X } from "lucide-react";
 import {
   EditableAmountCell,
   EditableCategoryCell,
@@ -33,7 +33,23 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
 
   if (isEditing) {
     return (
-      <div className="flex justify-end gap-1">
+      <div className="flex justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => table.options.meta?.onSave(rowId)}
+          className="h-8 w-8 p-0 text-green-500 hover:text-green-600"
+        >
+          <Check className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => table.options.meta?.onStopEditing(rowId)}
+          className="h-8 w-8 p-0 text-red-400 hover:text-red-500"
+        >
+          <X className="h-4 w-4" />
+        </Button>
         {isPlanned && (
           <Button
             variant="ghost"
@@ -44,14 +60,6 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
             <Trash2 className="h-4 w-4" />
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => table.options.meta?.onStopEditing(rowId)}
-          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </div>
     );
   }
