@@ -13,7 +13,7 @@ const features = [
     bullets: [
       "Projekte nach Förderern oder Departments organisieren",
       "Erwartete Ausgaben planen und tracken",
-      "Budget-Warnungen bei Überschreitung",
+      "Transferiere Budgets zwischen Projekten",
     ],
     screenshot: "/screenshots/Dashboard Overview.png",
   },
@@ -23,7 +23,7 @@ const features = [
     description:
       "Importiere Kontoauszüge per CSV und ordne Transaktionen automatisch den richtigen Projekten und Kategorien zu. Kein manuelles Copy-Paste mehr.",
     bullets: [
-      "CSV-Import von allen deutschen Banken",
+      "CSV-Import (Sparkasse, Volksbank, Moss)",
       "Smart Matching mit erwarteten Ausgaben",
       "Automatische Kategorisierung",
     ],
@@ -35,9 +35,9 @@ const features = [
     description:
       "Ordne alle Ausgaben deinen Projekten zu und sehe sofort, welches Budget noch verfügbar ist. Jede Transaktion an den richtigen Ort.",
     bullets: [
-      "Automatische Zuordnung nach Kategorie",
       "Echtzeit Budget-Verfolgung pro Projekt",
-      "Klare Ausgabenhistorie und Audit Trail",
+      "Reisekosten- und Auslagenerstattung",
+      "Logs für Nachvollziehbarkeit",
     ],
     screenshot: "/screenshots/Project Overview.png",
   },
@@ -47,11 +47,23 @@ const features = [
     description:
       "Erstelle professionelle Verwendungsnachweise und Budget-Reports für deine Förderer – ohne Excel-Akrobatik.",
     bullets: [
-      "PDF-Export mit Logo und Branding",
+      "PDF Export",
       "Filterbar nach Projekt, Zeitraum, Förderer",
-      "Transparente Aufschlüsselung aller Ausgaben",
+      "Ausgabennachweise als CSV-Export für Spender",
     ],
     screenshot: "/screenshots/Donor Overview.png",
+  },
+  {
+    side: "left",
+    title: "Zusammenarbeit leicht gemacht",
+    description:
+      "Lade dein Team per E-Mail ein und verwalte Zugriffsrechte. Jeder sieht nur, was er sehen soll.",
+    bullets: [
+      "E-Mail Einladungen",
+      "Team- und Projektzugriffskontrolle",
+      "Interaktives Onboarding für neue Nutzer",
+    ],
+    screenshot: "/screenshots/Dashboard Overview.png",
   },
 ];
 
