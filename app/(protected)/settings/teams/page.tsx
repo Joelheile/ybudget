@@ -4,7 +4,7 @@ import { CreateProjectDialog } from "@/components/Dialogs/CreateProjectDialog";
 import { CreateTeamDialog } from "@/components/Dialogs/CreateTeamDialog";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { AccessDenied } from "@/components/Settings/AccessDenied";
-import TeamRow from "@/components/Tables/TeamTable/TeamRowLogic";
+import TeamRow from "@/components/Tables/TeamTable/TeamRow";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
-import { useIsAdmin } from "@/hooks/useCurrentUserRole";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useQuery } from "convex/react";
 import { Plus, Users } from "lucide-react";
 import { useState } from "react";
@@ -38,7 +38,10 @@ export default function TeamsPage() {
           <p className="text-muted-foreground">
             Verwalte Teams und deren Projekt-Zugriffe
           </p>
-          <Button onClick={() => setCreateTeamDialogOpen(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setCreateTeamDialogOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Neues Team
           </Button>

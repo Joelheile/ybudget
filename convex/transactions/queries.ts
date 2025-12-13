@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { filterByProjectAccess } from "../teams/permissions";
 import { getCurrentUser } from "../users/getCurrentUser";
-import { addProjectAndCategoryNames } from "../utils/addProjectNames";
+import { addProjectAndCategoryNames } from "../utils/addProjectAndCategoryNames";
 
 export const getAllTransactions = query({
   args: {
@@ -53,17 +53,19 @@ export const getUnassignedProcessedTransactions = query({
       )
       .collect();
 
-    const unassigned = allTransactions.filter((t) => {
-      if (t.isArchived || t.status !== "processed") return false;
-      return !t.projectId || !t.categoryId || (t.amount > 0 && !t.donorId);
-    });
+    const unassigned = allTransactions.filter(
+      (t) =>
+        !t.isArchived &&
+        t.status === "processed" &&
+        !t.splitFromTransactionId &&
+        (!t.projectId || !t.categoryId || (t.amount > 0 && !t.donorId)),
+    );
 
-    return unassigned.sort((a, b) => b.date - a.date);
+    return unassigned.sort((first, second) => second.date - first.date);
   },
 });
 
 export const getOldestTransactionDate = query({
-  args: {},
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
 
@@ -84,8 +86,8 @@ export const getOldestTransactionDate = query({
   },
 });
 
-export const getTransactionRecommendations = query({
-  args: { amount: v.number(), projectId: v.optional(v.id("projects")) },
+export const getMatchingRecommendations = query({
+  args: { projectId: v.optional(v.id("projects")) },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
@@ -197,50 +199,6 @@ export const getPaginatedTransactions = query({
     return {
       ...result,
       page: await addProjectAndCategoryNames(ctx, filtered),
-    };
-  },
-});
-
-export const getTransactionWithSplits = query({
-  args: {
-    transactionId: v.id("transactions"),
-  },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-
-    const transaction = await ctx.db.get(args.transactionId);
-
-    if (!transaction) {
-      return null;
-    }
-
-    if (transaction.organizationId !== user.organizationId) {
-      throw new Error("Access denied");
-    }
-
-    let splitTransactions = null;
-    if (transaction.isArchived) {
-      splitTransactions = await ctx.db
-        .query("transactions")
-        .withIndex("by_splitFrom", (q) =>
-          q.eq("splitFromTransactionId", args.transactionId),
-        )
-        .collect();
-    }
-
-    let originalTransaction = null;
-    if (transaction.splitFromTransactionId) {
-      originalTransaction = await ctx.db.get(
-        transaction.splitFromTransactionId,
-      );
-    }
-
-    return {
-      transaction,
-      splitTransactions,
-      originalTransaction,
-      isSplit: transaction.isArchived === true,
-      isPartOfSplit: !!transaction.splitFromTransactionId,
     };
   },
 });

@@ -1,12 +1,10 @@
+"use client";
+
+import { DateInput } from "@/components/Selectors/DateInput";
+import { SelectProject } from "@/components/Selectors/SelectProject";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -15,66 +13,53 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
-import { CalendarIcon, Pencil, Plus, Trash2 } from "lucide-react";
+import { useMutation } from "convex/react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import { ReceiptUpload } from "./ReceiptUpload";
 
-type CurrentReceipt = {
-  receiptDate: string;
-  companyName: string;
-  description: string;
-  grossAmount: string;
-  taxRate: string;
-  receiptNumber: string;
-  fileStorageId: Id<"_storage"> | undefined;
-};
+type BankDetails = Pick<
+  Doc<"reimbursements">,
+  "iban" | "bic" | "accountHolder"
+>;
+type Receipt = Omit<
+  Doc<"receipts">,
+  "_id" | "_creationTime" | "reimbursementId" | "costType" | "kilometers"
+>;
 
-type Props = {
-  projects: Doc<"projects">[];
-  selectedProjectId: Id<"projects"> | null;
-  setSelectedProjectId: (id: Id<"projects"> | null) => void;
-  bankDetails: { iban: string; bic: string; accountHolder: string };
-  setBankDetails: (details: {
-    iban: string;
-    bic: string;
-    accountHolder: string;
-  }) => void;
-  editingBank: boolean;
-  setEditingBank: () => void;
-  currentReceipt: CurrentReceipt;
-  setCurrentReceipt: (receipt: CurrentReceipt) => void;
-  calculatedNet: number;
-  handleAddReceipt: () => void;
-  receipts: Omit<Doc<"receipts">, "_id" | "_creationTime">[];
-  handleDeleteReceipt: (index: number) => void;
-  handleSubmit: () => void;
-  reimbursementType: "expense" | "travel";
-  setReimbursementType: (type: "expense" | "travel") => void;
-};
+const calculateNet = (gross: number, taxRate: number) =>
+  gross / (1 + taxRate / 100);
 
 export function ReimbursementFormUI({
-  projects,
-  selectedProjectId,
-  setSelectedProjectId,
-  bankDetails,
-  setBankDetails,
-  editingBank,
-  setEditingBank,
-  currentReceipt,
-  setCurrentReceipt,
-  calculatedNet,
-  handleAddReceipt,
-  receipts,
-  handleDeleteReceipt,
-  handleSubmit,
-  reimbursementType,
-  setReimbursementType,
-}: Props) {
+  defaultBankDetails,
+}: {
+  defaultBankDetails: BankDetails;
+}) {
+  const router = useRouter();
+  const createReimbursement = useMutation(
+    api.reimbursements.functions.createReimbursement,
+  );
+  const updateUserBankDetails = useMutation(
+    api.users.functions.updateBankDetails,
+  );
+
+  const [selectedProjectId, setSelectedProjectId] =
+    useState<Id<"projects"> | null>(null);
+  const [bankDetails, setBankDetails] =
+    useState<BankDetails>(defaultBankDetails);
+  const [editingBank, setEditingBank] = useState(false);
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [draft, setDraft] = useState<Partial<Receipt>>({ taxRate: 19 });
+
+  const calculatedNet = draft.grossAmount
+    ? calculateNet(draft.grossAmount, draft.taxRate || 19)
+    : 0;
+
   const totalNet = receipts.reduce((sum, r) => sum + r.netAmount, 0);
   const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
   const totalTax7 = receipts
@@ -84,41 +69,66 @@ export function ReimbursementFormUI({
     .filter((r) => r.taxRate === 19)
     .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
 
-  const update = (fields: Partial<CurrentReceipt>) =>
-    setCurrentReceipt({ ...currentReceipt, ...fields });
+  const handleBankToggle = async () => {
+    if (editingBank) {
+      await updateUserBankDetails(bankDetails);
+    }
+    setEditingBank(!editingBank);
+  };
+
+  const handleAddReceipt = () => {
+    if (
+      !draft.receiptNumber ||
+      !draft.companyName ||
+      !draft.grossAmount ||
+      !draft.fileStorageId ||
+      !draft.receiptDate
+    ) {
+      toast.error("Bitte Pflichtfelder ausfüllen");
+      return;
+    }
+    const taxRate = draft.taxRate || 19;
+    setReceipts([
+      ...receipts,
+      {
+        receiptNumber: draft.receiptNumber,
+        receiptDate: draft.receiptDate,
+        companyName: draft.companyName,
+        description: draft.description || "",
+        netAmount: calculateNet(draft.grossAmount, taxRate),
+        taxRate,
+        grossAmount: draft.grossAmount,
+        fileStorageId: draft.fileStorageId,
+      },
+    ]);
+    setDraft({ taxRate: 19 });
+    toast.success(`Beleg ${receipts.length + 1} hinzugefügt`);
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedProjectId) {
+      toast.error("Bitte ein Projekt auswählen");
+      return;
+    }
+    await createReimbursement({
+      projectId: selectedProjectId,
+      amount: totalGross,
+      ...bankDetails,
+      receipts,
+    });
+    toast.success("Erstattung eingereicht");
+    router.push("/reimbursement");
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Neue Erstattung</h1>
-        <div className="flex items-center gap-3">
-          <Tabs
-            value={reimbursementType}
-            onValueChange={(v) =>
-              setReimbursementType(v as "expense" | "travel")
-            }
-          >
-            <TabsList>
-              <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
-              <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Select
-            value={selectedProjectId || ""}
-            onValueChange={(v) => setSelectedProjectId(v as Id<"projects">)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Projekt wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((p) => (
-                <SelectItem key={p._id} value={p._id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="w-[200px]">
+        <SelectProject
+          value={selectedProjectId || ""}
+          onValueChange={(value) =>
+            setSelectedProjectId(value ? (value as Id<"projects">) : null)
+          }
+        />
       </div>
 
       <div className="space-y-4">
@@ -127,16 +137,20 @@ export function ReimbursementFormUI({
           <div>
             <Label>Name/Firma *</Label>
             <Input
-              value={currentReceipt.companyName}
-              onChange={(e) => update({ companyName: e.target.value })}
+              value={draft.companyName || ""}
+              onChange={(e) =>
+                setDraft({ ...draft, companyName: e.target.value })
+              }
               placeholder="z.B. Amazon, Deutsche Bahn"
             />
           </div>
           <div>
             <Label>Beleg-Nr. *</Label>
             <Input
-              value={currentReceipt.receiptNumber}
-              onChange={(e) => update({ receiptNumber: e.target.value })}
+              value={draft.receiptNumber || ""}
+              onChange={(e) =>
+                setDraft({ ...draft, receiptNumber: e.target.value })
+              }
               placeholder="z.B. INV-2024-001"
             />
           </div>
@@ -145,8 +159,10 @@ export function ReimbursementFormUI({
         <div>
           <Label>Beschreibung</Label>
           <Textarea
-            value={currentReceipt.description}
-            onChange={(e) => update({ description: e.target.value })}
+            value={draft.description || ""}
+            onChange={(e) =>
+              setDraft({ ...draft, description: e.target.value })
+            }
             placeholder="z.B. Büromaterial für Q1"
             rows={2}
             className="resize-none"
@@ -156,58 +172,33 @@ export function ReimbursementFormUI({
         <div className="grid grid-cols-4 gap-4">
           <div>
             <Label>Datum *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !currentReceipt.receiptDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 size-4" />
-                  {currentReceipt.receiptDate
-                    ? format(
-                        new Date(currentReceipt.receiptDate),
-                        "dd.MM.yyyy",
-                        { locale: de },
-                      )
-                    : "Datum wählen"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    currentReceipt.receiptDate
-                      ? new Date(currentReceipt.receiptDate)
-                      : undefined
-                  }
-                  onSelect={(date) =>
-                    update({
-                      receiptDate: date ? format(date, "yyyy-MM-dd") : "",
-                    })
-                  }
-                  locale={de}
-                />
-              </PopoverContent>
-            </Popover>
+            <DateInput
+              value={draft.receiptDate || ""}
+              onChange={(date) => setDraft({ ...draft, receiptDate: date })}
+            />
           </div>
           <div>
             <Label>Bruttobetrag (€) *</Label>
             <Input
               type="number"
               step="0.01"
-              value={currentReceipt.grossAmount}
-              onChange={(e) => update({ grossAmount: e.target.value })}
+              value={draft.grossAmount || ""}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  grossAmount: parseFloat(e.target.value) || 0,
+                })
+              }
               placeholder="119,95"
             />
           </div>
           <div>
             <Label>Wie viel MwSt.?</Label>
             <Select
-              value={currentReceipt.taxRate}
-              onValueChange={(v) => update({ taxRate: v })}
+              value={String(draft.taxRate || 19)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, taxRate: parseInt(value) })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -233,8 +224,8 @@ export function ReimbursementFormUI({
         <div>
           <Label>Beleg hochladen *</Label>
           <ReceiptUpload
-            onUploadComplete={(id) => update({ fileStorageId: id })}
-            storageId={currentReceipt.fileStorageId}
+            onUploadComplete={(id) => setDraft({ ...draft, fileStorageId: id })}
+            storageId={draft.fileStorageId}
           />
         </div>
 
@@ -305,7 +296,7 @@ export function ReimbursementFormUI({
             <Button
               variant={editingBank ? "default" : "outline"}
               size="sm"
-              onClick={setEditingBank}
+              onClick={handleBankToggle}
             >
               {editingBank ? "Speichern" : <Pencil className="size-4" />}
             </Button>
@@ -330,7 +321,9 @@ export function ReimbursementFormUI({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDeleteReceipt(i)}
+                    onClick={() =>
+                      setReceipts(receipts.filter((_, j) => j !== i))
+                    }
                     className="hover:bg-destructive/10 hover:text-destructive"
                   >
                     <Trash2 className="size-4" />

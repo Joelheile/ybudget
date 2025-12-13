@@ -5,8 +5,8 @@ import { TourCard } from "@/components/Onboarding/TourCard";
 import { tourSteps } from "@/components/Onboarding/tourSteps";
 import { AppSidebar } from "@/components/Sidebar/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { DateRangeProvider } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
+import { DateRangeProvider } from "@/lib/contexts/DateRangeContext";
 import { useQuery } from "convex-helpers/react/cache";
 import { useConvexAuth } from "convex/react";
 import Image from "next/image";
@@ -22,7 +22,6 @@ export default function ProtectedLayout({
   const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
   const organizationId = useQuery(api.users.queries.getUserOrganizationId, {});
-  const user = useQuery(api.users.queries.getCurrentUserProfile);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -63,7 +62,7 @@ export default function ProtectedLayout({
           <SidebarProvider>
             <AppSidebar />
             <div className="flex flex-col w-full">
-              <div className="p-4 lg:px-6 pb-6 overflow-x-hidden w-full">
+              <div className="p-4 lg:px-6 pb-6 w-full">
                 {children}
                 {showOnboarding && (
                   <OnboardingDialog open onOpenChange={() => {}} />

@@ -35,17 +35,14 @@ export const updateUserRole = mutation({
       throw new Error("Access denied");
 
     if (targetUser.role === "admin" && args.role !== "admin") {
-      let adminCount = 0;
-      const users = ctx.db
+      const admins = await ctx.db
         .query("users")
         .withIndex("by_organization", (q) =>
           q.eq("organizationId", currentUser.organizationId),
-        );
-      for await (const user of users) {
-        if (user.role === "admin") adminCount++;
-        if (adminCount > 1) break;
-      }
-      if (adminCount <= 1)
+        )
+        .filter((q) => q.eq(q.field("role"), "admin"))
+        .take(2);
+      if (admins.length <= 1)
         throw new Error(
           "Der letzte Admin kann nicht entfernt werden. Mindestens ein Admin ist erforderlich.",
         );

@@ -2,9 +2,9 @@
 
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { EditableDataTable } from "@/components/Tables/TransactionTable/EditableDataTable";
-import { editableColumns } from "@/components/Tables/TransactionTable/editableColumns";
-import { formatDate } from "@/lib/formatDate";
-import type { EnrichedTransaction } from "@/lib/transactionFilters";
+import { editableColumns } from "@/components/Tables/TransactionTable/EditableColumns";
+import { formatDate } from "@/lib/formatters/formatDate";
+import type { EnrichedTransaction } from "@/lib/calculations/transactionFilters";
 import type { PaginationStatus } from "convex/react";
 import type { DateRange } from "react-day-picker";
 
@@ -34,7 +34,7 @@ export default function TransactionsOverviewUI({
 
   return (
     <div className="flex flex-col w-full h-screen">
-      <PageHeader title="Transaktionen" />
+      <PageHeader title="Transaktionen" showRangeCalendar />
       <div className="text-sm text-muted-foreground pb-4 ">
         {fromDate} - {toDate}
       </div>

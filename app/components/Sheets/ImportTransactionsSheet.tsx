@@ -28,52 +28,42 @@ import toast from "react-hot-toast";
 
 type ImportSource = "moss" | "sparkasse" | "volksbank";
 
+interface ImportTransactionsSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 export function ImportTransactionsSheet({
   open,
   onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
+}: ImportTransactionsSheetProps) {
   const [csvData, setCsvData] = useState<Record<string, string>[]>([]);
   const [importSource, setImportSource] = useState<ImportSource | "">("");
   const [isDragging, setIsDragging] = useState(false);
-
   const router = useRouter();
 
   const allTransactions = useQuery(
     api.transactions.queries.getAllTransactions,
     {},
   );
-
-  const existingIds = useMemo(() => {
-    if (!allTransactions) return undefined;
-    return allTransactions
-      .map((t) => t.importedTransactionId)
-      .filter(Boolean) as string[];
-  }, [allTransactions]);
   const addTransaction = useMutation(
     api.transactions.functions.createImportedTransaction,
   );
 
-  const handleFile = (file: File) => {
-    if (!(file.type === "text/csv" || file.type === "application/csv")) {
-      toast.error("Ungültiger Dateityp. Bitte laden Sie eine CSV-Datei hoch.");
-      return;
-    }
+  const existingIds = useMemo(() => {
+    if (!allTransactions) return undefined;
+    return new Set(
+      allTransactions.map((t) => t.importedTransactionId).filter(Boolean),
+    );
+  }, [allTransactions]);
 
+  const handleFile = (file: File) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results: Papa.ParseResult<Record<string, string>>) => {
-        setCsvData(results.data);
-      },
+      complete: (results: Papa.ParseResult<Record<string, string>>) =>
+        setCsvData(results.data),
     });
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -84,12 +74,11 @@ export function ImportTransactionsSheet({
   };
 
   const handleImport = async () => {
-    if (!importSource || existingIds === undefined) return;
+    if (!importSource || !existingIds) return;
 
-    const existingIdsSet = new Set(existingIds);
     const newTransactions = csvData.filter((row) => {
       const mapped = mapCSVRow(row, importSource);
-      return !existingIdsSet.has(mapped.importedTransactionId);
+      return !existingIds.has(mapped.importedTransactionId);
     });
 
     const skipped = csvData.length - newTransactions.length;
@@ -98,40 +87,32 @@ export function ImportTransactionsSheet({
     );
 
     try {
-      let processed = 0;
-      let inserted = 0;
-
-      for (const row of newTransactions) {
-        const mapped = mapCSVRow(row, importSource);
+      for (let i = 0; i < newTransactions.length; i++) {
+        const mapped = mapCSVRow(newTransactions[i], importSource);
         await addTransaction({
           date: mapped.date,
           amount: mapped.amount,
           description: mapped.description,
           counterparty: mapped.counterparty,
           importedTransactionId: mapped.importedTransactionId,
-          importSource: importSource,
+          importSource,
           accountName: mapped.accountName,
         });
-
-        processed++;
-        inserted++;
         toast.loading(
-          `Importiere ${processed}/${newTransactions.length} Transaktionen...`,
-          {
-            id: toastId,
-          },
+          `Importiere ${i + 1}/${newTransactions.length} Transaktionen...`,
+          { id: toastId },
         );
       }
 
       toast.success(
-        `${inserted} neue Transaktionen importiert, ${skipped} Duplikate übersprungen`,
+        `${newTransactions.length} neue Transaktionen importiert, ${skipped} Duplikate übersprungen`,
         { id: toastId },
       );
       router.push("/import");
       setCsvData([]);
       setImportSource("");
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast.error("Fehler beim Importieren", { id: toastId });
     }
   };
@@ -162,9 +143,7 @@ export function ImportTransactionsSheet({
               }`}
             >
               <Upload
-                className={`h-12 w-12 mb-4 ${
-                  isDragging ? "text-primary" : "text-muted-foreground"
-                }`}
+                className={`h-12 w-12 mb-4 ${isDragging ? "text-primary" : "text-muted-foreground"}`}
               />
               <p className="text-lg font-medium mb-2">CSV-Datei hier ablegen</p>
               <p className="text-sm text-muted-foreground mb-4">oder</p>
@@ -175,7 +154,9 @@ export function ImportTransactionsSheet({
                     type="file"
                     accept=".csv"
                     className="hidden"
-                    onChange={handleFileInput}
+                    onChange={(e) =>
+                      e.target.files?.[0] && handleFile(e.target.files[0])
+                    }
                   />
                 </label>
               </Button>
@@ -218,7 +199,7 @@ export function ImportTransactionsSheet({
 
             <Button
               onClick={handleImport}
-              disabled={!importSource || existingIds === undefined}
+              disabled={!importSource || !existingIds}
               className="w-full"
             >
               Transaktionen importieren

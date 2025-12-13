@@ -4,7 +4,6 @@ import { getCurrentUser } from "../users/getCurrentUser";
 
 export const getAllDonors = query({
   args: {},
-
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
     return ctx.db
@@ -18,7 +17,6 @@ export const getAllDonors = query({
 
 export const getDonorsByProject = query({
   args: { projectId: v.id("projects") },
-
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 

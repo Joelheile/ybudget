@@ -1,13 +1,11 @@
+"use client";
+
+import { DateInput } from "@/components/Selectors/DateInput";
+import { SelectProject } from "@/components/Selectors/SelectProject";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -16,164 +14,156 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
-import { CalendarIcon, Pencil } from "lucide-react";
+import { useMutation } from "convex/react";
+import { Pencil, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import { ReceiptUpload } from "./ReceiptUpload";
 
-type TransportationMode = "car" | "train" | "flight" | "taxi" | "bus";
+type BankDetails = Pick<
+  Doc<"reimbursements">,
+  "iban" | "bic" | "accountHolder"
+>;
+type CostType = NonNullable<Doc<"receipts">["costType"]>;
+type TravelReceipt = Omit<
+  Doc<"receipts">,
+  "_id" | "_creationTime" | "reimbursementId" | "costType"
+> & { costType: CostType };
+type TravelInfo = Omit<
+  Doc<"travelDetails">,
+  "_id" | "_creationTime" | "reimbursementId"
+>;
 
-type TravelDetails = {
-  travelStartDate: string;
-  travelEndDate: string;
-  destination: string;
-  travelPurpose: string;
-  isInternational: boolean;
-  transportationMode: TransportationMode;
-  kilometers: number;
-  transportationAmount: number;
-  accommodationAmount: number;
-  transportationReceiptId: Id<"_storage"> | undefined;
-  accommodationReceiptId: Id<"_storage"> | undefined;
-};
-
-type Props = {
-  projects: Doc<"projects">[];
-  selectedProjectId: Id<"projects"> | null;
-  setSelectedProjectId: (id: Id<"projects"> | null) => void;
-  bankDetails: { iban: string; bic: string; accountHolder: string };
-  setBankDetails: (details: {
-    iban: string;
-    bic: string;
-    accountHolder: string;
-  }) => void;
-  editingBank: boolean;
-  setEditingBank: () => void;
-  travelDetails: TravelDetails;
-  setTravelDetails: (details: TravelDetails) => void;
-  handleSubmit: () => void;
-  reimbursementType: "expense" | "travel";
-  setReimbursementType: (type: "expense" | "travel") => void;
-};
-
-const modeLabels: Record<TransportationMode, string> = {
-  car: "PKW (Privat)",
+const costTypeLabels: Record<CostType, string> = {
+  car: "PKW",
   train: "Bahn",
   flight: "Flug",
   taxi: "Taxi",
   bus: "Bus",
+  accommodation: "Unterkunft",
 };
 
-function DatePicker({
-  value,
-  onChange,
-  label,
-}: {
-  value: string;
-  onChange: (date: string) => void;
-  label: string;
-}) {
-  return (
-    <div>
-      <Label>{label}</Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground",
-            )}
-          >
-            <CalendarIcon className="mr-2 size-4" />
-            {value
-              ? format(new Date(value), "dd.MM.yyyy", { locale: de })
-              : "Datum wählen"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={value ? new Date(value) : undefined}
-            onSelect={(date) =>
-              onChange(date ? format(date, "yyyy-MM-dd") : "")
-            }
-            locale={de}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-}
+const costTypePlaceholders: Record<CostType, string> = {
+  car: "Eigenfahrt, Miles, Sixt, etc.",
+  train: "Deutsche Bahn, Flix, etc.",
+  flight: "Lufthansa, Ryanair, etc.",
+  taxi: "Uber, Bolt, etc.",
+  bus: "Flixbus, etc.",
+  accommodation: "Hotel, Airbnb, etc.",
+};
+
+const EMPTY_TRAVEL_INFO: TravelInfo = {
+  startDate: "",
+  endDate: "",
+  destination: "",
+  purpose: "",
+  isInternational: false,
+};
 
 export function TravelReimbursementFormUI({
-  projects,
-  selectedProjectId,
-  setSelectedProjectId,
-  bankDetails,
-  setBankDetails,
-  editingBank,
-  setEditingBank,
-  travelDetails,
-  setTravelDetails,
-  handleSubmit,
-  reimbursementType,
-  setReimbursementType,
-}: Props) {
-  const totalAmount =
-    travelDetails.transportationAmount + travelDetails.accommodationAmount;
+  defaultBankDetails,
+}: {
+  defaultBankDetails: BankDetails;
+}) {
+  const router = useRouter();
+  const createTravelReimbursement = useMutation(
+    api.reimbursements.functions.createTravelReimbursement,
+  );
+  const updateUserBankDetails = useMutation(
+    api.users.functions.updateBankDetails,
+  );
+
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [bankDetails, setBankDetails] =
+    useState<BankDetails>(defaultBankDetails);
+  const [editingBank, setEditingBank] = useState(false);
+  const [travelInfo, setTravelInfo] = useState<TravelInfo>(EMPTY_TRAVEL_INFO);
+  const [receipts, setReceipts] = useState<TravelReceipt[]>([]);
+
+  const hasReceipt = (type: CostType) =>
+    receipts.some((r) => r.costType === type);
+
+  const toggleType = (type: CostType) => {
+    if (hasReceipt(type)) {
+      setReceipts(receipts.filter((r) => r.costType !== type));
+      return;
+    }
+    setReceipts([
+      ...receipts,
+      {
+        costType: type,
+        receiptNumber: `${type.toUpperCase()}-001`,
+        receiptDate: travelInfo.startDate,
+        companyName: "",
+        description: "",
+        netAmount: 0,
+        taxRate: 0,
+        grossAmount: 0,
+        fileStorageId: "" as Id<"_storage">,
+        kilometers: type === "car" ? 0 : undefined,
+      },
+    ]);
+  };
+
+  const updateReceipt = (type: CostType, updates: Partial<TravelReceipt>) => {
+    setReceipts(
+      receipts.map((r) => (r.costType === type ? { ...r, ...updates } : r)),
+    );
+  };
+
   const hasBasicInfo =
-    travelDetails.destination &&
-    travelDetails.travelPurpose &&
-    travelDetails.travelStartDate &&
-    travelDetails.travelEndDate;
-  const hasTransportationCost = travelDetails.transportationAmount > 0;
-  const hasAccommodationCost = travelDetails.accommodationAmount > 0;
-  const isCar = travelDetails.transportationMode === "car";
+    travelInfo.destination &&
+    travelInfo.purpose &&
+    travelInfo.startDate &&
+    travelInfo.endDate;
+  const receiptsTotal = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
+  const mealAllowanceTotal =
+    (travelInfo.mealAllowanceDays || 0) *
+    (travelInfo.mealAllowanceDailyBudget || 0);
+  const totalAmount = receiptsTotal + mealAllowanceTotal;
+  const allReceiptsComplete = receipts.every(
+    (r) => r.grossAmount > 0 && r.fileStorageId && r.companyName,
+  );
+  const hasExpenses = receipts.length > 0 || mealAllowanceTotal > 0;
+  const canSubmit =
+    hasBasicInfo &&
+    hasExpenses &&
+    (receipts.length === 0 || allReceiptsComplete) &&
+    selectedProjectId;
 
-  const hasRequiredReceipts =
-    (hasTransportationCost ? !!travelDetails.transportationReceiptId : true) &&
-    (hasAccommodationCost ? !!travelDetails.accommodationReceiptId : true) &&
-    (hasTransportationCost || hasAccommodationCost);
+  const handleBankToggle = async () => {
+    if (editingBank) {
+      await updateUserBankDetails(bankDetails);
+    }
+    setEditingBank(!editingBank);
+  };
 
-  const update = (fields: Partial<TravelDetails>) =>
-    setTravelDetails({ ...travelDetails, ...fields });
+  const handleSubmit = async () => {
+    if (!selectedProjectId) {
+      toast.error("Bitte ein Projekt auswählen");
+      return;
+    }
+    await createTravelReimbursement({
+      projectId: selectedProjectId as Id<"projects">,
+      amount: totalAmount,
+      ...bankDetails,
+      ...travelInfo,
+      receipts,
+    });
+    toast.success("Reisekostenerstattung eingereicht");
+    router.push("/reimbursement");
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Neue Erstattung</h1>
-        <div className="flex items-center gap-3">
-          <Tabs
-            value={reimbursementType}
-            onValueChange={(v) =>
-              setReimbursementType(v as "expense" | "travel")
-            }
-          >
-            <TabsList>
-              <TabsTrigger value="expense">Auslagenerstattung</TabsTrigger>
-              <TabsTrigger value="travel">Reisekostenerstattung</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Select
-            value={selectedProjectId || ""}
-            onValueChange={(v) => setSelectedProjectId(v as Id<"projects">)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Projekt wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((p) => (
-                <SelectItem key={p._id} value={p._id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="w-[200px]">
+        <SelectProject
+          value={selectedProjectId}
+          onValueChange={setSelectedProjectId}
+        />
       </div>
 
       <div className="space-y-4">
@@ -182,37 +172,51 @@ export function TravelReimbursementFormUI({
           <div>
             <Label>Reiseziel *</Label>
             <Input
-              value={travelDetails.destination}
-              onChange={(e) => update({ destination: e.target.value })}
+              value={travelInfo.destination}
+              onChange={(e) =>
+                setTravelInfo({ ...travelInfo, destination: e.target.value })
+              }
               placeholder="z.B. München, Berlin"
             />
           </div>
           <div>
             <Label>Reisezweck *</Label>
             <Input
-              value={travelDetails.travelPurpose}
-              onChange={(e) => update({ travelPurpose: e.target.value })}
+              value={travelInfo.purpose}
+              onChange={(e) =>
+                setTravelInfo({ ...travelInfo, purpose: e.target.value })
+              }
               placeholder="z.B. Kundentermin, Konferenz"
             />
           </div>
         </div>
         <div className="grid grid-cols-4 gap-4">
-          <DatePicker
-            label="Reisebeginn *"
-            value={travelDetails.travelStartDate}
-            onChange={(d) => update({ travelStartDate: d })}
-          />
-          <DatePicker
-            label="Reiseende *"
-            value={travelDetails.travelEndDate}
-            onChange={(d) => update({ travelEndDate: d })}
-          />
+          <div>
+            <Label>Reisebeginn *</Label>
+            <DateInput
+              value={travelInfo.startDate}
+              onChange={(date) =>
+                setTravelInfo({ ...travelInfo, startDate: date })
+              }
+            />
+          </div>
+          <div>
+            <Label>Reiseende *</Label>
+            <DateInput
+              value={travelInfo.endDate}
+              onChange={(date) =>
+                setTravelInfo({ ...travelInfo, endDate: date })
+              }
+            />
+          </div>
           <div className="col-span-2 flex items-end pb-2">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="international"
-                checked={travelDetails.isInternational}
-                onCheckedChange={(c: boolean) => update({ isInternational: c })}
+                checked={travelInfo.isInternational}
+                onCheckedChange={(checked) =>
+                  setTravelInfo({ ...travelInfo, isInternational: !!checked })
+                }
               />
               <Label htmlFor="international" className="font-normal">
                 Auslandsreise
@@ -223,143 +227,179 @@ export function TravelReimbursementFormUI({
       </div>
 
       {hasBasicInfo && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Fahrtkosten</h2>
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label>Verkehrsmittel</Label>
-              <Select
-                value={travelDetails.transportationMode}
-                onValueChange={(v) => {
-                  const mode = v as TransportationMode;
-                  const km = mode === "car" ? travelDetails.kilometers : 0;
-                  update({
-                    transportationMode: mode,
-                    kilometers: km,
-                    transportationAmount:
-                      mode === "car"
-                        ? km * 0.3
-                        : travelDetails.transportationAmount,
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(modeLabels).map(([k, label]) => (
-                    <SelectItem key={k} value={k}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-medium mb-3">Kostenarten auswählen</h2>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(costTypeLabels) as CostType[]).map((type) => (
+                <Button
+                  key={type}
+                  type="button"
+                  variant={hasReceipt(type) ? "default" : "outline"}
+                  onClick={() => toggleType(type)}
+                >
+                  {costTypeLabels[type]}
+                </Button>
+              ))}
             </div>
-            {isCar ? (
-              <>
+          </div>
+
+          {receipts.map((receipt) => (
+            <div
+              key={receipt.costType}
+              className="border rounded-lg p-4 space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium">
+                  {receipt.costType === "car"
+                    ? "PKW (0,30€/km)"
+                    : costTypeLabels[receipt.costType]}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => toggleType(receipt.costType)}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label>Kilometer *</Label>
+                  <Label>Firma/Anbieter *</Label>
                   <Input
-                    type="number"
-                    min={0}
-                    value={travelDetails.kilometers || ""}
-                    onChange={(e) => {
-                      const km = Math.max(
-                        0,
-                        Math.floor(parseFloat(e.target.value) || 0),
-                      );
-                      update({
-                        kilometers: km,
-                        transportationAmount: Math.round(km * 0.3 * 100) / 100,
-                      });
-                    }}
-                    placeholder="0"
+                    value={receipt.companyName}
+                    onChange={(e) =>
+                      updateReceipt(receipt.costType, {
+                        companyName: e.target.value,
+                      })
+                    }
+                    placeholder={costTypePlaceholders[receipt.costType]}
                   />
                 </div>
+                {receipt.costType === "car" ? (
+                  <>
+                    <div>
+                      <Label>Kilometer *</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={receipt.kilometers || ""}
+                        onChange={(e) => {
+                          const km = Math.max(
+                            0,
+                            Math.floor(parseFloat(e.target.value) || 0),
+                          );
+                          updateReceipt(receipt.costType, {
+                            kilometers: km,
+                            grossAmount: Math.round(km * 0.3 * 100) / 100,
+                            netAmount: Math.round(km * 0.3 * 100) / 100,
+                          });
+                        }}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Betrag</Label>
+                      <Input
+                        value={`${receipt.grossAmount.toFixed(2)} €`}
+                        disabled
+                        className="bg-muted/50 font-mono"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <Label>Betrag (€) *</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={receipt.grossAmount || ""}
+                      onChange={(e) => {
+                        const amount = Math.max(
+                          0,
+                          parseFloat(e.target.value) || 0,
+                        );
+                        updateReceipt(receipt.costType, {
+                          grossAmount: amount,
+                          netAmount: amount,
+                        });
+                      }}
+                      placeholder="0.00"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {receipt.grossAmount > 0 && (
                 <div>
-                  <Label className="text-muted-foreground">
-                    Fahrtkosten (0,30€/km)
-                  </Label>
-                  <Input
-                    value={`${travelDetails.transportationAmount.toFixed(2)} €`}
-                    disabled
-                    className="bg-muted/50 font-mono"
+                  <Label>Beleg *</Label>
+                  <ReceiptUpload
+                    onUploadComplete={(id) =>
+                      updateReceipt(receipt.costType, { fileStorageId: id })
+                    }
+                    storageId={receipt.fileStorageId || undefined}
                   />
                 </div>
-              </>
-            ) : (
+              )}
+            </div>
+          ))}
+
+          <div className="border rounded-lg p-4 space-y-4">
+            <h3 className="font-medium">Verpflegungsmehraufwand</h3>
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label>Fahrtkosten (€) *</Label>
+                <Label>Tage</Label>
                 <Input
                   type="number"
-                  step="0.01"
+                  step="0.5"
                   min={0}
-                  value={travelDetails.transportationAmount || ""}
+                  value={travelInfo.mealAllowanceDays || ""}
                   onChange={(e) =>
-                    update({
-                      transportationAmount: Math.max(
-                        0,
-                        parseFloat(e.target.value) || 0,
-                      ),
+                    setTravelInfo({
+                      ...travelInfo,
+                      mealAllowanceDays:
+                        parseFloat(e.target.value) || undefined,
                     })
                   }
-                  placeholder="0.00"
+                  placeholder="z.B. 2.5"
                 />
               </div>
-            )}
-          </div>
-          {hasTransportationCost && (
-            <div>
-              <Label>Beleg Fahrtkosten *</Label>
-              <ReceiptUpload
-                onUploadComplete={(id) =>
-                  update({ transportationReceiptId: id })
-                }
-                storageId={travelDetails.transportationReceiptId}
-              />
+              <div>
+                <Label>Tagessatz (€)</Label>
+                <Select
+                  value={travelInfo.mealAllowanceDailyBudget?.toString() || ""}
+                  onValueChange={(value) =>
+                    setTravelInfo({
+                      ...travelInfo,
+                      mealAllowanceDailyBudget: parseFloat(value) || undefined,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="14">14 € (8-24h)</SelectItem>
+                    <SelectItem value="28">28 € (24h+)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Betrag</Label>
+                <Input
+                  value={`${mealAllowanceTotal.toFixed(2)} €`}
+                  disabled
+                  className="bg-muted/50 font-mono"
+                />
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {hasBasicInfo && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Übernachtung</h2>
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label>Übernachtungskosten (€)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min={0}
-                value={travelDetails.accommodationAmount || ""}
-                onChange={(e) =>
-                  update({
-                    accommodationAmount: Math.max(
-                      0,
-                      parseFloat(e.target.value) || 0,
-                    ),
-                  })
-                }
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          {hasAccommodationCost && (
-            <div>
-              <Label>Beleg Übernachtung *</Label>
-              <ReceiptUpload
-                onUploadComplete={(id) =>
-                  update({ accommodationReceiptId: id })
-                }
-                storageId={travelDetails.accommodationReceiptId}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {hasRequiredReceipts && (
+      {canSubmit && (
         <div className="space-y-8 mt-24">
           <h2 className="text-2xl font-bold">Zusammenfassung</h2>
           <div className="flex items-end gap-4">
@@ -414,41 +454,35 @@ export function TravelReimbursementFormUI({
             <Button
               variant={editingBank ? "default" : "outline"}
               size="sm"
-              onClick={setEditingBank}
+              onClick={handleBankToggle}
             >
               {editingBank ? "Speichern" : <Pencil className="size-4" />}
             </Button>
           </div>
 
           <div className="space-y-3">
-            {hasTransportationCost && (
-              <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
-                <div className="flex items-center gap-8 flex-1">
-                  <span className="font-semibold">Fahrtkosten</span>
-                  <span className="text-sm text-muted-foreground">
-                    {isCar
-                      ? `${travelDetails.kilometers} km × 0,30€`
-                      : modeLabels[travelDetails.transportationMode]}
+            {receipts
+              .filter((r) => r.grossAmount > 0)
+              .map((receipt) => (
+                <div
+                  key={receipt.costType}
+                  className="flex items-center justify-between px-3 bg-gray-50 border rounded-md"
+                >
+                  <div className="flex items-center gap-8 flex-1">
+                    <span className="font-semibold">
+                      {costTypeLabels[receipt.costType]}
+                    </span>
+                    {receipt.costType === "car" && (
+                      <span className="text-sm text-muted-foreground">
+                        {receipt.kilometers} km × 0,30€
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-semibold">
+                    {receipt.grossAmount.toFixed(2)} €
                   </span>
                 </div>
-                <span className="font-semibold">
-                  {travelDetails.transportationAmount.toFixed(2)} €
-                </span>
-              </div>
-            )}
-            {hasAccommodationCost && (
-              <div className="flex items-center justify-between px-3 bg-gray-50 border rounded-md">
-                <div className="flex items-center gap-8 flex-1">
-                  <span className="font-semibold">Übernachtung</span>
-                  <span className="text-sm text-muted-foreground">
-                    {travelDetails.destination}
-                  </span>
-                </div>
-                <span className="font-semibold">
-                  {travelDetails.accommodationAmount.toFixed(2)} €
-                </span>
-              </div>
-            )}
+              ))}
           </div>
 
           <div className="space-y-3 pt-6">

@@ -5,7 +5,7 @@ import { ImportTransactionsUI } from "@/(protected)/import/ImportTransactionsUI"
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export const ImportTransactionsLogic = () => {
@@ -15,10 +15,9 @@ export const ImportTransactionsLogic = () => {
   const [donorId, setDonorId] = useState("");
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
   const [splitIncome, setSplitIncome] = useState(false);
-  const [budgetAllocations, setBudgetAllocations] = useState<
+  const [budgets, setBudgets] = useState<
     Array<{ projectId: string; amount: number }>
   >([]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const transactions = useQuery(
     api.transactions.queries.getUnassignedProcessedTransactions,
@@ -35,12 +34,9 @@ export const ImportTransactionsLogic = () => {
 
   const expectedTransactions =
     useQuery(
-      api.transactions.queries.getTransactionRecommendations,
+      api.transactions.queries.getMatchingRecommendations,
       current
-        ? {
-            amount: current.amount,
-            projectId: projectId ? (projectId as Id<"projects">) : undefined,
-          }
+        ? { projectId: projectId ? (projectId as Id<"projects">) : undefined }
         : "skip",
     ) || [];
 
@@ -51,7 +47,7 @@ export const ImportTransactionsLogic = () => {
       setDonorId("");
       setSelectedMatch(null);
       setSplitIncome(false);
-      setBudgetAllocations([]);
+      setBudgets([]);
       return;
     }
     setProjectId(current.projectId || "");
@@ -59,26 +55,8 @@ export const ImportTransactionsLogic = () => {
     setDonorId(current.donorId || "");
     setSelectedMatch(current.matchedTransactionId || null);
     setSplitIncome(false);
-    setBudgetAllocations([]);
-  }, [current]);
-
-  useEffect(() => {
-    if (!transactions) return;
-    if (index >= transactions.length) setIndex(0);
-  }, [transactions, index]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setSelectedMatch(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    setBudgets([]);
+  }, [current?._id]);
 
   const handleNext = () => {
     if (!transactions || index >= transactions.length - 1) return;
@@ -100,7 +78,7 @@ export const ImportTransactionsLogic = () => {
     }
 
     try {
-      if (splitIncome && budgetAllocations.length > 0) {
+      if (splitIncome && budgets.length > 0) {
         await updateTransaction({
           transactionId: current._id,
           categoryId: categoryId as Id<"categories">,
@@ -112,9 +90,9 @@ export const ImportTransactionsLogic = () => {
 
         await splitTransaction({
           transactionId: current._id,
-          splits: budgetAllocations.map((a) => ({
-            projectId: a.projectId as Id<"projects">,
-            amount: a.amount,
+          splits: budgets.map((budget) => ({
+            projectId: budget.projectId as Id<"projects">,
+            amount: budget.amount,
           })),
         });
       } else {
@@ -139,21 +117,24 @@ export const ImportTransactionsLogic = () => {
       toast.success("Transaktion gespeichert");
       handleNext();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Fehler beim Speichern";
-      toast.error(errorMessage);
+      toast.error("Fehler beim Speichern");
     }
   };
 
   const handleExpectedTransactionSelect = (expectedTransactionId: string) => {
     setSelectedMatch(expectedTransactionId);
     const expected = expectedTransactions.find(
-      (t) => t._id === expectedTransactionId,
+      (transaction) => transaction._id === expectedTransactionId,
     );
     if (expected) {
       if (expected.projectId) setProjectId(expected.projectId);
       if (expected.categoryId) setCategoryId(expected.categoryId);
     }
+  };
+
+  const handleSplitIncomeChange = (newSplitIncome: boolean) => {
+    setSplitIncome(newSplitIncome);
+    if (!newSplitIncome) setBudgets([]);
   };
 
   useEffect(() => {
@@ -175,11 +156,6 @@ export const ImportTransactionsLogic = () => {
     return () => window.removeEventListener("keydown", handler);
   });
 
-  const handleSplitIncomeChange = (newSplitIncome: boolean) => {
-    setSplitIncome(newSplitIncome);
-    if (!newSplitIncome) setBudgetAllocations([]);
-  };
-
   if (!transactions) {
     return <ImportTransactionsSkeleton />;
   }
@@ -195,13 +171,12 @@ export const ImportTransactionsLogic = () => {
       selectedMatch={selectedMatch}
       splitIncome={splitIncome}
       expectedTransactions={expectedTransactions}
-      containerRef={containerRef}
       setProjectId={setProjectId}
       setCategoryId={setCategoryId}
       setDonorId={setDonorId}
       handleExpectedTransactionSelect={handleExpectedTransactionSelect}
       onSplitIncomeChange={handleSplitIncomeChange}
-      onBudgetAllocationsChange={setBudgetAllocations}
+      onBudgetsChange={setBudgets}
     />
   );
 };

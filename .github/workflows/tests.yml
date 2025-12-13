@@ -1,0 +1,48 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm vitest run
+
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install -g pnpm && pnpm install
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps
+
+      - name: Install Playwright deps only
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test --reporter=list
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.CONVEX_URL }}
+          IS_TEST: "true"

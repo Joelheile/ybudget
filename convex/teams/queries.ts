@@ -16,9 +16,7 @@ export const getAllTeams = query({
 
 export const getTeam = query({
   args: { teamId: v.id("teams") },
-  handler: async (ctx, args) => {
-    return ctx.db.get(args.teamId);
-  },
+  handler: async (ctx, args) => ctx.db.get(args.teamId),
 });
 
 export const getUserTeams = query({

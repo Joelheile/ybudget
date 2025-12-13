@@ -1,8 +1,8 @@
 "use client";
 
-import { useDateRange } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { useDateRange } from "@/lib/contexts/DateRangeContext";
 import { usePaginatedQuery } from "convex-helpers/react/cache";
 import { useMutation } from "convex/react";
 import TransactionsOverviewUI from "./TransactionsOverviewUI";

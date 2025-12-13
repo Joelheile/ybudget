@@ -4,7 +4,7 @@ import { CreateTeamDialog } from "@/components/Dialogs/CreateTeamDialog";
 import { InviteUserDialog } from "@/components/Dialogs/InviteUserDialog";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { AccessDenied } from "@/components/Settings/AccessDenied";
-import UserRow from "@/components/Tables/UserTable/UserRowLogic";
+import UserRow from "@/components/Tables/UserTable/UserRow";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -16,7 +16,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { UserRole } from "@/convex/users/permissions";
-import { useIsAdmin } from "@/hooks/useCurrentUserRole";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useMutation, useQuery } from "convex/react";
 import { Plus, Users } from "lucide-react";
 import { useState } from "react";

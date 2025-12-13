@@ -42,7 +42,7 @@ export const pay = action({
       customer_email: user.email,
       metadata: { userId: user._id },
       mode: "subscription",
-      success_url: `${domain}?paymentId=${paymentId}`,
+      success_url: `${domain}/payment-success`,
       cancel_url: domain,
       automatic_tax: { enabled: true },
     });

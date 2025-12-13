@@ -7,7 +7,7 @@ export default defineSchema({
   organizations: defineTable({
     name: v.string(),
     domain: v.string(),
-    createdBy: v.string(),
+    createdBy: v.id("users"),
   })
     .index("by_name", ["name"])
     .index("by_domain", ["domain"]),
@@ -40,7 +40,7 @@ export default defineSchema({
     organizationId: v.id("organizations"),
     description: v.optional(v.string()),
     isArchived: v.boolean(),
-    createdBy: v.string(),
+    createdBy: v.id("users"),
   }).index("by_organization", ["organizationId"]),
 
   transactions: defineTable({
@@ -64,7 +64,6 @@ export default defineSchema({
     status: v.union(v.literal("expected"), v.literal("processed")),
     matchedTransactionId: v.optional(v.string()),
     accountName: v.optional(v.string()),
-    isSplitIncome: v.optional(v.boolean()),
     isArchived: v.optional(v.boolean()),
     splitFromTransactionId: v.optional(v.id("transactions")),
     transferId: v.optional(v.string()),
@@ -86,19 +85,8 @@ export default defineSchema({
     .index("by_archived", ["isArchived"])
     .index("by_transferId", ["transferId"]),
 
-  budgets: defineTable({
-    projectId: v.id("projects"),
-    amount: v.number(),
-    allocatedBy: v.id("users"),
-    sourceTransactionId: v.optional(v.id("transactions")),
-    note: v.optional(v.string()),
-  })
-    .index("by_project", ["projectId"])
-    .index("by_source_transaction", ["sourceTransactionId"]),
-
   categories: defineTable({
     name: v.string(),
-    description: v.string(),
     taxsphere: v.union(
       v.literal("non-profit"), // Ideeller Bereich
       v.literal("asset-management"), // Vermögensverwaltung
@@ -173,7 +161,17 @@ export default defineSchema({
     .index("by_organization", ["organizationId"])
     .index("by_organization_and_createdBy", ["organizationId", "createdBy"]),
 
-  // multiple receipts make one reimbursement
+  travelDetails: defineTable({
+    reimbursementId: v.id("reimbursements"),
+    startDate: v.string(),
+    endDate: v.string(),
+    destination: v.string(),
+    purpose: v.string(),
+    isInternational: v.boolean(),
+    mealAllowanceDays: v.optional(v.number()),
+    mealAllowanceDailyBudget: v.optional(v.number()),
+  }).index("by_reimbursement", ["reimbursementId"]),
+
   receipts: defineTable({
     reimbursementId: v.id("reimbursements"),
     receiptNumber: v.string(),
@@ -184,29 +182,17 @@ export default defineSchema({
     taxRate: v.number(),
     grossAmount: v.number(),
     fileStorageId: v.id("_storage"),
-  }).index("by_reimbursement", ["reimbursementId"]),
-
-  // travel-specific details for travel reimbursements
-  travelDetails: defineTable({
-    reimbursementId: v.id("reimbursements"),
-    travelStartDate: v.string(),
-    travelEndDate: v.string(),
-    destination: v.string(),
-    travelPurpose: v.string(),
-    isInternational: v.boolean(),
-    transportationMode: v.union(
-      v.literal("car"),
-      v.literal("train"),
-      v.literal("flight"),
-      v.literal("taxi"),
-      v.literal("bus"),
-      v.literal("other"),
+    costType: v.optional(
+      v.union(
+        v.literal("car"),
+        v.literal("train"),
+        v.literal("flight"),
+        v.literal("taxi"),
+        v.literal("bus"),
+        v.literal("accommodation"),
+      ),
     ),
-    kilometers: v.optional(v.number()), // for car travel
-    transportationAmount: v.number(),
-    accommodationAmount: v.number(),
-    transportationReceiptId: v.optional(v.id("_storage")),
-    accommodationReceiptId: v.optional(v.id("_storage")),
+    kilometers: v.optional(v.number()),
   }).index("by_reimbursement", ["reimbursementId"]),
 
   logs: defineTable({

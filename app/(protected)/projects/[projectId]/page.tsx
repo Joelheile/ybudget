@@ -3,11 +3,11 @@
 import ProjectDashboardSkeleton from "@/(protected)/projects/[projectId]/ProjectDashboardSkeleton";
 import ProjectDashboardUI from "@/(protected)/projects/[projectId]/ProjectDashboardUI";
 import TransferDialog from "@/components/Dialogs/TransferDialog";
-import { useDateRange } from "@/contexts/DateRangeContext";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { calculateBudget } from "@/lib/budgetCalculations";
-import { filterTransactionsByDateRange } from "@/lib/transactionFilters";
+import { calculateBudget } from "@/lib/calculations/budgetCalculations";
+import { filterTransactionsByDateRange } from "@/lib/calculations/transactionFilters";
+import { useDateRange } from "@/lib/contexts/DateRangeContext";
 import { useQuery } from "convex-helpers/react/cache";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import { useParams } from "next/navigation";
@@ -20,7 +20,7 @@ export default function ProjectDetail() {
   const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const project = useQuery(api.projects.queries.getProjectById, {
-    projectId,
+    projectId: projectId as Id<"projects">,
   });
 
   const {
@@ -84,16 +84,6 @@ export default function ProjectDetail() {
     setIsTransferOpen(true);
   };
 
-  const handleArchive = () => {
-    try {
-      archiveProject({ projectId: projectId as Id<"projects"> });
-      toast.success("Projekt archiviert");
-    } catch (error) {
-      toast.error("Fehler beim Archivieren des Projekts");
-      throw error;
-    }
-  };
-
   if (!project) {
     return <ProjectDashboardSkeleton />;
   }
@@ -109,7 +99,6 @@ export default function ProjectDetail() {
         onUpdate={handleUpdateTransaction}
         onDelete={handleDeleteTransaction}
         openTransfer={handleOpenTransfer}
-        onArchive={handleArchive}
       />
       <TransferDialog open={isTransferOpen} onOpenChange={setIsTransferOpen} />
     </>

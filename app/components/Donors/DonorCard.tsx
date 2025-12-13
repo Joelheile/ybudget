@@ -4,17 +4,20 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { formatCurrency } from "@/lib/formatCurrency";
+import { formatCurrency } from "@/lib/formatters/formatCurrency";
 import { useQuery } from "convex-helpers/react/cache";
 import Link from "next/link";
 
+export const donorTypeLabels: Record<string, string> = {
+  donation: "Spende",
+  sponsoring: "Sponsoring",
+};
+
 interface DonorCardProps {
   donorId: Id<"donors">;
-  name: string;
-  type: "donation" | "sponsoring";
 }
 
-export default function DonorCard({ donorId, name, type }: DonorCardProps) {
+export default function DonorCard({ donorId }: DonorCardProps) {
   const donor = useQuery(api.donors.queries.getDonorById, {
     donorId,
   });
@@ -33,14 +36,14 @@ export default function DonorCard({ donorId, name, type }: DonorCardProps) {
       : 0;
 
   return (
-    <Card className="w-full p-4 cursor-pointer hover:border-primary transition-colors">
+    <Card className="w-full p-4 cursor-pointer hover:bg-muted transition-colors">
       <Link href={`/donors/${donorId}`}>
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-xl font-semibold">{name}</h3>
+              <h3 className="text-xl font-semibold">{donor.name}</h3>
               <span className="text-xs text-muted-foreground capitalize">
-                {type}
+                {donorTypeLabels[donor.type] ?? donor.type}
               </span>
             </div>
             <span className="text-sm font-medium text-muted-foreground">

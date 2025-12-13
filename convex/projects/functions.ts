@@ -24,17 +24,15 @@ export const createProject = mutation({
       .filter((q) => q.eq(q.field("status"), "completed"))
       .first();
 
-    const isPremium = activePayment !== null;
-
-    if (!isPremium) {
-      const existingProjects = await ctx.db
+    if (!activePayment) {
+      const projects = await ctx.db
         .query("projects")
         .withIndex("by_organization", (q) =>
           q.eq("organizationId", user.organizationId),
         )
         .collect();
 
-      if (existingProjects.length >= FREE_TIER_LIMIT) {
+      if (projects.length >= FREE_TIER_LIMIT) {
         throw new Error(
           `Du hast das Limit von ${FREE_TIER_LIMIT} Projekten erreicht. Bitte upgrade auf Premium.`,
         );
@@ -58,7 +56,6 @@ export const createProject = mutation({
       projectId,
       args.name,
     );
-
     return projectId;
   },
 });
@@ -69,9 +66,10 @@ export const renameProject = mutation({
     await requireRole(ctx, "lead");
     const user = await getCurrentUser(ctx);
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.organizationId !== user.organizationId) {
-      throw new Error(!project ? "Project not found" : "Access denied");
-    }
+
+    if (!project) throw new Error("Project not found");
+    if (project.organizationId !== user.organizationId)
+      throw new Error("Access denied");
 
     await ctx.db.patch(args.projectId, { name: args.name });
     await addLog(
@@ -91,6 +89,10 @@ export const archiveProject = mutation({
     await requireRole(ctx, "admin");
     const user = await getCurrentUser(ctx);
     const project = await ctx.db.get(args.projectId);
+
+    if (project?.name === "Rücklagen" && !project.parentId) {
+      throw new Error("Rücklagen kann nicht archiviert werden");
+    }
 
     await ctx.db.patch(args.projectId, { isArchived: true });
     await addLog(

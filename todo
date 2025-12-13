@@ -1,7 +1,31 @@
-- [ ] add tests
+Tests
 
-archive (latest on top):
+**todo**
 
+- [ ] test setup with cloning
+
+**archive (latest on top):**
+
+---
+
+-> add tests (5 unit tests, 10 integration tests, 3 end to end tests) -> 94.5% of lines
+
+- [x] e2e test for reimbursement & travel reimbursement
+- [x] unit tests
+- [x] transactions
+- [x] categories
+- [x] donors
+- [x] logs
+- [x] organizations
+- [x] projects
+- [x] reimbursements
+- [x] teams
+
+---
+
+- [x] check if Readme is up to date and gives all information to install program
+- [x] add import e2e test but without import logic, just adding it, splitting it and making sure they are correctly there
+- [x] check budgets implementation and if it really works what i had intended
 - [x] add logs
 - [x] add reimbursement as expected transaction when marked as paid
 - [x] negative amount in chart should be negative

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import RangeCalendar from "@/components/RangeCalendar/RangeCalendar";
 import { Button } from "@/components/ui/button";
-import { useDateRange } from "@/contexts/DateRangeContext";
+import { useDateRange } from "@/lib/contexts/DateRangeContext";
 
 export function RangeCalendarToggle() {
   const [open, setOpen] = useState(false);
@@ -27,7 +27,7 @@ export function RangeCalendarToggle() {
         Datumsbereich wählen
       </Button>
       {open && (
-        <div className="absolute left-0 mt-2 z-10">
+        <div className="absolute right-0 mt-2 z-10">
           <RangeCalendar
             selectedDateRange={selectedDateRange}
             onDateRangeChange={setSelectedDateRange}

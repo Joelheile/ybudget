@@ -34,11 +34,7 @@ export default function DonorsPage() {
                 key={donor._id}
                 id={index === 0 ? "tour-donor-card" : undefined}
               >
-                <DonorCard
-                  donorId={donor._id}
-                  name={donor.name}
-                  type={donor.type}
-                />
+                <DonorCard donorId={donor._id} />
               </div>
             ))}
           </div>
