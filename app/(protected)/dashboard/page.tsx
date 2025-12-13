@@ -1,6 +1,8 @@
 "use client";
 import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { CashflowChartUI } from "@/components/Dashboard/CashflowChartUI";
+import { ExpensesByCategoryChart } from "@/components/Dashboard/ExpensesByCategoryChart";
+import { IncomeByDonorChart } from "@/components/Dashboard/IncomeByDonorChart";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { api } from "@/convex/_generated/api";
 import { calculateBudget } from "@/lib/calculations/budgetCalculations";
@@ -47,6 +49,10 @@ export default function Dashboard() {
         id="tour-chart"
       >
         <CashflowChartUI />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4 lg:mt-6">
+        <ExpensesByCategoryChart transactions={transactions} />
+        <IncomeByDonorChart transactions={transactions} />
       </div>
     </div>
   );

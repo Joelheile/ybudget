@@ -8,6 +8,7 @@ interface DateRange {
 export type EnrichedTransaction = Doc<"transactions"> & {
   projectName?: string;
   categoryName?: string;
+  donorName?: string;
 };
 
 export function filterTransactionsByDateRange(
