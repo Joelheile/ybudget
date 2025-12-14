@@ -145,17 +145,11 @@ export default defineSchema({
     projectId: v.id("projects"),
     amount: v.number(),
     type: v.union(v.literal("expense"), v.literal("travel")),
-    status: v.union(
-      v.literal("draft"),
-      v.literal("pending"),
-      v.literal("approved"),
-      v.literal("rejected"),
-      v.literal("paid"),
-    ),
+    isApproved: v.boolean(),
     iban: v.string(),
     bic: v.string(),
     accountHolder: v.string(),
-    adminNote: v.optional(v.string()),
+    rejectionNote: v.optional(v.string()),
     createdBy: v.id("users"),
   })
     .index("by_organization", ["organizationId"])
@@ -202,4 +196,41 @@ export default defineSchema({
     entityId: v.string(),
     details: v.optional(v.string()),
   }).index("by_organization", ["organizationId"]),
+
+  volunteerAllowance: defineTable({
+    organizationId: v.id("organizations"),
+    projectId: v.id("projects"),
+    amount: v.number(),
+    isApproved: v.boolean(),
+    iban: v.string(),
+    bic: v.string(),
+    accountHolder: v.string(),
+    rejectionNote: v.optional(v.string()),
+    createdBy: v.id("users"),
+    activityDescription: v.string(),
+    startDate: v.string(),
+    endDate: v.string(),
+    volunteerName: v.string(),
+    volunteerStreet: v.string(),
+    volunteerPlz: v.string(),
+    volunteerCity: v.string(),
+    signatureStorageId: v.id("_storage"),
+    token: v.optional(v.string()),
+    expiresAt: v.optional(v.number()),
+    usedAt: v.optional(v.number()),
+  })
+    .index("by_token", ["token"])
+    .index("by_organization", ["organizationId"])
+    .index("by_organization_and_createdBy", ["organizationId", "createdBy"]),
+
+  signatureTokens: defineTable({
+    token: v.string(),
+    organizationId: v.id("organizations"),
+    createdBy: v.id("users"),
+    expiresAt: v.number(),
+    signatureStorageId: v.optional(v.id("_storage")),
+    usedAt: v.optional(v.number()),
+  })
+    .index("by_token", ["token"])
+    .index("by_createdBy", ["createdBy"]),
 });
