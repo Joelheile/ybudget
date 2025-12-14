@@ -34,7 +34,7 @@ const NAV_ITEMS = [
   { name: "Transaktionen", url: "/transactions", icon: SquareCheckBig },
   { name: "Import", url: "/import", icon: Upload, adminOnly: true },
   { name: "Förderer", url: "/donors", icon: Users },
-  { name: "Auslagenerstattung", url: "/reimbursement", icon: Coins },
+  { name: "Erstattungen", url: "/reimbursement", icon: Coins },
 ];
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {

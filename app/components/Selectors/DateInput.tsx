@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { forwardRef, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 interface DateInputProps {
   value: string;
@@ -37,16 +38,18 @@ function parseToIso(display: string): string {
   const d = parseInt(day, 10);
   const m = parseInt(month, 10);
   const y = parseInt(year, 10);
-  const currentYear = new Date().getFullYear();
 
-  if (d < 1 || d > 31 || m < 1 || m > 12 || y < 2000 || y > currentYear)
+  if (d < 1 || d > 31 || m < 1 || m > 12 || y < 2000 || y > 2100)
     return "";
 
   return `${year}-${month}-${day}`;
 }
 
 function formatAsUserTypes(input: string): string {
-  return input.replace(/[^\d.]/g, "");
+  const digits = input.replace(/\D/g, "");
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4, 8)}`;
 }
 
 export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -79,6 +82,7 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         setDisplayValue(formatDisplayDate(iso));
         onChange(iso);
       } else if (displayValue && displayValue.replace(/\D/g, "").length > 0) {
+        toast.error("Ungültiges Datum");
         setDisplayValue(formatDisplayDate(value));
       }
     };
