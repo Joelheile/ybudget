@@ -51,7 +51,7 @@ export function InviteUserDialog({
         <div className="space-y-6 py-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Wenn möchtest du einladen?
+              Wen möchtest du einladen?
             </label>
             <Input
               value={name}

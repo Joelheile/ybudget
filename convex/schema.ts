@@ -46,8 +46,8 @@ export default defineSchema({
   transactions: defineTable({
     projectId: v.optional(v.id("projects")),
     organizationId: v.id("organizations"),
-    date: v.number(), //epoch timestamp
-    amount: v.number(), // negative for expenses, positive for income
+    date: v.number(),
+    amount: v.number(),
     description: v.string(),
     counterparty: v.string(),
     categoryId: v.optional(v.id("categories")),

@@ -5,7 +5,7 @@ import { ImportTransactionsUI } from "@/(protected)/import/ImportTransactionsUI"
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export const ImportTransactionsLogic = () => {
@@ -58,17 +58,17 @@ export const ImportTransactionsLogic = () => {
     setBudgets([]);
   }, [current?._id]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (!transactions || index >= transactions.length - 1) return;
     setIndex(index + 1);
-  };
+  }, [transactions, index]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (index === 0) return;
     setIndex(index - 1);
-  };
+  }, [index]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!current) return;
 
     if (!categoryId || (!splitIncome && !projectId)) {
@@ -116,10 +116,10 @@ export const ImportTransactionsLogic = () => {
 
       toast.success("Transaktion gespeichert");
       handleNext();
-    } catch (error) {
+    } catch {
       toast.error("Fehler beim Speichern");
     }
-  };
+  }, [current, categoryId, splitIncome, projectId, budgets, donorId, selectedMatch, updateTransaction, splitTransaction, handleNext]);
 
   const handleExpectedTransactionSelect = (expectedTransactionId: string) => {
     setSelectedMatch(expectedTransactionId);
@@ -154,7 +154,7 @@ export const ImportTransactionsLogic = () => {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  });
+  }, [handleNext, handleSave, handlePrev]);
 
   if (!transactions) {
     return <ImportTransactionsSkeleton />;
