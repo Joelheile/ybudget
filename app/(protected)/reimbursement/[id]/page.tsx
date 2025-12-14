@@ -10,19 +10,6 @@ import { formatDate } from "@/lib/formatters/formatDate";
 import { useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 
-const STATUS_BADGES: Record<
-  string,
-  {
-    variant: "default" | "destructive" | "secondary" | "outline";
-    label: string;
-  }
-> = {
-  paid: { variant: "default", label: "Bezahlt" },
-  approved: { variant: "default", label: "Genehmigt" },
-  rejected: { variant: "destructive", label: "Abgelehnt" },
-  pending: { variant: "secondary", label: "Ausstehend" },
-};
-
 const COST_TYPE_LABELS: Record<string, string> = {
   car: "PKW",
   train: "Bahn",
@@ -30,7 +17,6 @@ const COST_TYPE_LABELS: Record<string, string> = {
   taxi: "Taxi",
   bus: "Bus",
   accommodation: "Hotel",
-  food: "Verpflegung",
 };
 
 function ReceiptImage({ storageId }: { storageId: Id<"_storage"> }) {
@@ -65,31 +51,17 @@ export default function ReimbursementDetailPage() {
     );
   }
 
-  const totalNet = receipts.reduce(
-    (sum, receipt) => sum + receipt.netAmount,
-    0,
-  );
+  const totalNet = receipts.reduce((sum, r) => sum + r.netAmount, 0);
   const totalTax7 = receipts
-    .filter((receipt) => receipt.taxRate === 7)
-    .reduce(
-      (sum, receipt) => sum + (receipt.grossAmount - receipt.netAmount),
-      0,
-    );
+    .filter((r) => r.taxRate === 7)
+    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
   const totalTax19 = receipts
-    .filter((receipt) => receipt.taxRate === 19)
-    .reduce(
-      (sum, receipt) => sum + (receipt.grossAmount - receipt.netAmount),
-      0,
-    );
-  const totalGross = receipts.reduce(
-    (sum, receipt) => sum + receipt.grossAmount,
-    0,
-  );
+    .filter((r) => r.taxRate === 19)
+    .reduce((sum, r) => sum + (r.grossAmount - r.netAmount), 0);
+  const totalGross = receipts.reduce((sum, r) => sum + r.grossAmount, 0);
 
-  const statusBadge = STATUS_BADGES[reimbursement.status] || {
-    variant: "outline" as const,
-    label: "Unbekannt",
-  };
+  const statusLabel = reimbursement.isApproved ? "Genehmigt" : "Ausstehend";
+  const statusVariant = reimbursement.isApproved ? "default" : "secondary";
 
   return (
     <div className="flex flex-col w-full h-screen">
@@ -98,7 +70,7 @@ export default function ReimbursementDetailPage() {
       <div className="max-w-4xl mx-auto p-6 space-y-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+            <Badge variant={statusVariant}>{statusLabel}</Badge>
             <span className="text-muted-foreground">
               {reimbursement.type === "travel"
                 ? "Reisekostenerstattung"
@@ -108,10 +80,10 @@ export default function ReimbursementDetailPage() {
           <p className="text-3xl font-bold">{formatCurrency(totalGross)}</p>
         </div>
 
-        {reimbursement.adminNote && reimbursement.status === "rejected" && (
+        {reimbursement.rejectionNote && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm font-medium text-red-800">Ablehnungsgrund:</p>
-            <p className="text-red-700">{reimbursement.adminNote}</p>
+            <p className="text-red-700">{reimbursement.rejectionNote}</p>
           </div>
         )}
 
