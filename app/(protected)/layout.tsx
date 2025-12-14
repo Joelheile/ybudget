@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatTrigger } from "@/components/chat";
+import { ChatTrigger } from "@/components/Chat/ChatOverlay";
 import { OnboardingDialog } from "@/components/Onboarding/OnboardingDialog";
 import { TourCard } from "@/components/Onboarding/TourCard";
 import { tourSteps } from "@/components/Onboarding/tourSteps";
