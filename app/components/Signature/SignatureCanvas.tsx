@@ -12,13 +12,15 @@ import SignaturePad from "react-signature-canvas";
 type Props = {
   onUploadComplete: (storageId: Id<"_storage">) => void;
   storageId?: Id<"_storage">;
+  generateUploadUrl?: () => Promise<string>;
 };
 
-export function SignatureCanvas({ onUploadComplete, storageId }: Props) {
+export function SignatureCanvas({ onUploadComplete, storageId, generateUploadUrl: customUploadUrl }: Props) {
   const padRef = useRef<SignaturePad>(null);
   const [uploading, setUploading] = useState(false);
 
-  const generateUploadUrl = useMutation(api.reimbursements.functions.generateUploadUrl);
+  const defaultUploadUrl = useMutation(api.reimbursements.functions.generateUploadUrl);
+  const generateUploadUrl = customUploadUrl || defaultUploadUrl;
   const previewUrl = useQuery(api.reimbursements.queries.getFileUrl, storageId ? { storageId } : "skip");
 
   const handleSave = async () => {
