@@ -45,6 +45,8 @@ import type * as users_getCurrentUser from "../users/getCurrentUser.js";
 import type * as users_permissions from "../users/permissions.js";
 import type * as users_queries from "../users/queries.js";
 import type * as utils_addProjectAndCategoryNames from "../utils/addProjectAndCategoryNames.js";
+import type * as volunteerAllowance_functions from "../volunteerAllowance/functions.js";
+import type * as volunteerAllowance_queries from "../volunteerAllowance/queries.js";
 
 import type {
   ApiFromModules,
@@ -90,6 +92,8 @@ declare const fullApi: ApiFromModules<{
   "users/permissions": typeof users_permissions;
   "users/queries": typeof users_queries;
   "utils/addProjectAndCategoryNames": typeof utils_addProjectAndCategoryNames;
+  "volunteerAllowance/functions": typeof volunteerAllowance_functions;
+  "volunteerAllowance/queries": typeof volunteerAllowance_queries;
 }>;
 
 /**
