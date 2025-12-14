@@ -214,7 +214,7 @@ export default defineSchema({
     volunteerStreet: v.string(),
     volunteerPlz: v.string(),
     volunteerCity: v.string(),
-    signatureStorageId: v.id("_storage"),
+    signatureStorageId: v.optional(v.id("_storage")),
     token: v.optional(v.string()),
     expiresAt: v.optional(v.number()),
     usedAt: v.optional(v.number()),
