@@ -83,7 +83,6 @@ export const createToken = mutation({
       volunteerStreet: "",
       volunteerPlz: "",
       volunteerCity: "",
-      signatureStorageId: "" as any,
       token,
       expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
     });
