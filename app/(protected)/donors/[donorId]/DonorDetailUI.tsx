@@ -1,13 +1,12 @@
 import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { donorTypeLabels } from "@/components/Donors/DonorCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
-import { editableColumnsWithoutProject } from "@/components/Tables/TransactionTable/EditableColumns";
-import { EditableDataTable } from "@/components/Tables/TransactionTable/EditableDataTable";
+import { editableColumnsWithoutProject } from "@/components/Tables/Transactions/EditableColumns";
+import { EditableDataTable } from "@/components/Tables/Transactions/EditableDataTable";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
-import { PaginationStatus } from "convex/react";
+import { PaginationStatus, useQuery } from "convex/react";
 import { CSVLink } from "react-csv";
 
 interface DonorDetailUIProps {

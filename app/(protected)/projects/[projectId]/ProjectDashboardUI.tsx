@@ -1,7 +1,7 @@
 import BudgetCard from "@/components/Dashboard/BudgetCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
-import { editableColumnsWithoutProject } from "@/components/Tables/TransactionTable/EditableColumns";
-import { EditableDataTable } from "@/components/Tables/TransactionTable/EditableDataTable";
+import { editableColumnsWithoutProject } from "@/components/Tables/Transactions/EditableColumns";
+import { EditableDataTable } from "@/components/Tables/Transactions/EditableDataTable";
 import { Button } from "@/components/ui/button";
 import type { Doc } from "@/convex/_generated/dataModel";
 import type { PaginationStatus } from "convex/react";

@@ -77,41 +77,26 @@ export const ImportTransactionsLogic = () => {
       return;
     }
 
+    const baseUpdate = {
+      transactionId: current._id,
+      categoryId: categoryId as Id<"categories">,
+      donorId: donorId ? (donorId as Id<"donors">) : undefined,
+      matchedTransactionId: selectedMatch ? (selectedMatch as Id<"transactions">) : undefined,
+    };
+
     try {
       if (splitIncome && budgets.length > 0) {
-        await updateTransaction({
-          transactionId: current._id,
-          categoryId: categoryId as Id<"categories">,
-          donorId: donorId ? (donorId as Id<"donors">) : undefined,
-          matchedTransactionId: selectedMatch
-            ? (selectedMatch as Id<"transactions">)
-            : undefined,
-        });
-
+        await updateTransaction(baseUpdate);
         await splitTransaction({
           transactionId: current._id,
-          splits: budgets.map((budget) => ({
-            projectId: budget.projectId as Id<"projects">,
-            amount: budget.amount,
-          })),
+          splits: budgets.map((b) => ({ projectId: b.projectId as Id<"projects">, amount: b.amount })),
         });
       } else {
-        await updateTransaction({
-          transactionId: current._id,
-          projectId: projectId as Id<"projects">,
-          categoryId: categoryId as Id<"categories">,
-          donorId: donorId ? (donorId as Id<"donors">) : undefined,
-          matchedTransactionId: selectedMatch
-            ? (selectedMatch as Id<"transactions">)
-            : undefined,
-        });
+        await updateTransaction({ ...baseUpdate, projectId: projectId as Id<"projects"> });
       }
 
       if (selectedMatch) {
-        await updateTransaction({
-          transactionId: selectedMatch as Id<"transactions">,
-          matchedTransactionId: current._id,
-        });
+        await updateTransaction({ transactionId: selectedMatch as Id<"transactions">, matchedTransactionId: current._id });
       }
 
       toast.success("Transaktion gespeichert");
