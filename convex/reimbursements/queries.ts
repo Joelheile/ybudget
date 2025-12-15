@@ -94,7 +94,7 @@ export const getAllReimbursements = query({
           ...r,
           creatorName: creator?.name || "Unknown",
           projectName: project?.name || "Unbekanntes Projekt",
-          travelDetails,
+          travelDetails: travelDetails ?? undefined,
         };
       }),
     );

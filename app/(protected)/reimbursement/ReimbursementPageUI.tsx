@@ -20,32 +20,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import type { Id } from "@/convex/_generated/dataModel";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { formatDate } from "@/lib/formatters/formatDate";
 import { Check, Download, Plus, Trash2, X } from "lucide-react";
 
-type Reimbursement = {
-  _id: Id<"reimbursements">;
-  _creationTime: number;
+type Reimbursement = Doc<"reimbursements"> & {
+  creatorName: string;
   projectName: string;
-  amount: number;
-  isApproved: boolean;
-  rejectionNote?: string;
-  creatorName?: string;
-  type: "expense" | "travel";
-  travelDetails?: { destination?: string };
+  travelDetails?: Doc<"travelDetails">;
 };
 
-type Allowance = {
-  _id: Id<"volunteerAllowance">;
-  _creationTime: number;
+type Allowance = Doc<"volunteerAllowance"> & {
+  creatorName: string;
   projectName: string;
-  amount: number;
-  isApproved: boolean;
-  rejectionNote?: string;
-  creatorName?: string;
-  volunteerName: string;
-  signatureStorageId?: Id<"_storage">;
+  organizationName: string;
 };
 
 type RejectDialog = {
