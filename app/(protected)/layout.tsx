@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/Sidebar/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { api } from "@/convex/_generated/api";
 import { DateRangeProvider } from "@/lib/contexts/DateRangeContext";
+import { useCanEdit } from "@/lib/hooks/useCurrentUserRole";
 import { useConvexAuth, useQuery } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ export default function ProtectedLayout({
   const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
   const organizationId = useQuery(api.users.queries.getUserOrganizationId, {});
+  const canEdit = useCanEdit();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -69,7 +71,7 @@ export default function ProtectedLayout({
                 )}
               </div>
             </div>
-            <ChatTrigger />
+            {canEdit && <ChatTrigger />}
           </SidebarProvider>
         </Onborda>
       </DateRangeProvider>
