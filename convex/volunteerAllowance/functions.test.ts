@@ -251,3 +251,312 @@ test("submitSignature stores signature", async () => {
   );
   expect(doc?.signatureStorageId).toBe(storageId);
 });
+
+test("generatePublicUploadUrl fails with expired token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      amount: 0,
+      isApproved: false,
+      iban: "",
+      bic: "",
+      accountHolder: "",
+      createdBy: userId,
+      activityDescription: "",
+      startDate: "",
+      endDate: "",
+      volunteerName: "",
+      volunteerStreet: "",
+      volunteerPlz: "",
+      volunteerCity: "",
+      token: "expired-token",
+      expiresAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.generatePublicUploadUrl, {
+      token: "expired-token",
+    }),
+  ).rejects.toThrow("Link expired");
+});
+
+test("generatePublicUploadUrl fails with used token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      amount: 0,
+      isApproved: false,
+      iban: "",
+      bic: "",
+      accountHolder: "",
+      createdBy: userId,
+      activityDescription: "",
+      startDate: "",
+      endDate: "",
+      volunteerName: "",
+      volunteerStreet: "",
+      volunteerPlz: "",
+      volunteerCity: "",
+      token: "used-token",
+      expiresAt: Date.now() + 1000000,
+      usedAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.generatePublicUploadUrl, {
+      token: "used-token",
+    }),
+  ).rejects.toThrow("Link already used");
+});
+
+test("submitExternal fails with expired token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      amount: 0,
+      isApproved: false,
+      iban: "",
+      bic: "",
+      accountHolder: "",
+      createdBy: userId,
+      activityDescription: "",
+      startDate: "",
+      endDate: "",
+      volunteerName: "",
+      volunteerStreet: "",
+      volunteerPlz: "",
+      volunteerCity: "",
+      token: "expired-ext-token",
+      expiresAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.submitExternal, {
+      token: "expired-ext-token",
+      ...formData(storageId, 400),
+    }),
+  ).rejects.toThrow("Link expired");
+});
+
+test("submitExternal fails with used token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      amount: 0,
+      isApproved: false,
+      iban: "",
+      bic: "",
+      accountHolder: "",
+      createdBy: userId,
+      activityDescription: "",
+      startDate: "",
+      endDate: "",
+      volunteerName: "",
+      volunteerStreet: "",
+      volunteerPlz: "",
+      volunteerCity: "",
+      token: "used-ext-token",
+      expiresAt: Date.now() + 1000000,
+      usedAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.submitExternal, {
+      token: "used-ext-token",
+      ...formData(storageId, 400),
+    }),
+  ).rejects.toThrow("Link already used");
+});
+
+test("submitExternal fails with invalid token", async () => {
+  const t = convexTest(schema, modules);
+  await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.submitExternal, {
+      token: "nonexistent",
+      ...formData(storageId, 400),
+    }),
+  ).rejects.toThrow("Invalid link");
+});
+
+test("generateSignatureUploadUrl fails with expired token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId } = await setupTestData(t);
+
+  await t.run((ctx) =>
+    ctx.db.insert("signatureTokens", {
+      token: "expired-sig-upload",
+      organizationId,
+      createdBy: userId,
+      expiresAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.generateSignatureUploadUrl, {
+      token: "expired-sig-upload",
+    }),
+  ).rejects.toThrow("Link expired");
+});
+
+test("generateSignatureUploadUrl fails with used token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId } = await setupTestData(t);
+
+  await t.run((ctx) =>
+    ctx.db.insert("signatureTokens", {
+      token: "used-sig-upload",
+      organizationId,
+      createdBy: userId,
+      expiresAt: Date.now() + 1000000,
+      usedAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.generateSignatureUploadUrl, {
+      token: "used-sig-upload",
+    }),
+  ).rejects.toThrow("Link already used");
+});
+
+test("generateSignatureUploadUrl fails with invalid token", async () => {
+  const t = convexTest(schema, modules);
+  await setupTestData(t);
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.generateSignatureUploadUrl, {
+      token: "invalid",
+    }),
+  ).rejects.toThrow("Invalid link");
+});
+
+test("submitSignature fails with expired token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await t.run((ctx) =>
+    ctx.db.insert("signatureTokens", {
+      token: "expired-submit-sig",
+      organizationId,
+      createdBy: userId,
+      expiresAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.submitSignature, {
+      token: "expired-submit-sig",
+      signatureStorageId: storageId,
+    }),
+  ).rejects.toThrow("Link expired");
+});
+
+test("submitSignature fails with used token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await t.run((ctx) =>
+    ctx.db.insert("signatureTokens", {
+      token: "used-submit-sig",
+      organizationId,
+      createdBy: userId,
+      expiresAt: Date.now() + 1000000,
+      usedAt: Date.now() - 1000,
+    }),
+  );
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.submitSignature, {
+      token: "used-submit-sig",
+      signatureStorageId: storageId,
+    }),
+  ).rejects.toThrow("Link already used");
+});
+
+test("submitSignature fails with invalid token", async () => {
+  const t = convexTest(schema, modules);
+  await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await expect(
+    t.mutation(api.volunteerAllowance.functions.submitSignature, {
+      token: "invalid",
+      signatureStorageId: storageId,
+    }),
+  ).rejects.toThrow("Invalid link");
+});
+
+test("approve fails for non-existent allowance", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  const id = await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      createdBy: userId,
+      isApproved: false,
+      ...formData(storageId),
+    }),
+  );
+
+  await t.run((ctx) => ctx.db.delete(id));
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.volunteerAllowance.functions.approve, { id }),
+  ).rejects.toThrow("Not found");
+});
+
+test("remove fails for non-existent allowance", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  const id = await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      createdBy: userId,
+      isApproved: false,
+      ...formData(storageId),
+    }),
+  );
+
+  await t.run((ctx) => ctx.db.delete(id));
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.volunteerAllowance.functions.remove, { id }),
+  ).rejects.toThrow("Not found");
+});
