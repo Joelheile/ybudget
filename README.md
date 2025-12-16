@@ -18,7 +18,7 @@ Simple, affordable, intuitive and open-source.
 - 🎯 **Project Organization:** Assign expenses to projects, see remaining budgets at a glance
 - 🧾 **Reimbursements:** Submit expense and travel reimbursements with receipt uploads
 - 🎁 **Volunteer Allowance:** "Ehrenamtspauschale" forms with shareable links for external signatures
-- 🤖 **AI Assistant:** Chat with your budget data, get insights and manage finances via natural language
+- 🤖 **AI Assistant:** Chat with your budget data (admin/lead only) to get transactions, todos in form of expected transactions and open reimbursements via natural language
 - 👥 **Team Management:** Organize members into teams with project access control
 - 📤 **Donor Export:** Export transactions by donor to CSV
 - ✉️ **Email Invitations:** Invite team members via email (powered by Resend)
