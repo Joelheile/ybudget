@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { Plus } from "lucide-react";
+import { Plus, Share2 } from "lucide-react";
 import { ReimbursementRow } from "../../components/Tables/Reimbursements/ReimbursementRow";
 
 type Reimbursement = Doc<"reimbursements"> & {
@@ -48,12 +48,13 @@ interface ReimbursementPageUIProps {
   allowances: Allowance[];
   rejectDialog: RejectDialog;
   onNewClick: () => void;
+  onShareClick: () => void;
   onRowClick: (id: Id<"reimbursements">) => void;
   onApproveReimbursement: (id: Id<"reimbursements">) => void;
   onApproveAllowance: (id: Id<"volunteerAllowance">) => void;
   onOpenRejectDialog: (
     type: "reimbursement" | "allowance",
-    id: Id<"reimbursements"> | Id<"volunteerAllowance">,
+    id: Id<"reimbursements"> | Id<"volunteerAllowance">
   ) => void;
   onRejectDialogChange: (dialog: RejectDialog) => void;
   onReject: () => void;
@@ -70,6 +71,7 @@ export default function ReimbursementPageUI({
   allowances,
   rejectDialog,
   onNewClick,
+  onShareClick,
   onRowClick,
   onApproveReimbursement,
   onApproveAllowance,
@@ -87,10 +89,14 @@ export default function ReimbursementPageUI({
     <div className="flex flex-col w-full h-screen">
       <PageHeader title="Erstattungen" />
 
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end gap-2 mb-4">
         <Button variant="secondary" onClick={onNewClick}>
           <Plus className="h-4 w-4 mr-2" />
           Neue Erstattung
+        </Button>
+        <Button variant="secondary" onClick={onShareClick}>
+          <Share2 className="h-4 w-4 mr-2" />
+          Ehrenamtspauschale
         </Button>
       </div>
 
