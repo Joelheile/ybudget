@@ -201,3 +201,99 @@ test("getSignatureToken returns null for using it with invalid token", async () 
   );
   expect(result).toBeNull();
 });
+
+test("validateToken returns invalid for used token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      ...baseAllowance(organizationId, projectId, userId, storageId),
+      token: "used-token",
+      expiresAt: Date.now() + 1000000,
+      usedAt: Date.now() - 1000,
+    }),
+  );
+
+  const result = await t.query(api.volunteerAllowance.queries.validateToken, {
+    token: "used-token",
+  });
+  expect(result.valid).toBe(false);
+  expect(result.error).toBe("Link already used");
+});
+
+test("getAll returns allowances for non-admin user", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  const memberUserId = await t.run((ctx) =>
+    ctx.db.insert("users", {
+      email: "member@test.com",
+      organizationId,
+      role: "member",
+    }),
+  );
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      ...baseAllowance(organizationId, projectId, memberUserId, storageId),
+    }),
+  );
+
+  await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      ...baseAllowance(organizationId, projectId, userId, storageId),
+    }),
+  );
+
+  const results = await t
+    .withIdentity({ subject: memberUserId })
+    .query(api.volunteerAllowance.queries.getAll, {});
+
+  expect(results.every((r) => r.createdBy === memberUserId)).toBe(true);
+});
+
+test("validateSignatureToken returns expired for expired token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId } = await setupTestData(t);
+
+  await t.run((ctx) =>
+    ctx.db.insert("signatureTokens", {
+      token: "expired-sig-token",
+      organizationId,
+      createdBy: userId,
+      expiresAt: Date.now() - 1000,
+    }),
+  );
+
+  const result = await t.query(
+    api.volunteerAllowance.queries.validateSignatureToken,
+    { token: "expired-sig-token" },
+  );
+  expect(result.valid).toBe(false);
+  expect(result.error).toBe("Link expired");
+});
+
+test("validateSignatureToken returns used for already used token", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, organizationId } = await setupTestData(t);
+
+  await t.run((ctx) =>
+    ctx.db.insert("signatureTokens", {
+      token: "used-sig-token",
+      organizationId,
+      createdBy: userId,
+      expiresAt: Date.now() + 1000000,
+      usedAt: Date.now() - 1000,
+    }),
+  );
+
+  const result = await t.query(
+    api.volunteerAllowance.queries.validateSignatureToken,
+    { token: "used-sig-token" },
+  );
+  expect(result.valid).toBe(false);
+  expect(result.error).toBe("Link already used");
+});
