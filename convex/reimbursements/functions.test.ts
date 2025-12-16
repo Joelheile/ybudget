@@ -138,6 +138,22 @@ test("throw error if trying to mark non existent reimbursement as paid", async (
   ).rejects.toThrow("Reimbursement not found");
 });
 
+test("throw error if trying to reject non existent reimbursement", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, reimbursementId } = await setupTestData(t);
+
+  await t.run((ctx) => ctx.db.delete(reimbursementId));
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.reimbursements.functions.rejectReimbursement, {
+        reimbursementId,
+        rejectionNote: "Test",
+      }),
+  ).rejects.toThrow("Reimbursement not found");
+});
+
 test("delete travel reimbursement deletes travel details", async () => {
   const t = convexTest(schema, modules);
   const { userId, travelReimbursementId } = await setupTestData(t);
