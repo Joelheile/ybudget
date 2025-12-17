@@ -138,10 +138,7 @@ export function PageHeader({
                         <DropdownMenuItem
                           onSelect={() => setIsIncomeOpen(true)}
                         >
-                          <span className="font-semibold">
-                            {" "}
-                            Einnahme planen
-                          </span>
+                          <span className="font-semibold">Einnahme planen</span>
                           <DropdownMenuShortcut>⌘I</DropdownMenuShortcut>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

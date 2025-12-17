@@ -53,18 +53,18 @@ export default function ReimbursementDetailPage() {
 
   const totalNet = receipts.reduce(
     (sum, receipt) => sum + receipt.netAmount,
-    0,
+    0
   );
   const totalGross = receipts.reduce(
     (sum, receipt) => sum + receipt.grossAmount,
-    0,
+    0
   );
   const taxByRate = (rate: number) =>
     receipts
       .filter((receipt) => receipt.taxRate === rate)
       .reduce(
         (sum, receipt) => sum + receipt.grossAmount - receipt.netAmount,
-        0,
+        0
       );
 
   const statusLabel = reimbursement.isApproved ? "Genehmigt" : "Ausstehend";
@@ -99,16 +99,16 @@ export default function ReimbursementDetailPage() {
             <h3 className="font-medium">Reisedetails</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-muted-foreground">Reiseziel:</span>{" "}
+                <span className="text-muted-foreground">Reiseziel:</span>
                 {reimbursement.travelDetails.destination}
               </div>
               <div>
-                <span className="text-muted-foreground">Zweck:</span>{" "}
+                <span className="text-muted-foreground">Zweck:</span>
                 {reimbursement.travelDetails.purpose}
               </div>
               <div>
-                <span className="text-muted-foreground">Zeitraum:</span>{" "}
-                {formatDate(reimbursement.travelDetails.startDate)} –{" "}
+                <span className="text-muted-foreground">Zeitraum:</span>
+                {formatDate(reimbursement.travelDetails.startDate)} –
                 {formatDate(reimbursement.travelDetails.endDate)}
               </div>
               {reimbursement.travelDetails.isInternational && (
@@ -124,15 +124,15 @@ export default function ReimbursementDetailPage() {
           <h3 className="font-medium">Bankverbindung</h3>
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground">Kontoinhaber:</span>{" "}
+              <span className="text-muted-foreground">Kontoinhaber:</span>
               {reimbursement.accountHolder || "–"}
             </div>
             <div>
-              <span className="text-muted-foreground">IBAN:</span>{" "}
+              <span className="text-muted-foreground">IBAN:</span>
               <span className="font-mono">{reimbursement.iban || "–"}</span>
             </div>
             <div>
-              <span className="text-muted-foreground">BIC:</span>{" "}
+              <span className="text-muted-foreground">BIC:</span>
               <span className="font-mono">{reimbursement.bic || "–"}</span>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function ReimbursementDetailPage() {
                   <div>
                     <p className="font-semibold">{receipt.companyName}</p>
                     <p className="text-sm text-muted-foreground">
-                      Beleg-Nr. {receipt.receiptNumber} •{" "}
+                      Beleg-Nr. {receipt.receiptNumber} •
                       {formatDate(receipt.receiptDate)}
                     </p>
                   </div>
@@ -157,7 +157,7 @@ export default function ReimbursementDetailPage() {
                       {formatCurrency(receipt.grossAmount)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(receipt.netAmount)} netto +{" "}
+                      {formatCurrency(receipt.netAmount)} netto +
                       {receipt.taxRate}% USt
                     </p>
                   </div>
