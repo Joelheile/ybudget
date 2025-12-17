@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden  px-4 pt-32 pb-24 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden px-4 pt-24 pb-16 sm:pt-32 sm:pb-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -17,25 +17,24 @@ export function HeroSection() {
           className="text-center"
         >
           <div>
-            <h1 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
-              Budgetverwaltung für
-              <br />
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-7xl">
+              Budgetverwaltung für{" "}
               <span className="text-primary">gemeinnützige Vereine.</span>
             </h1>
           </div>
-          <p className="mt-6 text-xl text-slate-600 sm:text-2xl">
+          <p className="mt-4 text-lg text-slate-600 sm:mt-6 sm:text-2xl">
             Zeit ist Geld. Spare beides.
           </p>
-          <p className="mx-auto mt-6 max-w-3xl text-lg text-slate-600">
+          <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:mt-6 sm:text-lg">
             YBudget hilft dir, Budgets zu planen, Ausgaben zu tracken und
             Berichte für Förderer zu erstellen. Einfach und schnell :)
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="mt-8 flex justify-center sm:mt-10">
             <Button
               asChild
               size="lg"
-              className="group h-12 px-8 text-base font-semibold"
+              className="group h-11 px-6 text-sm font-semibold sm:h-12 sm:px-8 sm:text-base"
             >
               <Link href="/login">
                 Kostenlos starten
@@ -49,11 +48,11 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="mt-16"
+          className="mt-10 sm:mt-16"
         >
           <div className="relative mx-auto max-w-5xl">
-            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200 opacity-20 blur-2xl" />
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="absolute -inset-2 rounded-2xl bg-linear-to-r from-gray-50 via-gray-100 to-gray-200 opacity-20 blur-xl sm:-inset-4 sm:rounded-3xl sm:blur-2xl" />
+            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:rounded-2xl sm:shadow-2xl">
               <Image
                 src="/screenshots/Dashboard Overview.png"
                 alt="YBudget Dashboard mit Budget-Übersicht, Transaktionen und Projekten"

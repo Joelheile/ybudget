@@ -32,7 +32,7 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="bg-white px-4 py-24 sm:px-6 lg:px-8">
+    <section id="how-it-works" className="bg-white px-4 py-16 sm:py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -41,16 +41,16 @@ export function HowItWorksSection() {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
             So einfach geht's
           </h2>
         </motion.div>
 
-        <div className="mt-16">
+        <div className="mt-10 sm:mt-16">
           <div className="relative">
-            <div className="absolute left-1/2 top-0 hidden h-full w-0.5 -translate-x-1/2 bg-gradient-to-b from-primary to-primary/60 lg:block" />
+            <div className="absolute left-1/2 top-0 hidden h-full w-0.5 -translate-x-1/2 bg-linear-to-b from-primary to-primary/60 lg:block" />
 
-            <div className="space-y-12">
+            <div className="space-y-6 sm:space-y-12">
               {steps.map((step, index) => {
                 const Icon = step.icon;
                 return (
@@ -71,23 +71,23 @@ export function HowItWorksSection() {
                         }`}
                       >
                         <div
-                          className={`inline-flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${
+                          className={`inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:gap-4 sm:rounded-2xl sm:p-6 ${
                             index % 2 === 0 ? "" : "lg:flex-row-reverse"
                           }`}
                         >
-                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
-                            <Icon className="h-8 w-8" />
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary text-white shadow-md sm:h-16 sm:w-16 sm:rounded-xl sm:shadow-lg">
+                            <Icon className="h-6 w-6 sm:h-8 sm:w-8" />
                           </div>
                           <div
                             className={index % 2 === 0 ? "lg:text-right" : ""}
                           >
-                            <div className="text-sm font-semibold text-primary">
+                            <div className="text-xs font-semibold text-primary sm:text-sm">
                               Schritt {step.number}
                             </div>
-                            <h3 className="mt-1 text-xl font-bold text-slate-900">
+                            <h3 className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
                               {step.title}
                             </h3>
-                            <p className="mt-2 text-slate-600">
+                            <p className="mt-1 text-sm text-slate-600 sm:mt-2 sm:text-base">
                               {step.description}
                             </p>
                           </div>
