@@ -38,7 +38,7 @@ export function DonorCard({ donorId }: { donorId: Id<"donors"> }) {
 
   return (
     <Link href={`/donors/${donorId}`}>
-      <Card className="w-full p-4 cursor-pointer hover:bg-muted transition-colors">
+      <Card className="w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-xl font-semibold">{donor.name}</h3>

@@ -11,10 +11,10 @@ const TRANSACTIONS_PER_PAGE = 50;
 export default function TransactionsPage() {
   const { selectedDateRange } = useDateRange();
   const updateTransaction = useMutation(
-    api.transactions.functions.updateTransaction,
+    api.transactions.functions.updateTransaction
   );
   const deleteTransaction = useMutation(
-    api.transactions.functions.deleteExpectedTransaction,
+    api.transactions.functions.deleteExpectedTransaction
   );
 
   const { results, status, loadMore } = usePaginatedQuery(
@@ -23,11 +23,11 @@ export default function TransactionsPage() {
       startDate: selectedDateRange?.from?.getTime(),
       endDate: selectedDateRange?.to?.getTime(),
     },
-    { initialNumItems: TRANSACTIONS_PER_PAGE },
+    { initialNumItems: TRANSACTIONS_PER_PAGE }
   );
 
   return (
-    <TransactionsOverviewUI
+    <TransactionsPageUI
       selectedDateRange={selectedDateRange}
       transactions={results ?? []}
       status={status}
