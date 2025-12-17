@@ -125,82 +125,89 @@ test("remove volunteer allowance", async () => {
   expect(doc).toBeNull();
 });
 
-test("createToken returns token", async () => {
+test("createLink returns id", async () => {
   const t = convexTest(schema, modules);
   const { userId, projectId } = await setupTestData(t);
 
-  const token = await t
+  const id = await t
     .withIdentity({ subject: userId })
-    .mutation(api.volunteerAllowance.functions.createToken, { projectId });
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
 
-  expect(typeof token).toBe("string");
+  expect(typeof id).toBe("string");
 });
 
-test("generatePublicUploadUrl with valid token returns url", async () => {
+test("generatePublicUploadUrl with valid id returns url", async () => {
   const t = convexTest(schema, modules);
   const { userId, projectId } = await setupTestData(t);
 
-  const token = await t
+  const id = await t
     .withIdentity({ subject: userId })
-    .mutation(api.volunteerAllowance.functions.createToken, { projectId });
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
   const url = await t.mutation(
     api.volunteerAllowance.functions.generatePublicUploadUrl,
-    { token },
+    { id },
   );
 
   expect(typeof url).toBe("string");
 });
 
-test("generatePublicUploadUrl fails with invalid token throws error invalid link", async () => {
+test("generatePublicUploadUrl fails with invalid id throws error", async () => {
   const t = convexTest(schema, modules);
-  await setupTestData(t);
+  const { userId, organizationId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+
+  const id = await t.run((ctx) =>
+    ctx.db.insert("volunteerAllowance", {
+      organizationId,
+      projectId,
+      createdBy: userId,
+      isApproved: false,
+      ...formData(storageId),
+    }),
+  );
+  await t.run((ctx) => ctx.db.delete(id));
 
   await expect(
     t.mutation(api.volunteerAllowance.functions.generatePublicUploadUrl, {
-      token: "invalid",
+      id,
     }),
-  ).rejects.toThrow("Invalid link");
+  ).rejects.toThrow("Ungültiger Link");
 });
 
 test("submitExternal completes allowance", async () => {
   const t = convexTest(schema, modules);
   const { userId, projectId } = await setupTestData(t);
 
-  const token = await t
+  const id = await t
     .withIdentity({ subject: userId })
-    .mutation(api.volunteerAllowance.functions.createToken, { projectId });
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
   const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
 
   await t.mutation(api.volunteerAllowance.functions.submitExternal, {
-    token,
+    id,
     ...formData(storageId, 400),
   });
 
-  const doc = await t.run((ctx) =>
-    ctx.db
-      .query("volunteerAllowance")
-      .withIndex("by_token", (q) => q.eq("token", token))
-      .first(),
-  );
+  const doc = await t.run((ctx) => ctx.db.get(id));
   expect(doc?.amount).toBe(400);
-  expect(doc?.usedAt).toBeDefined();
+  expect(doc?.signatureStorageId).toBe(storageId);
 });
 
 test("submitExternal fails if amount exceeds 840€", async () => {
   const t = convexTest(schema, modules);
   const { userId, projectId } = await setupTestData(t);
 
-  const token = await t
+  const id = await t
     .withIdentity({ subject: userId })
-    .mutation(api.volunteerAllowance.functions.createToken, { projectId });
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
   const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
 
   await expect(
     t.mutation(api.volunteerAllowance.functions.submitExternal, {
-      token,
+      id,
       ...formData(storageId, 900),
     }),
-  ).rejects.toThrow("Volunteer allowance cannot exceed 840€");
+  ).rejects.toThrow("Maximal 840€ erlaubt");
 });
 
 test("createSignatureToken returns token", async () => {
@@ -252,155 +259,47 @@ test("submitSignature stores signature", async () => {
   expect(doc?.signatureStorageId).toBe(storageId);
 });
 
-test("generatePublicUploadUrl fails with expired token", async () => {
+test("generatePublicUploadUrl fails with already signed allowance", async () => {
   const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
+  const { userId, projectId } = await setupTestData(t);
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
 
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      organizationId,
-      projectId,
-      amount: 0,
-      isApproved: false,
-      iban: "",
-      bic: "",
-      accountHolder: "",
-      createdBy: userId,
-      activityDescription: "",
-      startDate: "",
-      endDate: "",
-      volunteerName: "",
-      volunteerStreet: "",
-      volunteerPlz: "",
-      volunteerCity: "",
-      token: "expired-token",
-      expiresAt: Date.now() - 1000,
-    }),
-  );
+  const id = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
+
+  await t.mutation(api.volunteerAllowance.functions.submitExternal, {
+    id,
+    ...formData(storageId, 400),
+  });
 
   await expect(
     t.mutation(api.volunteerAllowance.functions.generatePublicUploadUrl, {
-      token: "expired-token",
+      id,
     }),
-  ).rejects.toThrow("Link expired");
+  ).rejects.toThrow("Bereits ausgefüllt");
 });
 
-test("generatePublicUploadUrl fails with used token", async () => {
+test("submitExternal fails with already signed allowance", async () => {
   const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
-
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      organizationId,
-      projectId,
-      amount: 0,
-      isApproved: false,
-      iban: "",
-      bic: "",
-      accountHolder: "",
-      createdBy: userId,
-      activityDescription: "",
-      startDate: "",
-      endDate: "",
-      volunteerName: "",
-      volunteerStreet: "",
-      volunteerPlz: "",
-      volunteerCity: "",
-      token: "used-token",
-      expiresAt: Date.now() + 1000000,
-      usedAt: Date.now() - 1000,
-    }),
-  );
-
-  await expect(
-    t.mutation(api.volunteerAllowance.functions.generatePublicUploadUrl, {
-      token: "used-token",
-    }),
-  ).rejects.toThrow("Link already used");
-});
-
-test("submitExternal fails with expired token", async () => {
-  const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
+  const { userId, projectId } = await setupTestData(t);
   const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
 
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      organizationId,
-      projectId,
-      amount: 0,
-      isApproved: false,
-      iban: "",
-      bic: "",
-      accountHolder: "",
-      createdBy: userId,
-      activityDescription: "",
-      startDate: "",
-      endDate: "",
-      volunteerName: "",
-      volunteerStreet: "",
-      volunteerPlz: "",
-      volunteerCity: "",
-      token: "expired-ext-token",
-      expiresAt: Date.now() - 1000,
-    }),
-  );
+  const id = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
+
+  await t.mutation(api.volunteerAllowance.functions.submitExternal, {
+    id,
+    ...formData(storageId, 400),
+  });
 
   await expect(
     t.mutation(api.volunteerAllowance.functions.submitExternal, {
-      token: "expired-ext-token",
+      id,
       ...formData(storageId, 400),
     }),
-  ).rejects.toThrow("Link expired");
-});
-
-test("submitExternal fails with used token", async () => {
-  const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
-  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
-
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      organizationId,
-      projectId,
-      amount: 0,
-      isApproved: false,
-      iban: "",
-      bic: "",
-      accountHolder: "",
-      createdBy: userId,
-      activityDescription: "",
-      startDate: "",
-      endDate: "",
-      volunteerName: "",
-      volunteerStreet: "",
-      volunteerPlz: "",
-      volunteerCity: "",
-      token: "used-ext-token",
-      expiresAt: Date.now() + 1000000,
-      usedAt: Date.now() - 1000,
-    }),
-  );
-
-  await expect(
-    t.mutation(api.volunteerAllowance.functions.submitExternal, {
-      token: "used-ext-token",
-      ...formData(storageId, 400),
-    }),
-  ).rejects.toThrow("Link already used");
-});
-
-test("submitExternal fails with invalid token", async () => {
-  const t = convexTest(schema, modules);
-  await setupTestData(t);
-  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
-
-  await expect(
-    t.mutation(api.volunteerAllowance.functions.submitExternal, {
-      token: "nonexistent",
-      ...formData(storageId, 400),
-    }),
-  ).rejects.toThrow("Invalid link");
+  ).rejects.toThrow("Bereits ausgefüllt");
 });
 
 test("generateSignatureUploadUrl fails with expired token", async () => {

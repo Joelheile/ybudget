@@ -64,73 +64,64 @@ test("return all completed allowances", async () => {
   expect(results.length).toBeGreaterThanOrEqual(1);
 });
 
-test("getAll filters out incomplete allowances", async () => {
+test("getAll filters out unsigned allowances", async () => {
   const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
-  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+  const { userId, projectId } = await setupTestData(t);
 
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      ...baseAllowance(organizationId, projectId, userId, storageId),
-      token: "test-token",
-      expiresAt: Date.now() + 1000000,
-    }),
-  );
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
 
   const results = await t
     .withIdentity({ subject: userId })
     .query(api.volunteerAllowance.queries.getAll, {});
-  expect(results.some((r) => r.token === "test-token" && !r.usedAt)).toBe(
-    false,
-  );
+  expect(results.every((r) => r.signatureStorageId)).toBe(true);
 });
 
-test("validateToken return valid token", async () => {
+test("validateLink returns valid for unsigned allowance", async () => {
   const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
-  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
+  const { userId, projectId } = await setupTestData(t);
 
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      ...baseAllowance(organizationId, projectId, userId, storageId),
-      token: "valid-token",
-      expiresAt: Date.now() + 1000000,
-    }),
-  );
+  const id = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
 
-  const result = await t.query(api.volunteerAllowance.queries.validateToken, {
-    token: "valid-token",
+  const result = await t.query(api.volunteerAllowance.queries.validateLink, {
+    id,
   });
   expect(result.valid).toBe(true);
 });
 
-test("validateToken returns invalid token", async () => {
+test("validateLink returns invalid for signed allowance", async () => {
   const t = convexTest(schema, modules);
-  await setupTestData(t);
-
-  const result = await t.query(api.volunteerAllowance.queries.validateToken, {
-    token: "invalid",
-  });
-  expect(result.valid).toBe(false);
-});
-
-test("validateToken using expired token returns invalid", async () => {
-  const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
+  const { userId, projectId } = await setupTestData(t);
   const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
 
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      ...baseAllowance(organizationId, projectId, userId, storageId),
-      token: "expired-token",
-      expiresAt: Date.now() - 1000,
-    }),
-  );
+  const id = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.volunteerAllowance.functions.createLink, { projectId });
 
-  const result = await t.query(api.volunteerAllowance.queries.validateToken, {
-    token: "expired-token",
+  await t.mutation(api.volunteerAllowance.functions.submitExternal, {
+    id,
+    amount: 400,
+    iban: "DE12345678900000000000",
+    bic: "TESTBIC",
+    accountHolder: "Test User",
+    activityDescription: "Test",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    volunteerName: "Max Mustermann",
+    volunteerStreet: "Teststr. 1",
+    volunteerPlz: "12345",
+    volunteerCity: "Berlin",
+    signatureStorageId: storageId,
+  });
+
+  const result = await t.query(api.volunteerAllowance.queries.validateLink, {
+    id,
   });
   expect(result.valid).toBe(false);
+  expect(result.error).toBe("Bereits ausgefüllt");
 });
 
 test("getSignatureUrl returns url", async () => {
@@ -202,26 +193,6 @@ test("getSignatureToken returns null for using it with invalid token", async () 
   expect(result).toBeNull();
 });
 
-test("validateToken returns invalid for used token", async () => {
-  const t = convexTest(schema, modules);
-  const { userId, organizationId, projectId } = await setupTestData(t);
-  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["sig"])));
-
-  await t.run((ctx) =>
-    ctx.db.insert("volunteerAllowance", {
-      ...baseAllowance(organizationId, projectId, userId, storageId),
-      token: "used-token",
-      expiresAt: Date.now() + 1000000,
-      usedAt: Date.now() - 1000,
-    }),
-  );
-
-  const result = await t.query(api.volunteerAllowance.queries.validateToken, {
-    token: "used-token",
-  });
-  expect(result.valid).toBe(false);
-  expect(result.error).toBe("Link already used");
-});
 
 test("getAll returns allowances for non-admin user", async () => {
   const t = convexTest(schema, modules);
