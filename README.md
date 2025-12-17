@@ -111,7 +111,7 @@ We're building a tool to support NGOs on their mission by making budgeting as ea
 **This is how you contribute:**
 
 1. Fork the repo
-2. Clone your fork locally (`git clone https://github.com/YOUR-USERNAME/ybudget.git`)
+2. Clone your fork locally (`git clone https://github.com/joelheile/ybudget.git`)
 3. Create a feature branch (`git checkout -b feat/amazing-feature`)
 4. Make and commit your changes
 5. Push to your fork (`git push origin feat/amazing-feature`)
