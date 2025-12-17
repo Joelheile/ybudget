@@ -132,6 +132,13 @@ const baseColumns = [
     },
   },
   {
+    accessorKey: "counterparty",
+    header: "Gegenpartei",
+    cell: ({ row }: any) => (
+      <div className="p-1 max-w-48 truncate">{row.original.counterparty || ""}</div>
+    ),
+  },
+  {
     accessorKey: "projectName",
     header: "Projekt",
     cell: ({ row, table }: any) => {
@@ -145,7 +152,7 @@ const baseColumns = [
         );
       }
       return (
-        <div className="p-1 max-w-32">{row.original.projectName || ""}</div>
+        <div className="p-1 max-w-40 truncate">{row.original.projectName || ""}</div>
       );
     },
   },
@@ -165,10 +172,8 @@ const baseColumns = [
         );
       }
       return (
-        <div className="min-w-64 max-w-xl">
-          <div className="whitespace-pre-wrap text-muted-foreground wrap-break-word text-sm">
-            {description}
-          </div>
+        <div className="max-w-64 text-muted-foreground text-sm">
+          {description}
         </div>
       );
     },

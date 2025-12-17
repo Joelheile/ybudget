@@ -111,10 +111,10 @@ export const getMatchingRecommendations = query({
 
     const unmatched = allTransactions.filter(
       (t) =>
+        t.status === "expected" &&
         t.projectId &&
         t.amount < 0 &&
-        !t.matchedTransactionId &&
-        (args.projectId || t.status === "expected"),
+        !t.matchedTransactionId,
     );
 
     const filtered = await filterByProjectAccess(
