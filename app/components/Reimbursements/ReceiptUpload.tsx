@@ -6,7 +6,7 @@ import {
   convertToJPG,
   FileConversionError,
   isValidFileType,
-} from "@/lib/files/fileConversion";
+} from "@/lib/fileHandlers/fileConversion";
 import { useMutation, useQuery } from "convex/react";
 import { Loader2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
@@ -21,11 +21,11 @@ export function ReceiptUpload({ onUploadComplete, storageId }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const generateUploadUrl = useMutation(
-    api.reimbursements.functions.generateUploadUrl,
+    api.reimbursements.functions.generateUploadUrl
   );
   const previewUrl = useQuery(
     api.reimbursements.queries.getFileUrl,
-    storageId ? { storageId } : "skip",
+    storageId ? { storageId } : "skip"
   );
 
   const handleFile = async (file: File) => {
@@ -51,7 +51,7 @@ export function ReceiptUpload({ onUploadComplete, storageId }: Props) {
       toast.error(
         error instanceof FileConversionError
           ? error.message
-          : "Upload fehlgeschlagen",
+          : "Upload fehlgeschlagen"
       );
     } finally {
       setIsUploading(false);
