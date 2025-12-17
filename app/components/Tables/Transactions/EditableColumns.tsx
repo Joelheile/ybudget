@@ -172,7 +172,7 @@ const baseColumns = [
         );
       }
       return (
-        <div className="max-w-64 text-muted-foreground text-sm">
+        <div className="max-w-64 text-muted-foreground text-sm truncate">
           {description}
         </div>
       );
@@ -192,7 +192,7 @@ const baseColumns = [
         );
       }
       return (
-        <div className="p-1 max-w-32">{row.original.categoryName || ""}</div>
+        <div className="p-1 max-w-32 truncate">{row.original.categoryName || ""}</div>
       );
     },
   },

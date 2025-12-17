@@ -2,14 +2,19 @@
 
 import { DonorCard } from "@/components/Donors/DonorCard";
 import { PageHeader } from "@/components/Layout/PageHeader";
+import { AccessDenied } from "@/components/Settings/AccessDenied";
 import { api } from "@/convex/_generated/api";
-import { Doc } from "@/convex/_generated/dataModel";
+import type { Doc } from "@/convex/_generated/dataModel";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useQuery } from "convex/react";
 
 export default function DonorsPage() {
+  const isAdmin = useIsAdmin();
   const donors = useQuery(api.donors.queries.getAllDonors) as
     | Doc<"donors">[]
     | undefined;
+
+  if (!isAdmin) return <AccessDenied title="Förderer" />;
 
   return (
     <div>

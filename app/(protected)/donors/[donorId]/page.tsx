@@ -1,7 +1,9 @@
 "use client";
 
+import { AccessDenied } from "@/components/Settings/AccessDenied";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { useIsAdmin } from "@/lib/hooks/useCurrentUserRole";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import { DonorDetailSkeleton } from "./DonorDetailSkeleton";
@@ -9,6 +11,7 @@ import { DonorDetailUI } from "./DonorDetailUI";
 
 export default function DonorDetailPage() {
   const { donorId } = useParams<{ donorId: Id<"donors"> }>();
+  const isAdmin = useIsAdmin();
 
   const donor = useQuery(api.donors.queries.getDonorById, { donorId });
   const { results: transactions, status } = usePaginatedQuery(
@@ -35,6 +38,7 @@ export default function DonorDetailPage() {
     await deleteTransaction({ transactionId: rowId as Id<"transactions"> });
   };
 
+  if (!isAdmin) return <AccessDenied title="Förderer" />;
   if (!donor) return <DonorDetailSkeleton />;
 
   return (

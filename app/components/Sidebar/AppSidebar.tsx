@@ -32,7 +32,7 @@ const NAV_ITEMS: Array<NavItem & { adminOnly?: boolean }> = [
   { name: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { name: "Transaktionen", url: "/transactions", icon: SquareCheckBig },
   { name: "Import", url: "/import", icon: Upload, adminOnly: true },
-  { name: "Förderer", url: "/donors", icon: Users },
+  { name: "Förderer", url: "/donors", icon: Users, adminOnly: true },
   { name: "Erstattungen", url: "/reimbursements", icon: Coins },
 ];
 

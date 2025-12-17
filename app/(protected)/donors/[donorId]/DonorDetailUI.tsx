@@ -59,10 +59,26 @@ export function DonorDetailUI({
         className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
         id="tour-donor-budget"
       >
-        <BudgetCard title="Zugesagt" amount={donor.committedIncome} />
-        <BudgetCard title="Bezahlt" amount={donor.paidIncome} />
-        <BudgetCard title="Offen" amount={donor.openIncome} />
-        <BudgetCard title="Ausgaben" amount={-donor.totalExpenses} />
+        <BudgetCard
+          title="Zugesagt"
+          description="Geplante + überwiesene Einnahmen"
+          amount={donor.committedIncome}
+        />
+        <BudgetCard
+          title="Bezahlt"
+          description="Auf Konto überwiesene Einnahmen"
+          amount={donor.paidIncome}
+        />
+        <BudgetCard
+          title="Offen"
+          description="Noch ausstehende Zahlungen"
+          amount={donor.openIncome}
+        />
+        <BudgetCard
+          title="Ausgaben"
+          description="Mit diesem Förderer verknüpfte Ausgaben"
+          amount={-donor.totalExpenses}
+        />
       </div>
 
       <div className="mt-6" id="tour-donor-transactions">

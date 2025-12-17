@@ -172,12 +172,9 @@ export const getPaginatedTransactions = query({
       );
     }
 
-    const filtered = await filterByProjectAccess(
-      ctx,
-      user._id,
-      user.organizationId,
-      page,
-    );
+    const filtered = args.donorId
+      ? page
+      : await filterByProjectAccess(ctx, user._id, user.organizationId, page);
 
     return {
       ...result,
