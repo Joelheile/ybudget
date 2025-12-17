@@ -8,7 +8,7 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import type { PaginationStatus } from "convex/react";
 import { CSVLink } from "react-csv";
 
-interface DonorDetailUIProps {
+interface Props {
   donor: Doc<"donors"> & {
     committedIncome: number;
     paidIncome: number;
@@ -36,14 +36,14 @@ export default function DonorDetailUI({
   status,
   onUpdate,
   onDelete,
-}: DonorDetailUIProps) {
-  const csvData = transactions.map((t) => ({
-    date: new Date(t.date).toISOString(),
-    amount: t.amount,
-    description: t.description,
-    counterparty: t.counterparty,
-    accountName: t.accountName ?? "",
-    status: t.status,
+}: Props) {
+  const csvData = transactions.map((transaction) => ({
+    date: new Date(transaction.date).toISOString(),
+    amount: transaction.amount,
+    description: transaction.description,
+    counterparty: transaction.counterparty,
+    accountName: transaction.accountName ?? "",
+    status: transaction.status,
   }));
 
   return (
@@ -55,7 +55,10 @@ export default function DonorDetailUI({
         backUrl="/donors"
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6" id="tour-donor-budget">
+      <div
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+        id="tour-donor-budget"
+      >
         <BudgetCard title="Zugesagt" amount={donor.committedIncome} />
         <BudgetCard title="Bezahlt" amount={donor.paidIncome} />
         <BudgetCard title="Offen" amount={donor.openIncome} />
@@ -65,8 +68,14 @@ export default function DonorDetailUI({
       <div className="mt-6" id="tour-donor-transactions">
         <div className="flex flex-row justify-between">
           <h2 className="text-xl font-semibold mb-4">Transaktionen</h2>
-          <CSVLink data={csvData} filename={`${donor.name}-transactions.csv`} headers={csvHeaders}>
-            <Button variant="outline" size="sm">Download CSV</Button>
+          <CSVLink
+            data={csvData}
+            filename={`${donor.name}-transactions.csv`}
+            headers={csvHeaders}
+          >
+            <Button variant="outline" size="sm">
+              Download CSV
+            </Button>
           </CSVLink>
         </div>
         <EditableDataTable
