@@ -3,7 +3,7 @@
 import { AddDonorDialog } from "@/components/Dialogs/AddDonorDialog";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { focusNextInput } from "@/lib/selectorHelpers/focusNextInput";
+import { focusNextInput } from "@/lib/focusNextInput";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";

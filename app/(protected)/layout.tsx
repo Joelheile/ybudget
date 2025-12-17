@@ -7,7 +7,7 @@ import { tourSteps } from "@/components/Onboarding/tourSteps";
 import { AppSidebar } from "@/components/Sidebar/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { api } from "@/convex/_generated/api";
-import { DateRangeProvider } from "@/lib/contexts/DateRangeContext";
+import { DateRangeProvider } from "@/lib/DateRangeContext";
 import { useCanEdit } from "@/lib/hooks/useCurrentUserRole";
 import { useConvexAuth, useQuery } from "convex/react";
 import Image from "next/image";

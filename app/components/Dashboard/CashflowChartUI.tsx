@@ -22,15 +22,14 @@ import {
 } from "@/components/ui/chart";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { useDateRange } from "@/lib/DateRangeContext";
+import { formatCurrency } from "@/lib/formatters/formatCurrency";
+import { formatDate } from "@/lib/formatters/formatDate";
 import {
   filterTransactionsBeforeDate,
   filterTransactionsByDateRange,
-} from "@/lib/calculations/transactionFilters";
-import { useDateRange } from "@/lib/contexts/DateRangeContext";
-import { formatCurrency } from "@/lib/formatters/formatCurrency";
+} from "@/lib/transactionFilters";
 import { useQuery } from "convex/react";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
 import {
   Bar,
   CartesianGrid,
@@ -51,12 +50,11 @@ const chartConfig = {
 
 function formatTooltipLabel(
   _: string,
-  payload: Array<{ payload?: { timestamp?: number } }>,
+  payload: Array<{ payload?: { timestamp?: number } }>
 ) {
   const timestamp = payload?.[0]?.payload?.timestamp;
   if (!timestamp) return "";
-  const date = new Date(timestamp);
-  return `${format(date, "EEEE", { locale: de })}, ${format(date, "d. MMMM", { locale: de })}`;
+  return formatDate(timestamp);
 }
 
 function getPastEndDate(from: Date): Date {
@@ -70,13 +68,26 @@ interface Props {
   transactions?: Doc<"transactions">[];
 }
 
+function getDateRangeFromTransactions(transactions: Doc<"transactions">[]): {
+  from: Date;
+  to: Date;
+} {
+  if (transactions.length === 0) {
+    const now = new Date();
+    return { from: now, to: now };
+  }
+  const dates = transactions.map((t) => t.date);
+  const minDate = new Date(Math.min(...dates));
+  const maxDate = new Date(Math.max(...dates));
+  return { from: minDate, to: maxDate };
+}
+
 export function CashflowChartUI({ transactions: providedTransactions }: Props) {
   const { selectedDateRange } = useDateRange();
-  const { from, to } = selectedDateRange;
 
   const allTransactionsQuery = useQuery(
     api.transactions.queries.getAllTransactions,
-    providedTransactions ? "skip" : {},
+    providedTransactions ? "skip" : {}
   );
 
   const sourceTransactions = providedTransactions || allTransactionsQuery;
@@ -84,11 +95,17 @@ export function CashflowChartUI({ transactions: providedTransactions }: Props) {
     providedTransactions ||
     filterTransactionsByDateRange(allTransactionsQuery, selectedDateRange);
 
+  const effectiveDateRange =
+    selectedDateRange ??
+    (transactions ? getDateRangeFromTransactions(transactions) : null);
+  const from = effectiveDateRange?.from ?? new Date();
+  const to = effectiveDateRange?.to ?? new Date();
+
   const pastTransactions = sourceTransactions
     ? filterTransactionsBeforeDate(
         sourceTransactions,
         getPastEndDate(from),
-        (tx) => tx.status === "processed",
+        (tx) => tx.status === "processed"
       )
     : undefined;
 
@@ -98,7 +115,9 @@ export function CashflowChartUI({ transactions: providedTransactions }: Props) {
     : [];
   const axisConfig = calculateAxisConfig(dataPoints, from, to);
 
-  const dateRangeText = `${format(from, "d. MMM yyyy", { locale: de })} - ${format(to, "d. MMM yyyy", { locale: de })}`;
+  const dateRangeText = selectedDateRange
+    ? `${formatDate(selectedDateRange.from)} - ${formatDate(selectedDateRange.to)}`
+    : "Alle Transaktionen";
 
   const showRotatedLabels =
     axisConfig.isManyDataPoints && !axisConfig.isLongTimeSlot;

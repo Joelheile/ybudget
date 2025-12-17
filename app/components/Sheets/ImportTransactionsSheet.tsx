@@ -17,7 +17,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { api } from "@/convex/_generated/api";
-import { mapCSVRow } from "@/lib/bankImportMapping/csvMappers";
+import { mapCSVRow } from "@/lib/csvMappers";
 import { useMutation, useQuery } from "convex/react";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";

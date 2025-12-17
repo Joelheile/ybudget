@@ -13,9 +13,10 @@ export type EnrichedTransaction = Doc<"transactions"> & {
 
 export function filterTransactionsByDateRange(
   transactions: EnrichedTransaction[] | undefined,
-  dateRange: DateRange,
+  dateRange: DateRange | null,
 ): EnrichedTransaction[] | undefined {
   if (!transactions) return undefined;
+  if (!dateRange) return transactions;
 
   const startDate = dateRange.from.getTime();
   const endDate = dateRange.to.getTime();

@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { calculateBudget } from "./budgetCalculations";
 
+
 const mockTransaction = (amount: number, status: "processed" | "expected") =>
   ({ amount, status }) as Parameters<typeof calculateBudget>[0][0];
 

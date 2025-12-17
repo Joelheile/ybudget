@@ -5,13 +5,13 @@ import { ExpensesByCategoryChart } from "@/components/Dashboard/ExpensesByCatego
 import { IncomeByDonorChart } from "@/components/Dashboard/IncomeByDonorChart";
 import { PageHeader } from "@/components/Layout/PageHeader";
 import { api } from "@/convex/_generated/api";
-import { calculateBudget } from "@/lib/calculations/budgetCalculations";
+import { calculateBudget } from "@/lib/budgetCalculations";
 import { useQuery } from "convex/react";
 
 export default function DashboardPage() {
   const transactions = useQuery(
     api.transactions.queries.getAllTransactions,
-    {},
+    {}
   );
   const { currentBalance, expectedIncome, expectedExpenses, availableBudget } =
     calculateBudget(transactions ?? []);

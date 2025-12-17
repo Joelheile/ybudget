@@ -9,7 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { calculateBudget } from "@/lib/calculations/budgetCalculations";
+import { calculateBudget } from "@/lib/budgetCalculations";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -23,7 +23,9 @@ interface Props {
 }
 
 export function TransferDialog({ open, onOpenChange, fromProjectId }: Props) {
-  const [senderId, setSenderId] = useState<Id<"projects"> | null>(fromProjectId ?? null);
+  const [senderId, setSenderId] = useState<Id<"projects"> | null>(
+    fromProjectId ?? null
+  );
   const [receiverId, setReceiverId] = useState<Id<"projects"> | null>(null);
   const [amountStr, setAmountStr] = useState("");
 
@@ -31,7 +33,9 @@ export function TransferDialog({ open, onOpenChange, fromProjectId }: Props) {
     api.transactions.queries.getAllTransactions,
     senderId ? { projectId: senderId } : "skip"
   );
-  const balance = transactions ? calculateBudget(transactions).currentBalance : 0;
+  const balance = transactions
+    ? calculateBudget(transactions).currentBalance
+    : 0;
   const amount = Number(amountStr.replace(",", ".")) || 0;
 
   const transferMoney = useMutation(api.transactions.functions.transferMoney);
@@ -46,7 +50,11 @@ export function TransferDialog({ open, onOpenChange, fromProjectId }: Props) {
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
-    await transferMoney({ amount, sendingProjectId: senderId, receivingProjectId: receiverId });
+    await transferMoney({
+      amount,
+      sendingProjectId: senderId,
+      receivingProjectId: receiverId,
+    });
     toast.success("Geld erfolgreich übertragen");
     onOpenChange(false);
   };
@@ -75,10 +83,7 @@ export function TransferDialog({ open, onOpenChange, fromProjectId }: Props) {
           </div>
           <div className="space-y-2">
             <Label>Betrag</Label>
-            <AmountInput
-              value={amountStr}
-              onChange={setAmountStr}
-            />
+            <AmountInput value={amountStr} onChange={setAmountStr} />
           </div>
         </div>
         <DialogFooter>

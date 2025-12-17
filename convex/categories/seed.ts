@@ -1,4 +1,4 @@
-import { CATEGORY_GROUPS } from "../../app/lib/mockData/mockCategories";
+import { CATEGORY_GROUPS } from "../../app/lib/mockCategories";
 import { internalMutation } from "../_generated/server";
 
 export const seedCategories = internalMutation({

@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { EnrichedTransaction } from "@/lib/calculations/transactionFilters";
+import type { EnrichedTransaction } from "@/lib/transactionFilters";
 import {
   type Cell,
   type ColumnDef,
@@ -167,7 +167,7 @@ export function EditableDataTable({
                   <TableHead key={header.id}>
                     {flexRender(
                       header.column.columnDef.header,
-                      header.getContext(),
+                      header.getContext()
                     )}
                   </TableHead>
                 ))}

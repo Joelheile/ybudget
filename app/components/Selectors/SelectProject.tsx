@@ -2,7 +2,7 @@
 
 import { CreateProjectDialog } from "@/components/Dialogs/CreateProjectDialog";
 import { api } from "@/convex/_generated/api";
-import { focusNextInput } from "@/lib/selectorHelpers/focusNextInput";
+import { focusNextInput } from "@/lib/focusNextInput";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
@@ -26,7 +26,7 @@ export function SelectProject({ value, onValueChange, autoFocus }: Props) {
   const selected = projects?.find((project) => project._id === value);
   const filtered =
     projects?.filter((project) =>
-      project.name.toLowerCase().includes(search.toLowerCase()),
+      project.name.toLowerCase().includes(search.toLowerCase())
     ) ?? [];
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function SelectProject({ value, onValueChange, autoFocus }: Props) {
     if (e.key === "ArrowUp" && open) {
       e.preventDefault();
       setHighlightedIndex(
-        (current) => (current - 1 + filtered.length) % filtered.length,
+        (current) => (current - 1 + filtered.length) % filtered.length
       );
       return;
     }
@@ -93,7 +93,7 @@ export function SelectProject({ value, onValueChange, autoFocus }: Props) {
           ref={inputRef}
           className={cn(
             "h-9 w-full rounded-md bg-muted px-3 pr-8 text-sm outline-none",
-            open || !selected ? "text-muted-foreground" : "text-foreground",
+            open || !selected ? "text-muted-foreground" : "text-foreground"
           )}
           placeholder="Projekt suchen..."
           value={open ? search : (selected?.name ?? "")}
@@ -119,7 +119,7 @@ export function SelectProject({ value, onValueChange, autoFocus }: Props) {
                 type="button"
                 className={cn(
                   "w-full text-left px-3 py-2 text-sm flex items-center justify-between",
-                  index === highlightedIndex && "bg-accent",
+                  index === highlightedIndex && "bg-accent"
                 )}
                 onClick={() => handleSelect(project._id)}
                 onMouseEnter={() => setHighlightedIndex(index)}

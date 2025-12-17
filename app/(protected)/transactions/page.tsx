@@ -2,7 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { useDateRange } from "@/lib/contexts/DateRangeContext";
+import { useDateRange } from "@/lib/DateRangeContext";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import { TransactionsPageUI } from "./TransactionsPageUI";
 

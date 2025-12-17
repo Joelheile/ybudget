@@ -13,14 +13,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useDateRange } from "@/lib/DateRangeContext";
+import { formatCurrency } from "@/lib/formatters/formatCurrency";
+import { formatDate } from "@/lib/formatters/formatDate";
 import {
   filterTransactionsByDateRange,
   type EnrichedTransaction,
-} from "@/lib/calculations/transactionFilters";
-import { useDateRange } from "@/lib/contexts/DateRangeContext";
-import { formatCurrency } from "@/lib/formatters/formatCurrency";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
+} from "@/lib/transactionFilters";
 import { Cell, Pie, PieChart } from "recharts";
 
 const CHART_COLORS = [
@@ -50,7 +49,7 @@ function buildChartConfig(data: Array<{ name: string }>): ChartConfig {
     data.map((item, index) => [
       item.name,
       { label: item.name, color: CHART_COLORS[index % CHART_COLORS.length] },
-    ]),
+    ])
   );
 }
 
@@ -60,16 +59,17 @@ interface Props {
 
 export function ExpensesByCategoryChart({ transactions }: Props) {
   const { selectedDateRange } = useDateRange();
-  const { from, to } = selectedDateRange;
 
   const filtered = filterTransactionsByDateRange(
     transactions,
-    selectedDateRange,
+    selectedDateRange
   );
   const data = filtered ? aggregateByCategory(filtered) : [];
   const chartConfig = buildChartConfig(data);
 
-  const dateRangeText = `${format(from, "d. MMM yyyy", { locale: de })} - ${format(to, "d. MMM yyyy", { locale: de })}`;
+  const dateRangeText = selectedDateRange
+    ? `${formatDate(selectedDateRange.from)} - ${formatDate(selectedDateRange.to)}`
+    : "Alle Transaktionen";
 
   if (transactions === undefined) {
     return (

@@ -2,9 +2,9 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { EnrichedTransaction } from "@/lib/calculations/transactionFilters";
 import { formatCurrency } from "@/lib/formatters/formatCurrency";
 import { formatDate } from "@/lib/formatters/formatDate";
+import type { EnrichedTransaction } from "@/lib/transactionFilters";
 import type { Column, Row, Table } from "@tanstack/react-table";
 import { ArrowUpDown, Check, Pencil, Trash2, X } from "lucide-react";
 import {
@@ -20,7 +20,13 @@ type TransactionRow = Row<EnrichedTransaction>;
 type TransactionTable = Table<EnrichedTransaction>;
 type TransactionColumn = Column<EnrichedTransaction>;
 
-function SortableHeader({ column, label }: { column: TransactionColumn; label: string }) {
+function SortableHeader({
+  column,
+  label,
+}: {
+  column: TransactionColumn;
+  label: string;
+}) {
   return (
     <Button
       variant="ghost"
@@ -33,7 +39,13 @@ function SortableHeader({ column, label }: { column: TransactionColumn; label: s
   );
 }
 
-function ActionsCell({ row, table }: { row: TransactionRow; table: TransactionTable }) {
+function ActionsCell({
+  row,
+  table,
+}: {
+  row: TransactionRow;
+  table: TransactionTable;
+}) {
   const meta = table.options.meta as TableMeta | undefined;
   const rowId = row.original._id;
   const isPlanned = row.original.status === "expected";
@@ -78,9 +90,7 @@ function ActionsCell({ row, table }: { row: TransactionRow; table: TransactionTa
         variant="ghost"
         size="sm"
         onClick={() =>
-          meta?.setEditingRows((prev: Set<string>) =>
-            new Set(prev).add(rowId),
-          )
+          meta?.setEditingRows((prev: Set<string>) => new Set(prev).add(rowId))
         }
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
       >
@@ -135,7 +145,9 @@ const baseColumns = [
     accessorKey: "counterparty",
     header: "Gegenpartei",
     cell: ({ row }: any) => (
-      <div className="p-1 max-w-48 truncate">{row.original.counterparty || ""}</div>
+      <div className="p-1 max-w-48 truncate">
+        {row.original.counterparty || ""}
+      </div>
     ),
   },
   {
@@ -152,7 +164,9 @@ const baseColumns = [
         );
       }
       return (
-        <div className="p-1 max-w-40 truncate">{row.original.projectName || ""}</div>
+        <div className="p-1 max-w-40 truncate">
+          {row.original.projectName || ""}
+        </div>
       );
     },
   },
@@ -192,7 +206,9 @@ const baseColumns = [
         );
       }
       return (
-        <div className="p-1 max-w-32 truncate">{row.original.categoryName || ""}</div>
+        <div className="p-1 max-w-32 truncate">
+          {row.original.categoryName || ""}
+        </div>
       );
     },
   },
@@ -228,7 +244,8 @@ const baseColumns = [
     header: "Status",
     cell: ({ row }: any) => {
       const status = row.getValue("status");
-      const isBudget = !!row.original.splitFromTransactionId || !!row.original.transferId;
+      const isBudget =
+        !!row.original.splitFromTransactionId || !!row.original.transferId;
       const label = isBudget
         ? "Budget"
         : status === "expected"
@@ -251,5 +268,5 @@ const baseColumns = [
 export const editableColumns = baseColumns;
 
 export const editableColumnsWithoutProject = baseColumns.filter(
-  (column) => column.accessorKey !== "projectName",
+  (column) => column.accessorKey !== "projectName"
 );

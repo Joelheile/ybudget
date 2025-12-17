@@ -17,8 +17,6 @@ import type { DateRange as ReactDayPickerDateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
 
 interface DateRange {
   from: Date;
@@ -26,19 +24,15 @@ interface DateRange {
 }
 
 interface Props {
-  selectedDateRange: DateRange;
-  onDateRangeChange: (dateRange: DateRange) => void;
+  selectedDateRange: DateRange | null;
+  onDateRangeChange: (dateRange: DateRange | null) => void;
 }
 
 export function RangeCalendar({ selectedDateRange, onDateRangeChange }: Props) {
   const today = new Date();
   const [month, setMonth] = useState(today);
-  const oldestDate = useQuery(
-    api.transactions.queries.getOldestTransactionDate,
-    {},
-  );
 
-  const presets: Array<{ key: string; label: string; range: DateRange }> = [
+  const presets: Array<{ key: string; label: string; range: DateRange | null }> = [
     {
       key: "month",
       label: "Monat",
@@ -81,13 +75,13 @@ export function RangeCalendar({ selectedDateRange, onDateRangeChange }: Props) {
     {
       key: "all",
       label: "Alles",
-      range: { from: new Date(oldestDate ?? 0), to: new Date() },
+      range: null,
     },
   ];
 
-  const handlePresetClick = (range: DateRange) => {
+  const handlePresetClick = (range: DateRange | null) => {
     onDateRangeChange(range);
-    setMonth(range.to);
+    if (range) setMonth(range.to);
   };
 
   return (
@@ -95,7 +89,7 @@ export function RangeCalendar({ selectedDateRange, onDateRangeChange }: Props) {
       <CardContent className="px-4">
         <Calendar
           mode="range"
-          selected={selectedDateRange as ReactDayPickerDateRange}
+          selected={selectedDateRange ?? undefined}
           onSelect={(newDate: ReactDayPickerDateRange | undefined) => {
             if (newDate?.from && newDate?.to) {
               onDateRangeChange({ from: newDate.from, to: newDate.to });

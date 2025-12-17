@@ -13,14 +13,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useDateRange } from "@/lib/DateRangeContext";
+import { formatCurrency } from "@/lib/formatters/formatCurrency";
+import { formatDate } from "@/lib/formatters/formatDate";
 import {
   filterTransactionsByDateRange,
   type EnrichedTransaction,
-} from "@/lib/calculations/transactionFilters";
-import { useDateRange } from "@/lib/contexts/DateRangeContext";
-import { formatCurrency } from "@/lib/formatters/formatCurrency";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
+} from "@/lib/transactionFilters";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 
 function aggregateByDonor(transactions: EnrichedTransaction[]) {
@@ -47,15 +46,16 @@ interface Props {
 
 export function IncomeByDonorChart({ transactions }: Props) {
   const { selectedDateRange } = useDateRange();
-  const { from, to } = selectedDateRange;
 
   const filtered = filterTransactionsByDateRange(
     transactions,
-    selectedDateRange,
+    selectedDateRange
   );
   const data = filtered ? aggregateByDonor(filtered) : [];
 
-  const dateRangeText = `${format(from, "d. MMM yyyy", { locale: de })} - ${format(to, "d. MMM yyyy", { locale: de })}`;
+  const dateRangeText = selectedDateRange
+    ? `${formatDate(selectedDateRange.from)} - ${formatDate(selectedDateRange.to)}`
+    : "Alle Transaktionen";
 
   if (transactions === undefined) {
     return (

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import RangeCalendar from "@/components/RangeCalendar/RangeCalendar";
 import { Button } from "@/components/ui/button";
-import { useDateRange } from "@/lib/contexts/DateRangeContext";
+import { useDateRange } from "@/lib/DateRangeContext";
+import { formatDate } from "@/lib/formatters/formatDate";
 
 export function RangeCalendarToggle() {
   const [open, setOpen] = useState(false);
@@ -21,10 +22,14 @@ export function RangeCalendarToggle() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
+  const buttonLabel = selectedDateRange
+    ? `${formatDate(selectedDateRange.from)} - ${formatDate(selectedDateRange.to)}`
+    : "Alle Transaktionen";
+
   return (
     <div ref={containerRef} className="relative z-10" data-onborda-exclude>
       <Button variant="outline" onClick={() => setOpen(!open)}>
-        Datumsbereich wählen
+        {buttonLabel}
       </Button>
       {open && (
         <div className="absolute right-0 mt-2 z-10">

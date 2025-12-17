@@ -5,7 +5,7 @@ import { ProjectDashboardUI } from "@/(protected)/projects/[projectId]/ProjectDa
 import { TransferDialog } from "@/components/Dialogs/TransferDialog";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { calculateBudget } from "@/lib/calculations/budgetCalculations";
+import { calculateBudget } from "@/lib/budgetCalculations";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
