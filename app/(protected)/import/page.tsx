@@ -74,7 +74,7 @@ export default function ImportTransactionsPage() {
       return;
     }
 
-    const baseUpdate = {
+    const transactionBase = {
       transactionId: current._id,
       categoryId: categoryId as Id<"categories">,
       donorId: donorId ? (donorId as Id<"donors">) : undefined,
@@ -85,7 +85,7 @@ export default function ImportTransactionsPage() {
 
     try {
       if (splitIncome && budgets.length > 0) {
-        await updateTransaction(baseUpdate);
+        await updateTransaction(transactionBase);
         await splitTransaction({
           transactionId: current._id,
           splits: budgets.map((b) => ({
@@ -95,7 +95,7 @@ export default function ImportTransactionsPage() {
         });
       } else {
         await updateTransaction({
-          ...baseUpdate,
+          ...transactionBase,
           projectId: projectId as Id<"projects">,
         });
       }
