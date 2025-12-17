@@ -44,7 +44,7 @@ export function CreateCategoryDialog({
   const createCategory = useMutation(api.categories.functions.createCategory);
 
   const parentCategories = categories?.filter(
-    (category: Doc<"categories">) => !category.parentId,
+    (category: Doc<"categories">) => !category.parentId
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +106,7 @@ export function CreateCategoryDialog({
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="parent">
-              Übergeordnete Kategorie{" "}
+              Übergeordnete Kategorie
               <span className="text-muted-foreground font-normal">
                 (optional, für Unterkategorien)
               </span>
@@ -115,7 +115,7 @@ export function CreateCategoryDialog({
               value={parentId || "none"}
               onValueChange={(value) =>
                 setParentId(
-                  value === "none" ? undefined : (value as Id<"categories">),
+                  value === "none" ? undefined : (value as Id<"categories">)
                 )
               }
             >
