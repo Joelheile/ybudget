@@ -7,14 +7,14 @@ import { useQuery } from "convex/react";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { forwardRef, useEffect, useRef, useState } from "react";
 
-interface SelectProjectProps {
+interface Props {
   value: string;
   onValueChange: (value: string) => void;
   onTabPressed?: () => void;
 }
 
-export const SelectProject = forwardRef<HTMLInputElement, SelectProjectProps>(
-  function SelectProject({ value, onValueChange, onTabPressed }, ref) {
+export const SelectProject = forwardRef<HTMLInputElement, Props>(
+  ({ value, onValueChange, onTabPressed }, ref) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -22,26 +22,24 @@ export const SelectProject = forwardRef<HTMLInputElement, SelectProjectProps>(
     const containerRef = useRef<HTMLDivElement>(null);
 
     const projects = useQuery(api.projects.queries.getAllProjects);
-    const selectedProject = projects?.find((p) => p._id === value);
+    const selected = projects?.find((project) => project._id === value);
     const filtered =
-      projects?.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()),
+      projects?.filter((project) =>
+        project.name.toLowerCase().includes(search.toLowerCase())
       ) ?? [];
 
     useEffect(() => {
       if (!open) return;
-      const handleClickOutside = (e: MouseEvent) => {
+      const handler = (event: MouseEvent) => {
         if (
           containerRef.current &&
-          !containerRef.current.contains(e.target as Node)
+          !containerRef.current.contains(event.target as Node)
         ) {
-          setOpen(false);
-          setSearch("");
+          close();
         }
       };
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
     }, [open]);
 
     useEffect(() => setHighlightedIndex(0), [search]);
@@ -51,36 +49,40 @@ export const SelectProject = forwardRef<HTMLInputElement, SelectProjectProps>(
       setSearch("");
     };
 
-    const handleSelect = (id: string) => {
+    const select = (id: string) => {
       onValueChange(id === value ? "" : id);
       close();
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") return close();
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+      if (event.key === "Escape") return close();
 
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
         if (!open) return setOpen(true);
-        setHighlightedIndex((i) => (i < filtered.length - 1 ? i + 1 : 0));
+        setHighlightedIndex((index) =>
+          index < filtered.length - 1 ? index + 1 : 0
+        );
         return;
       }
 
-      if (e.key === "ArrowUp" && open) {
-        e.preventDefault();
-        setHighlightedIndex((i) => (i > 0 ? i - 1 : filtered.length - 1));
+      if (event.key === "ArrowUp" && open) {
+        event.preventDefault();
+        setHighlightedIndex((index) =>
+          index > 0 ? index - 1 : filtered.length - 1
+        );
         return;
       }
 
-      if (e.key === "Enter") {
-        e.preventDefault();
+      if (event.key === "Enter") {
+        event.preventDefault();
         if (open && filtered[highlightedIndex])
-          return handleSelect(filtered[highlightedIndex]._id);
+          return select(filtered[highlightedIndex]._id);
         if (!open) return setOpen(true);
       }
 
-      if (e.key === "Tab" && open) {
-        e.preventDefault();
+      if (event.key === "Tab" && open) {
+        event.preventDefault();
         close();
         onTabPressed?.();
       }
@@ -93,14 +95,12 @@ export const SelectProject = forwardRef<HTMLInputElement, SelectProjectProps>(
             ref={ref}
             className={cn(
               "h-9 w-full rounded-md bg-muted px-3 pr-8 text-sm outline-none",
-              open || !selectedProject
-                ? "text-muted-foreground"
-                : "text-foreground",
+              open || !selected ? "text-muted-foreground" : "text-foreground"
             )}
             placeholder="Projekt suchen..."
-            value={open ? search : (selectedProject?.name ?? "")}
-            onChange={(e) => {
-              setSearch(e.target.value);
+            value={open ? search : (selected?.name ?? "")}
+            onChange={(event) => {
+              setSearch(event.target.value);
               setOpen(true);
             }}
             onFocus={() => setOpen(true)}
@@ -121,16 +121,16 @@ export const SelectProject = forwardRef<HTMLInputElement, SelectProjectProps>(
                   type="button"
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm flex items-center justify-between",
-                    idx === highlightedIndex && "bg-accent",
+                    idx === highlightedIndex && "bg-accent"
                   )}
-                  onClick={() => handleSelect(project._id)}
+                  onClick={() => select(project._id)}
                   onMouseEnter={() => setHighlightedIndex(idx)}
                 >
                   {project.name}
                   <Check
                     className={cn(
                       "h-4 w-4",
-                      value === project._id ? "opacity-100" : "opacity-0",
+                      value === project._id ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </button>
@@ -157,5 +157,5 @@ export const SelectProject = forwardRef<HTMLInputElement, SelectProjectProps>(
         />
       </>
     );
-  },
+  }
 );
