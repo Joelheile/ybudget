@@ -31,15 +31,30 @@ export function SelectCategory({ value, onValueChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  console.log("[SelectCategory] render", { open, mounted, value, search });
+
   useEffect(() => {
+    console.log("[SelectCategory] mounting effect running");
     setMounted(true);
+    console.log("[SelectCategory] mounted set to true");
   }, []);
 
   const categories = useQuery(api.categories.functions.getAllCategories);
+  console.log("[SelectCategory] categories query result", {
+    hasCategories: !!categories,
+    count: categories?.length,
+  });
+
   const selected = categories?.find((category) => category._id === value);
   const grouped = categories ? groupCategories(categories) : [];
   const filtered = filterGroups(grouped, search);
   const activeChildren = filtered[activeGroupIndex]?.children ?? [];
+
+  console.log("[SelectCategory] data", {
+    groupedCount: grouped.length,
+    filteredCount: filtered.length,
+    activeChildrenCount: activeChildren.length,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -70,17 +85,25 @@ export function SelectCategory({ value, onValueChange }: Props) {
   };
 
   const handleOpen = () => {
+    console.log("[SelectCategory] handleOpen called", { currentOpen: open });
     if (open) return;
+    console.log("[SelectCategory] setting open to true");
     setOpen(true);
   };
 
   useEffect(() => {
+    console.log("[SelectCategory] position effect", {
+      open,
+      hasInputRef: !!inputRef.current,
+    });
     if (!open || !inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
-    setDropdownPosition({
+    const newPosition = {
       top: rect.bottom + window.scrollY + 4,
       left: rect.left + window.scrollX,
-    });
+    };
+    console.log("[SelectCategory] setting dropdown position", newPosition);
+    setDropdownPosition(newPosition);
     const groupIndex = grouped.findIndex(
       (group) =>
         group.parent._id === value ||
@@ -166,6 +189,16 @@ export function SelectCategory({ value, onValueChange }: Props) {
       />
       <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 pointer-events-none" />
 
+      {(() => {
+        console.log("[SelectCategory] portal check", {
+          mounted,
+          open,
+          filteredLength: filtered.length,
+          willRender: mounted && open && filtered.length > 0,
+          dropdownPosition,
+        });
+        return null;
+      })()}
       {mounted &&
         open &&
         filtered.length > 0 &&
