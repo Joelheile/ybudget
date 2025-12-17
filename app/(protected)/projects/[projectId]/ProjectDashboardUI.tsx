@@ -22,7 +22,7 @@ interface Props {
   onOpenTransfer: () => void;
 }
 
-export default function ProjectDashboardUI({
+export function ProjectDashboardUI({
   project,
   transactions,
   budgets,
