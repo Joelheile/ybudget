@@ -17,8 +17,12 @@ export default function DonorDetailPage() {
     { initialNumItems: 50 }
   );
 
-  const updateTransaction = useMutation(api.transactions.functions.updateTransaction);
-  const deleteTransaction = useMutation(api.transactions.functions.deleteExpectedTransaction);
+  const updateTransaction = useMutation(
+    api.transactions.functions.updateTransaction
+  );
+  const deleteTransaction = useMutation(
+    api.transactions.functions.deleteExpectedTransaction
+  );
 
   const handleUpdate = async (rowId: string, field: string, value: unknown) => {
     await updateTransaction({
