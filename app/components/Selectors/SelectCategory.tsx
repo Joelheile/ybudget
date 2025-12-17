@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Category = NonNullable<
   ReturnType<typeof useQuery<typeof api.categories.functions.getAllCategories>>
@@ -25,9 +26,14 @@ export function SelectCategory({ value, onValueChange }: Props) {
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
   const [activeItemIndex, setActiveItemIndex] = useState(0);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const categories = useQuery(api.categories.functions.getAllCategories);
   const selected = categories?.find((category) => category._id === value);
@@ -157,53 +163,57 @@ export function SelectCategory({ value, onValueChange }: Props) {
       />
       <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 pointer-events-none" />
 
-      {open && filtered.length > 0 && (
-        <div
-          ref={dropdownRef}
-          className="fixed bg-background border rounded-md shadow-lg z-100 flex w-fit"
-          style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
-        >
-          <div className="w-52 shrink-0 border-r bg-muted/30 overflow-y-auto max-h-80">
-            {filtered.map((group, index) => (
-              <button
-                key={group.parent._id}
-                type="button"
-                className={cn(
-                  "w-full text-left px-4 py-3 text-sm font-semibold hover:bg-accent/50",
-                  index === activeGroupIndex && "bg-accent",
-                )}
-                onMouseEnter={() => {
-                  setActiveGroupIndex(index);
-                  setActiveItemIndex(0);
-                }}
-              >
-                {index + 1}. {group.parent.name}
-              </button>
-            ))}
-          </div>
-          <div className="w-56 overflow-y-auto max-h-80">
-            {activeChildren.map((item, index) => (
-              <button
-                key={item._id}
-                type="button"
-                className={cn(
-                  "w-full text-left px-3 py-2 hover:bg-accent",
-                  index === activeItemIndex && "bg-accent",
-                  value === item._id && "bg-accent/50",
-                  isTaxWarning(item) && "bg-red-50",
-                )}
-                onClick={() => handleSelect(item._id)}
-                onMouseEnter={() => setActiveItemIndex(index)}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm wrap-break-word">{item.name}</span>
-                  {value === item._id && <Check className="h-4 w-4 shrink-0" />}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {mounted &&
+        open &&
+        filtered.length > 0 &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed bg-background border rounded-md shadow-lg z-50 flex w-fit"
+            style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+          >
+            <div className="w-52 shrink-0 border-r bg-muted/30 overflow-y-auto max-h-80">
+              {filtered.map((group, index) => (
+                <button
+                  key={group.parent._id}
+                  type="button"
+                  className={cn(
+                    "w-full text-left px-4 py-3 text-sm font-semibold hover:bg-accent/50",
+                    index === activeGroupIndex && "bg-accent",
+                  )}
+                  onMouseEnter={() => {
+                    setActiveGroupIndex(index);
+                    setActiveItemIndex(0);
+                  }}
+                >
+                  {index + 1}. {group.parent.name}
+                </button>
+              ))}
+            </div>
+            <div className="w-56 overflow-y-auto max-h-80">
+              {activeChildren.map((item, index) => (
+                <button
+                  key={item._id}
+                  type="button"
+                  className={cn(
+                    "w-full text-left px-3 py-2 hover:bg-accent",
+                    index === activeItemIndex && "bg-accent",
+                    value === item._id && "bg-accent/50",
+                    isTaxWarning(item) && "bg-red-50",
+                  )}
+                  onClick={() => handleSelect(item._id)}
+                  onMouseEnter={() => setActiveItemIndex(index)}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm wrap-break-word">{item.name}</span>
+                    {value === item._id && <Check className="h-4 w-4 shrink-0" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
