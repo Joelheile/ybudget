@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 type Category = NonNullable<
   ReturnType<typeof useQuery<typeof api.categories.functions.getAllCategories>>
@@ -25,51 +24,25 @@ export function SelectCategory({ value, onValueChange }: Props) {
   const [search, setSearch] = useState("");
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
   const [activeItemIndex, setActiveItemIndex] = useState(0);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
-  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  console.log("[SelectCategory] render", { open, mounted, value, search });
-
-  useEffect(() => {
-    console.log("[SelectCategory] mounting effect running");
-    setMounted(true);
-    console.log("[SelectCategory] mounted set to true");
-  }, []);
 
   const categories = useQuery(api.categories.functions.getAllCategories);
-  console.log("[SelectCategory] categories query result", {
-    hasCategories: !!categories,
-    count: categories?.length,
-  });
-
   const selected = categories?.find((category) => category._id === value);
   const grouped = categories ? groupCategories(categories) : [];
   const filtered = filterGroups(grouped, search);
   const activeChildren = filtered[activeGroupIndex]?.children ?? [];
 
-  console.log("[SelectCategory] data", {
-    groupedCount: grouped.length,
-    filteredCount: filtered.length,
-    activeChildrenCount: activeChildren.length,
-  });
-
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        !containerRef.current?.contains(target) &&
-        !dropdownRef.current?.contains(target)
-      ) {
+      if (!containerRef.current?.contains(e.target as Node)) {
         setOpen(false);
         setSearch("");
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, [open]);
 
   useEffect(() => {
@@ -79,44 +52,26 @@ export function SelectCategory({ value, onValueChange }: Props) {
     }
   }, [search, filtered.length]);
 
-  const close = () => {
-    setOpen(false);
-    setSearch("");
-  };
-
-  const handleOpen = () => {
-    console.log("[SelectCategory] handleOpen called", { currentOpen: open });
-    if (open) return;
-    console.log("[SelectCategory] setting open to true");
-    setOpen(true);
-  };
-
   useEffect(() => {
-    console.log("[SelectCategory] position effect", {
-      open,
-      hasInputRef: !!inputRef.current,
-    });
-    if (!open || !inputRef.current) return;
-    const rect = inputRef.current.getBoundingClientRect();
-    const newPosition = {
-      top: rect.bottom + window.scrollY + 4,
-      left: rect.left + window.scrollX,
-    };
-    console.log("[SelectCategory] setting dropdown position", newPosition);
-    setDropdownPosition(newPosition);
+    if (!open || !value) return;
     const groupIndex = grouped.findIndex(
       (group) =>
         group.parent._id === value ||
         group.children.some((child) => child._id === value),
     );
-    setActiveGroupIndex(Math.max(0, groupIndex));
     if (groupIndex >= 0) {
+      setActiveGroupIndex(groupIndex);
       const itemIndex = grouped[groupIndex].children.findIndex(
         (child) => child._id === value,
       );
-      setActiveItemIndex(Math.max(0, itemIndex));
+      if (itemIndex >= 0) setActiveItemIndex(itemIndex);
     }
-  }, [open, grouped, value]);
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    setSearch("");
+  };
 
   const handleSelect = (id: Id<"categories">) => {
     onValueChange(id);
@@ -129,7 +84,7 @@ export function SelectCategory({ value, onValueChange }: Props) {
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (!open) return handleOpen();
+      if (!open) return setOpen(true);
       setActiveItemIndex((current) => (current + 1) % activeChildren.length);
       return;
     }
@@ -163,7 +118,7 @@ export function SelectCategory({ value, onValueChange }: Props) {
       e.preventDefault();
       if (open && activeChildren[activeItemIndex])
         return handleSelect(activeChildren[activeItemIndex]._id);
-      if (!open) return handleOpen();
+      if (!open) return setOpen(true);
     }
   };
 
@@ -182,74 +137,56 @@ export function SelectCategory({ value, onValueChange }: Props) {
         value={open ? search : (selected?.name ?? "")}
         onChange={(e) => {
           setSearch(e.target.value);
-          if (!open) handleOpen();
+          if (!open) setOpen(true);
         }}
-        onFocus={handleOpen}
+        onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
       />
       <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 pointer-events-none" />
 
-      {(() => {
-        console.log("[SelectCategory] portal check", {
-          mounted,
-          open,
-          filteredLength: filtered.length,
-          willRender: mounted && open && filtered.length > 0,
-          dropdownPosition,
-        });
-        return null;
-      })()}
-      {mounted &&
-        open &&
-        filtered.length > 0 &&
-        createPortal(
-          <div
-            ref={dropdownRef}
-            className="fixed bg-background border rounded-md shadow-lg z-50 flex w-fit"
-            style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
-          >
-            <div className="w-52 shrink-0 border-r bg-muted/30 overflow-y-auto max-h-80">
-              {filtered.map((group, index) => (
-                <button
-                  key={group.parent._id}
-                  type="button"
-                  className={cn(
-                    "w-full text-left px-4 py-3 text-sm font-semibold hover:bg-accent/50",
-                    index === activeGroupIndex && "bg-accent",
-                  )}
-                  onMouseEnter={() => {
-                    setActiveGroupIndex(index);
-                    setActiveItemIndex(0);
-                  }}
-                >
-                  {index + 1}. {group.parent.name}
-                </button>
-              ))}
-            </div>
-            <div className="w-56 overflow-y-auto max-h-80">
-              {activeChildren.map((item, index) => (
-                <button
-                  key={item._id}
-                  type="button"
-                  className={cn(
-                    "w-full text-left px-3 py-2 hover:bg-accent",
-                    index === activeItemIndex && "bg-accent",
-                    value === item._id && "bg-accent/50",
-                    isTaxWarning(item) && "bg-red-50",
-                  )}
-                  onClick={() => handleSelect(item._id)}
-                  onMouseEnter={() => setActiveItemIndex(index)}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm wrap-break-word">{item.name}</span>
-                    {value === item._id && <Check className="h-4 w-4 shrink-0" />}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>,
-          document.body,
-        )}
+      {open && filtered.length > 0 && (
+        <div className="absolute top-full left-0 mt-1 bg-background border rounded-md shadow-lg z-50 flex w-max">
+          <div className="w-52 shrink-0 border-r bg-muted/30 overflow-y-auto max-h-80">
+            {filtered.map((group, index) => (
+              <button
+                key={group.parent._id}
+                type="button"
+                className={cn(
+                  "w-full text-left px-4 py-3 text-sm font-semibold hover:bg-accent/50",
+                  index === activeGroupIndex && "bg-accent",
+                )}
+                onMouseEnter={() => {
+                  setActiveGroupIndex(index);
+                  setActiveItemIndex(0);
+                }}
+              >
+                {index + 1}. {group.parent.name}
+              </button>
+            ))}
+          </div>
+          <div className="w-56 overflow-y-auto max-h-80">
+            {activeChildren.map((item, index) => (
+              <button
+                key={item._id}
+                type="button"
+                className={cn(
+                  "w-full text-left px-3 py-2 hover:bg-accent",
+                  index === activeItemIndex && "bg-accent",
+                  value === item._id && "bg-accent/50",
+                  isTaxWarning(item) && "bg-red-50",
+                )}
+                onClick={() => handleSelect(item._id)}
+                onMouseEnter={() => setActiveItemIndex(index)}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm wrap-break-word">{item.name}</span>
+                  {value === item._id && <Check className="h-4 w-4 shrink-0" />}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
