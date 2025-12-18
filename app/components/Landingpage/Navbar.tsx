@@ -37,8 +37,8 @@ export function Navbar() {
               <Image
                 src="/AppIcon.png"
                 alt="YBudget"
-                width={48}
-                height={48}
+                width={36}
+                height={36}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   const link = document.createElement("a");
