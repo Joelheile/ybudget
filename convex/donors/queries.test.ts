@@ -98,7 +98,7 @@ test("calculate income using getDonorById", async () => {
 
   expect(donor?.committedIncome).toBe(800);
   expect(donor?.paidIncome).toBe(300);
-  expect(donor?.openIncome).toBe(500);
+  expect(donor?.availableBudget).toBe(300);
 });
 
 test("throw error when no donor is found by id", async () => {
@@ -143,12 +143,22 @@ test("throw error if donor is not in user organization", async () => {
   ).rejects.toThrow("Unauthorized");
 });
 
-test("calculate expenses with negative amounts", async () => {
+test("calculate available budget with expenses", async () => {
   const t = convexTest(schema, modules);
   const { organizationId, userId, donorId } = await setupTestData(t);
 
-  await t.run((ctx) =>
-    ctx.db.insert("transactions", {
+  await t.run(async (ctx) => {
+    await ctx.db.insert("transactions", {
+      organizationId,
+      donorId,
+      date: Date.now(),
+      amount: 1000,
+      description: "Income",
+      counterparty: "Donor",
+      status: "processed",
+      importedBy: userId,
+    });
+    await ctx.db.insert("transactions", {
       organizationId,
       donorId,
       date: Date.now(),
@@ -157,12 +167,12 @@ test("calculate expenses with negative amounts", async () => {
       counterparty: "Vendor",
       status: "processed",
       importedBy: userId,
-    }),
-  );
+    });
+  });
 
   const donor = await t
     .withIdentity({ subject: userId })
     .query(api.donors.queries.getDonorById, { donorId });
 
-  expect(donor?.totalExpenses).toBe(200);
+  expect(donor?.availableBudget).toBe(800);
 });

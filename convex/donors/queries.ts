@@ -64,7 +64,7 @@ export const getDonorById = query({
 
     let expectedIncome = 0;
     let paidIncome = 0;
-    let totalExpenses = 0;
+    let expenses = 0;
 
     for (const transaction of transactions) {
       if (transaction.amount > 0) {
@@ -73,7 +73,7 @@ export const getDonorById = query({
         if (transaction.status === "processed")
           paidIncome += transaction.amount;
       } else {
-        totalExpenses += Math.abs(transaction.amount);
+        expenses += Math.abs(transaction.amount);
       }
     }
 
@@ -81,8 +81,7 @@ export const getDonorById = query({
       ...donor,
       committedIncome: expectedIncome + paidIncome,
       paidIncome,
-      openIncome: expectedIncome,
-      totalExpenses,
+      availableBudget: paidIncome - expenses,
     };
   },
 });

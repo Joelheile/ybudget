@@ -12,8 +12,7 @@ interface Props {
   donor: Doc<"donors"> & {
     committedIncome: number;
     paidIncome: number;
-    openIncome: number;
-    totalExpenses: number;
+    availableBudget: number;
   };
   transactions: Doc<"transactions">[];
   status: PaginationStatus;
@@ -56,7 +55,7 @@ export function DonorDetailUI({
       />
 
       <div
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+        className="grid grid-cols-3 gap-4 lg:gap-6"
         id="tour-donor-budget"
       >
         <BudgetCard
@@ -70,14 +69,9 @@ export function DonorDetailUI({
           amount={donor.paidIncome}
         />
         <BudgetCard
-          title="Offen"
-          description="Noch ausstehende Zahlungen"
-          amount={donor.openIncome}
-        />
-        <BudgetCard
-          title="Ausgaben"
-          description="Mit diesem Förderer verknüpfte Ausgaben"
-          amount={-donor.totalExpenses}
+          title="Verfügbar"
+          description="Überwiesene Förderungen - geplante & überwiesene Ausgaben"
+          amount={donor.availableBudget}
         />
       </div>
 

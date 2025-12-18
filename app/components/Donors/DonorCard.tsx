@@ -56,7 +56,7 @@ export function DonorCard({ donorId }: { donorId: Id<"donors"> }) {
         <div className="grid grid-cols-3 gap-2">
           <Stat label="Zugesagt" value={donor.committedIncome} />
           <Stat label="Bezahlt" value={donor.paidIncome} />
-          <Stat label="Offen" value={donor.openIncome} />
+          <Stat label="Verfügbar" value={donor.availableBudget} />
         </div>
       </Card>
     </Link>
