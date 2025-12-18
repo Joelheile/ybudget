@@ -70,7 +70,10 @@ const tiers: Tier[] = [
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="bg-slate-50 px-4 py-16 sm:py-24 sm:px-6 lg:px-8">
+    <section
+      id="pricing"
+      className="bg-slate-50 px-4 py-16 sm:py-24 sm:px-6 lg:px-8"
+    >
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -83,8 +86,8 @@ export function PricingSection() {
             Transparent. Fair. Ohne versteckte Kosten.
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:mt-6 sm:text-lg">
-            Starte kostenlos mit bis zu 3 Projekten. Braucht dein Verein mehr?
-            Upgrade jederzeit auf Premium.
+            Starte kostenlos mit bis zu 10 Projekten. <br /> Braucht dein Verein
+            mehr? Upgrade jederzeit auf Premium :)
           </p>
         </motion.div>
 
@@ -139,7 +142,9 @@ export function PricingSection() {
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2 sm:gap-3">
                     <Check className="h-4 w-4 shrink-0 text-emerald-500 sm:h-5 sm:w-5" />
-                    <span className="text-sm text-slate-700 sm:text-base">{feature}</span>
+                    <span className="text-sm text-slate-700 sm:text-base">
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
