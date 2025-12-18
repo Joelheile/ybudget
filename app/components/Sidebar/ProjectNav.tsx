@@ -310,7 +310,7 @@ export function ProjectNav({ id }: { id?: string }) {
         </SidebarGroupAction>
       )}
 
-      <SidebarMenu>
+      <SidebarMenu className="gap-0">
         {parentProjects.map((project) => (
           <Collapsible key={project._id} asChild defaultOpen>
             <SidebarMenuItem>
