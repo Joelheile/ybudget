@@ -17,7 +17,7 @@ export function HeroSection() {
         >
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-7xl">
-              Budgetverwaltung für{" "}
+              Budgetverwaltung für <br />
               <span className="text-primary">gemeinnützige Vereine.</span>
             </h1>
           </div>
@@ -52,12 +52,24 @@ export function HeroSection() {
           <div className="relative mx-auto max-w-5xl">
             <div className="absolute -inset-2 rounded-2xl bg-linear-to-r from-gray-50 via-gray-100 to-gray-200 opacity-20 blur-xl sm:-inset-4 sm:rounded-3xl sm:blur-2xl" />
             <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:rounded-2xl sm:shadow-2xl">
-              <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+              <div
+                style={{
+                  position: "relative",
+                  paddingBottom: "56.25%",
+                  height: 0,
+                }}
+              >
                 <iframe
                   src="https://www.loom.com/embed/59311d9ffde4452094bf2698419b2bdd?sid=a1234567-89ab-cdef-0123-456789abcdef"
                   frameBorder="0"
                   allowFullScreen
-                  style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
                   title="YBudget Demo Video"
                 />
               </div>
