@@ -73,9 +73,20 @@ export function ProjectNav({ id }: { id?: string }) {
     );
   }
 
-  const parentProjects = projects.filter((project) => !project.parentId);
+  const sortByName = (a: Project, b: Project) => {
+    if (a.name === "Rücklagen") return -1;
+    if (b.name === "Rücklagen") return 1;
+    return a.name.localeCompare(b.name);
+  };
+
+  const parentProjects = projects
+    .filter((project) => !project.parentId)
+    .sort(sortByName);
+
   const getChildren = (parentId: Id<"projects">) =>
-    projects.filter((project) => project.parentId === parentId);
+    projects
+      .filter((project) => project.parentId === parentId)
+      .sort(sortByName);
 
   const countText =
     projectLimits && !projectLimits.isPremium
