@@ -112,6 +112,17 @@ npx vercel
 
 Update `SITE_URL` to your production URL after deploying.
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `⌘ + B` | Hide sidebar |
+| `⌘ + E` | Plan expense |
+| `⌘ + I` | Plan income |
+| `⌘ + P` | Create project |
+| `⌘ + D` | Add donor |
+| `⌘ + K` | Add category |
+
 ## Contributing
 
 We're building a tool to support NGOs by making budgeting as easy as possible.

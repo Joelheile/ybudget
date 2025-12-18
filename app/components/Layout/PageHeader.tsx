@@ -52,9 +52,11 @@ export function PageHeader({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.metaKey && (e.code === "KeyE" || e.key === "e")) {
         e.preventDefault();
+        setIsIncomeOpen(false);
         setIsExpenseOpen(true);
       } else if (e.metaKey && (e.code === "KeyI" || e.key === "i")) {
         e.preventDefault();
+        setIsExpenseOpen(false);
         setIsIncomeOpen(true);
       } else if (e.metaKey && e.code === "KeyP") {
         e.preventDefault();
