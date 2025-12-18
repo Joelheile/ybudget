@@ -35,7 +35,10 @@ export default function ImportTransactionsPage() {
   const expectedTransactions = (useQuery(
     api.transactions.queries.getMatchingRecommendations,
     current
-      ? { projectId: projectId ? (projectId as Id<"projects">) : undefined }
+      ? {
+          projectId: projectId ? (projectId as Id<"projects">) : undefined,
+          isExpense: current.amount < 0,
+        }
       : "skip",
   ) ?? []) as Doc<"transactions">[];
 

@@ -77,7 +77,10 @@ export const getOldestTransactionDate = query({
 });
 
 export const getMatchingRecommendations = query({
-  args: { projectId: v.optional(v.id("projects")) },
+  args: {
+    projectId: v.optional(v.id("projects")),
+    isExpense: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
 
@@ -94,9 +97,11 @@ export const getMatchingRecommendations = query({
           );
 
     const allTransactions = await query.collect();
-    const unmatched = allTransactions.filter(
-      (transaction) => transaction.status === "expected" && transaction.projectId && !transaction.matchedTransactionId,
-    );
+    const unmatched = allTransactions.filter((transaction) => {
+      if (transaction.status !== "expected" || !transaction.projectId || transaction.matchedTransactionId) return false;
+      if (args.isExpense === undefined) return true;
+      return args.isExpense ? transaction.amount < 0 : transaction.amount > 0;
+    });
 
     const filtered = await filterByProjectAccess(ctx, user._id, user.organizationId, unmatched);
     return addProjectAndCategoryNames(ctx, filtered);
