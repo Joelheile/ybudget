@@ -71,8 +71,7 @@ export default function ExternalEhrenamtspauschalePage() {
   }
 
   const handleSubmit = async () => {
-    if (!form.volunteerName)
-      return toast.error("Bitte deinen Namen eingeben");
+    if (!form.volunteerName) return toast.error("Bitte deinen Namen eingeben");
     if (!form.volunteerStreet)
       return toast.error("Bitte deine Straße eingeben");
     if (!form.volunteerPlz) return toast.error("Bitte deine PLZ eingeben");
