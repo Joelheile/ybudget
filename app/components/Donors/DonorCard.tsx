@@ -32,8 +32,8 @@ export function DonorCard({ donorId }: { donorId: Id<"donors"> }) {
   }
 
   const progress =
-    donor.committedIncome > 0
-      ? (donor.paidIncome / donor.committedIncome) * 100
+    donor.paidIncome > 0
+      ? (donor.availableBudget / donor.paidIncome) * 100
       : 0;
 
   return (
