@@ -118,14 +118,14 @@ test.describe
 
   test("4. Verify split transactions in table", async () => {
     await page.getByRole("link", { name: "Transaktionen" }).click();
-    await expect(page.getByText("Processed 3 (Split)").first()).toBeVisible();
+    await expect(page.getByText("(Split) Processed 3").first()).toBeVisible();
 
     await page
       .locator("#tour-transactions-table")
       .getByText("Rücklagen")
       .click();
     await page.getByText("Test Projekt").nth(1).click();
-    await page.getByText("Processed 3 (Split)").nth(1).click();
+    await page.getByText("(Split) Processed 3").nth(1).click();
     await expect(page.getByText("Rücklagen").nth(1)).toBeVisible();
   });
 });

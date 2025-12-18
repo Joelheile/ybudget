@@ -169,7 +169,7 @@ export const splitTransaction = mutation({
         isArchived: false,
         projectId: split.projectId,
         amount: split.amount,
-        description: `${original.description} (Split)`,
+        description: `(Split) ${original.description} `,
       });
     }
   },
