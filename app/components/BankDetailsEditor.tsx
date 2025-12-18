@@ -69,7 +69,7 @@ export function BankDetailsEditor({ value, onChange }: Props) {
               disabled={!editing}
               placeholder="DE12 3456 7890 0000 0000 00"
               className="font-mono"
-              maxLength={22}
+              maxLength={27}
             />
           </div>
           <div>
