@@ -187,3 +187,201 @@ test("cannot archive reserves project", async () => {
       }),
   ).rejects.toThrow("Rücklagen");
 });
+
+test("move project to parent", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  const childId = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.createProject, { name: "Child" });
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.moveProject, {
+      projectId: childId,
+      newParentId: projectId,
+    });
+
+  const child = await t.run((ctx) => ctx.db.get(childId));
+  expect(child?.parentId).toBe(projectId);
+});
+
+test("move project to root", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  const childId = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.createProject, {
+      name: "Child",
+      parentId: projectId,
+    });
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.moveProject, {
+      projectId: childId,
+      newParentId: null,
+    });
+
+  const child = await t.run((ctx) => ctx.db.get(childId));
+  expect(child?.parentId).toBeUndefined();
+});
+
+test("move project throws if project not found", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  await t.run((ctx) => ctx.db.delete(projectId));
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId,
+        newParentId: null,
+      }),
+  ).rejects.toThrow("not found");
+});
+
+test("move project throws for wrong organization", async () => {
+  const t = convexTest(schema, modules);
+  const { userId } = await setupTestData(t);
+
+  const otherProjectId = await t.run(async (ctx) => {
+    const otherUserId = await ctx.db.insert("users", { email: "other@other.com" });
+    const otherOrgId = await ctx.db.insert("organizations", {
+      name: "Other",
+      domain: "other.com",
+      createdBy: otherUserId,
+    });
+    return ctx.db.insert("projects", {
+      name: "Other",
+      organizationId: otherOrgId,
+      isArchived: false,
+      createdBy: otherUserId,
+    });
+  });
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId: otherProjectId,
+        newParentId: null,
+      }),
+  ).rejects.toThrow("denied");
+});
+
+test("move project throws if parent not found", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  const fakeParentId = await t.run(async (ctx) => {
+    const tempId = await ctx.db.insert("projects", {
+      name: "Temp",
+      organizationId: (await ctx.db.get(projectId))!.organizationId,
+      isArchived: false,
+      createdBy: userId,
+    });
+    await ctx.db.delete(tempId);
+    return tempId;
+  });
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId,
+        newParentId: fakeParentId,
+      }),
+  ).rejects.toThrow("Parent not found");
+});
+
+test("move project throws if target is nested", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  const childId = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.createProject, {
+      name: "Child",
+      parentId: projectId,
+    });
+
+  const anotherProject = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.createProject, { name: "Another" });
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId: anotherProject,
+        newParentId: childId,
+      }),
+  ).rejects.toThrow("nested project");
+});
+
+test("move project throws if moving to itself", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId,
+        newParentId: projectId,
+      }),
+  ).rejects.toThrow("itself");
+});
+
+test("move project throws if moving to Rücklagen", async () => {
+  const t = convexTest(schema, modules);
+  const { organizationId, userId, projectId } = await setupTestData(t);
+
+  const ruecklagenId = await t.run((ctx) =>
+    ctx.db
+      .query("projects")
+      .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+      .filter((q) => q.eq(q.field("name"), "Rücklagen"))
+      .first()
+      .then((p) => p!._id),
+  );
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId,
+        newParentId: ruecklagenId,
+      }),
+  ).rejects.toThrow("Rücklagen");
+});
+
+test("move project throws if department has children", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, projectId } = await setupTestData(t);
+
+  await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.createProject, {
+      name: "Child",
+      parentId: projectId,
+    });
+
+  const anotherProject = await t
+    .withIdentity({ subject: userId })
+    .mutation(api.projects.functions.createProject, { name: "Another" });
+
+  await expect(
+    t
+      .withIdentity({ subject: userId })
+      .mutation(api.projects.functions.moveProject, {
+        projectId,
+        newParentId: anotherProject,
+      }),
+  ).rejects.toThrow("children");
+});

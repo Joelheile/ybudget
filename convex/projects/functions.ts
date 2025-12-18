@@ -6,6 +6,12 @@ import { requireRole } from "../users/permissions";
 
 const FREE_TIER_LIMIT = 10;
 
+async function getProjectName(ctx: any, projectId: any) {
+  if (!projectId) return "Root";
+  const project = await ctx.db.get(projectId);
+  return project?.name ?? "Root";
+}
+
 export const createProject = mutation({
   args: {
     name: v.string(),
@@ -17,24 +23,18 @@ export const createProject = mutation({
 
     const activePayment = await ctx.db
       .query("payments")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", user.organizationId),
-      )
+      .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
       .filter((q) => q.eq(q.field("status"), "completed"))
       .first();
 
     if (!activePayment) {
       const projects = await ctx.db
         .query("projects")
-        .withIndex("by_organization", (q) =>
-          q.eq("organizationId", user.organizationId),
-        )
+        .withIndex("by_organization", (q) => q.eq("organizationId", user.organizationId))
         .collect();
 
       if (projects.length >= FREE_TIER_LIMIT) {
-        throw new Error(
-          `Du hast das Limit von ${FREE_TIER_LIMIT} Projekten erreicht. Bitte upgrade auf Premium.`,
-        );
+        throw new Error(`Du hast das Limit von ${FREE_TIER_LIMIT} Projekten erreicht. Bitte upgrade auf Premium.`);
       }
     }
 
@@ -53,14 +53,7 @@ export const createProject = mutation({
       createdBy: user._id,
     });
 
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "project.create",
-      projectId,
-      args.name,
-    );
+    await addLog(ctx, user.organizationId, user._id, "project.create", projectId, args.name);
     return projectId;
   },
 });
@@ -73,18 +66,10 @@ export const renameProject = mutation({
     const project = await ctx.db.get(args.projectId);
 
     if (!project) throw new Error("Project not found");
-    if (project.organizationId !== user.organizationId)
-      throw new Error("Access denied");
+    if (project.organizationId !== user.organizationId) throw new Error("Access denied");
 
     await ctx.db.patch(args.projectId, { name: args.name });
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "project.rename",
-      args.projectId,
-      `${project.name} → ${args.name}`,
-    );
+    await addLog(ctx, user.organizationId, user._id, "project.rename", args.projectId, `${project.name} → ${args.name}`);
   },
 });
 
@@ -95,18 +80,48 @@ export const archiveProject = mutation({
     const user = await getCurrentUser(ctx);
     const project = await ctx.db.get(args.projectId);
 
-    if (project?.name === "Rücklagen" && !project.parentId) {
-      throw new Error("Rücklagen kann nicht archiviert werden");
-    }
+    const isReserves = project?.name === "Rücklagen" && !project.parentId;
+    if (isReserves) throw new Error("Rücklagen kann nicht archiviert werden");
 
     await ctx.db.patch(args.projectId, { isArchived: true });
-    await addLog(
-      ctx,
-      user.organizationId,
-      user._id,
-      "project.archive",
-      args.projectId,
-      project?.name,
-    );
+    await addLog(ctx, user.organizationId, user._id, "project.archive", args.projectId, project?.name);
+  },
+});
+
+export const moveProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+    newParentId: v.union(v.id("projects"), v.null()),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "lead");
+    const user = await getCurrentUser(ctx);
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project) throw new Error("Project not found");
+    if (project.organizationId !== user.organizationId) throw new Error("Access denied");
+
+    if (args.newParentId) {
+      const newParent = await ctx.db.get(args.newParentId);
+      if (!newParent) throw new Error("Parent not found");
+      if (newParent.parentId) throw new Error("Cannot move to a nested project");
+      if (args.newParentId === args.projectId) throw new Error("Cannot move project to itself");
+      if (newParent.name === "Rücklagen") throw new Error("Cannot move to Rücklagen");
+    }
+
+    const children = await ctx.db
+      .query("projects")
+      .withIndex("by_organization_parentId", (q) => q.eq("organizationId", user.organizationId).eq("parentId", args.projectId))
+      .collect();
+
+    if (children.length > 0 && args.newParentId) {
+      throw new Error("Cannot move a department with children");
+    }
+
+    const oldParentName = await getProjectName(ctx, project.parentId);
+    const newParentName = await getProjectName(ctx, args.newParentId);
+
+    await ctx.db.patch(args.projectId, { parentId: args.newParentId ?? undefined });
+    await addLog(ctx, user.organizationId, user._id, "project.move", args.projectId, `${project.name}: ${oldParentName} → ${newParentName}`);
   },
 });
