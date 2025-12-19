@@ -57,7 +57,7 @@ export function ReimbursementRow({
   onDelete,
 }: ReimbursementRowProps) {
   const status = getStatus(item.isApproved, item.rejectionNote);
-  const showAdminActions = isAdmin && !item.isApproved;
+  const showAdminActions = isAdmin && !item.isApproved && !item.rejectionNote;
 
   return (
     <TableRow
