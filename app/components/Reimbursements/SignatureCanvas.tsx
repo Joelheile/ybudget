@@ -24,12 +24,12 @@ export function SignatureCanvas({
   const [uploading, setUploading] = useState(false);
 
   const defaultUploadUrl = useMutation(
-    api.reimbursements.functions.generateUploadUrl,
+    api.reimbursements.functions.generateUploadUrl
   );
   const generateUploadUrl = customUploadUrl || defaultUploadUrl;
   const previewUrl = useQuery(
     api.reimbursements.queries.getFileUrl,
-    storageId ? { storageId } : "skip",
+    storageId ? { storageId } : "skip"
   );
 
   const handleSave = async () => {
@@ -80,7 +80,7 @@ export function SignatureCanvas({
         <SignaturePad
           ref={padRef}
           minWidth={2}
-          maxWidth={4}
+          maxWidth={3}
           canvasProps={{ className: "w-full h-32" }}
         />
       </div>

@@ -15,6 +15,15 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+const IBAN_REGEX = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}([A-Z0-9]?){0,16}$/;
+const BIC_REGEX = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
+
+const formatIban = (iban: string) =>
+  iban
+    .replace(/\s/g, "")
+    .replace(/(.{4})/g, "$1 ")
+    .trim();
+
 export default function ExternalEhrenamtspauschalePage() {
   const { id } = useParams<{ id: Id<"volunteerAllowance"> }>();
 
@@ -86,8 +95,10 @@ export default function ExternalEhrenamtspauschalePage() {
     if (amount > 840) return toast.error("Maximal 840€ erlaubt");
     if (!form.accountHolder)
       return toast.error("Bitte den Kontoinhaber eingeben");
-    if (!form.iban) return toast.error("Bitte die IBAN eingeben");
-    if (!form.bic) return toast.error("Bitte die BIC eingeben");
+    const iban = form.iban.replace(/\s/g, "").toUpperCase();
+    const bic = form.bic.replace(/\s/g, "").toUpperCase();
+    if (!IBAN_REGEX.test(iban)) return toast.error("Ungültige IBAN");
+    if (!BIC_REGEX.test(bic)) return toast.error("Ungültige BIC");
     if (!form.confirmation)
       return toast.error("Bitte die Bestätigung ankreuzen");
     if (!signatureStorageId) return toast.error("Bitte unterschreiben");
@@ -97,8 +108,8 @@ export default function ExternalEhrenamtspauschalePage() {
       await submitExternal({
         id,
         amount,
-        iban: form.iban,
-        bic: form.bic,
+        iban,
+        bic,
         accountHolder: form.accountHolder,
         activityDescription: form.activityDescription,
         startDate: form.startDate,
@@ -277,19 +288,25 @@ export default function ExternalEhrenamtspauschalePage() {
             <div>
               <Label>IBAN *</Label>
               <Input
-                value={form.iban}
-                onChange={(event) => updateField("iban", event.target.value)}
+                value={formatIban(form.iban)}
+                onChange={(event) =>
+                  updateField("iban", event.target.value.replace(/\s/g, ""))
+                }
                 placeholder="DE89 3704 0044 0532 0130 00"
                 className="font-mono"
+                maxLength={27}
               />
             </div>
             <div>
               <Label>BIC *</Label>
               <Input
-                value={form.bic}
-                onChange={(event) => updateField("bic", event.target.value)}
+                value={form.bic.toUpperCase()}
+                onChange={(event) =>
+                  updateField("bic", event.target.value.toUpperCase())
+                }
                 placeholder="COBADEFFXXX"
                 className="font-mono"
+                maxLength={11}
               />
             </div>
           </div>
