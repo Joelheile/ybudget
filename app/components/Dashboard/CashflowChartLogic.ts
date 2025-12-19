@@ -133,7 +133,7 @@ export function buildCashflowData(
   const toTime = to.getTime();
 
   const filtered = transactions
-    .filter((tx) => tx.date >= fromTime && tx.date <= toTime)
+    .filter((tx) => tx.date >= fromTime && tx.date <= toTime && !tx.transferId)
     .sort((a, b) => a.date - b.date);
 
   return determineTimeSlots(from, to).map((slot) => {
@@ -161,7 +161,7 @@ export function calculateStartBalance(
 ): number {
   if (!transactions) return 0;
   return transactions
-    .filter((tx) => tx.status === "processed")
+    .filter((tx) => tx.status === "processed" && !tx.transferId)
     .reduce((total, tx) => total + tx.amount, 0);
 }
 
