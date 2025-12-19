@@ -9,7 +9,7 @@ import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
-  value: string;
+  value: string | undefined;
   onValueChange: (value: string) => void;
   autoFocus?: boolean;
   isExpense?: boolean;

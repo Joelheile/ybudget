@@ -19,13 +19,12 @@ import type { TableMeta } from "./EditableDataTable";
 
 type TransactionRow = Row<EnrichedTransaction>;
 type TransactionTable = Table<EnrichedTransaction>;
-type TransactionColumn = Column<EnrichedTransaction>;
 
 function SortableHeader({
   column,
   label,
 }: {
-  column: TransactionColumn;
+  column: Column<EnrichedTransaction>;
   label: string;
 }) {
   return (
@@ -40,6 +39,19 @@ function SortableHeader({
   );
 }
 
+function getEditState(row: TransactionRow, table: TransactionTable) {
+  const meta = table.options.meta as TableMeta | undefined;
+  const rowId = row.original._id;
+  const isPlanned = row.original.status === "expected";
+  const isEditing = meta?.editingRows?.has(rowId);
+
+  function onFieldChange(field: string, value: unknown) {
+    meta?.onFieldChange(rowId, field, value);
+  }
+
+  return { rowId, isPlanned, isEditing, onFieldChange, meta };
+}
+
 function ActionsCell({
   row,
   table,
@@ -47,40 +59,21 @@ function ActionsCell({
   row: TransactionRow;
   table: TransactionTable;
 }) {
-  const meta = table.options.meta as TableMeta | undefined;
-  const rowId = row.original._id;
-  const isPlanned = row.original.status === "expected";
-  const isEditing = meta?.editingRows?.has(rowId);
+  const { rowId, isPlanned, isEditing, meta } = getEditState(row, table);
 
-  if (isEditing) {
+  if (!isEditing) {
     return (
       <div className="flex justify-end">
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => meta?.onSave(rowId)}
-          className="h-8 w-8 p-0 text-green-500 hover:text-green-600"
+          onClick={() =>
+            meta?.setEditingRows((prev) => new Set(prev).add(rowId))
+          }
+          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
         >
-          <Check className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => meta?.onStopEditing(rowId)}
-          className="h-8 w-8 p-0 text-red-400 hover:text-red-500"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-        {isPlanned && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => meta?.onDelete(rowId)}
-            className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
       </div>
     );
   }
@@ -90,73 +83,96 @@ function ActionsCell({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() =>
-          meta?.setEditingRows((prev: Set<string>) => new Set(prev).add(rowId))
-        }
-        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+        onClick={() => meta?.onSave(rowId)}
+        className="h-8 w-8 p-0 text-green-500 hover:text-green-600"
       >
-        <Pencil className="h-4 w-4" />
+        <Check className="h-4 w-4" />
       </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => meta?.onStopEditing(rowId)}
+        className="h-8 w-8 p-0 text-red-400 hover:text-red-500"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+      {isPlanned && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => meta?.onDelete(rowId)}
+          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }
 
-function getEditState(row: TransactionRow, table: TransactionTable) {
-  const meta = table.options.meta as TableMeta | undefined;
-  const rowId = row.original._id;
-  const isPlanned = row.original.status === "expected";
-  const isEditing = meta?.editingRows?.has(rowId);
-  const onUpdate = (field: string, value: unknown) =>
-    meta?.onUpdate(rowId, field, value);
-  return { rowId, isPlanned, isEditing, onUpdate };
+function StatusCell({ row }: { row: TransactionRow }) {
+  const isTransfer = !!row.original.transferId;
+  const status = row.original.status;
+
+  if (isTransfer) {
+    return <Badge variant="outline">Budget</Badge>;
+  }
+  if (status === "expected") {
+    return <Badge variant="secondary">Geplant</Badge>;
+  }
+  return <Badge variant="default">Abgerechnet</Badge>;
 }
 
 const baseColumns = [
   {
     id: "indicator",
-    cell: ({ row }: any) => (
+    cell: ({ row }: { row: TransactionRow }) => (
       <div className="flex items-center px-1 justify-center">
         <div
-          className={`w-2 h-2 rounded-full ${row.getValue("amount") < 0 ? "bg-red-500" : "bg-green-500"}`}
+          className={`w-2 h-2 rounded-full ${
+            row.original.amount < 0 ? "bg-red-500" : "bg-green-500"
+          }`}
         />
       </div>
     ),
   },
   {
     accessorKey: "date",
-    header: ({ column }: any) => (
+    header: ({ column }: { column: Column<EnrichedTransaction> }) => (
       <SortableHeader column={column} label="Datum" />
     ),
-    cell: ({ row, table }: any) => {
-      const { isPlanned, isEditing, onUpdate } = getEditState(row, table);
+    cell: ({ row, table }: { row: TransactionRow; table: TransactionTable }) => {
+      const { isPlanned, isEditing, onFieldChange } = getEditState(row, table);
+
       if (isPlanned && isEditing) {
         return (
           <div className="pl-2">
             <EditableDateCell
-              value={row.getValue("date")}
-              onSave={(value) => onUpdate("date", value)}
+              value={row.original.date}
+              onSave={(value) => onFieldChange("date", value)}
             />
           </div>
         );
       }
-      return <div className="pl-2">{formatDate(row.getValue("date"))}</div>;
+      return <div className="pl-2">{formatDate(row.original.date)}</div>;
     },
   },
   {
     accessorKey: "counterparty",
     header: "Gegenpartei",
-    cell: ({ row, table }: any) => {
-      const { isPlanned, isEditing, onUpdate } = getEditState(row, table);
+    cell: ({ row, table }: { row: TransactionRow; table: TransactionTable }) => {
+      const { isPlanned, isEditing, onFieldChange } = getEditState(row, table);
+
       if (isPlanned && isEditing) {
         return (
           <EditableTextCell
             value={row.original.counterparty || ""}
-            onSave={(value) => onUpdate("counterparty", value)}
+            onSave={(value) => onFieldChange("counterparty", value)}
           />
         );
       }
       return (
-        <div className="p-1 max-w-48 truncate">
+        <div className="p-1 min-w-48 max-w-64 truncate">
           {row.original.counterparty || ""}
         </div>
       );
@@ -165,18 +181,19 @@ const baseColumns = [
   {
     accessorKey: "projectName",
     header: "Projekt",
-    cell: ({ row, table }: any) => {
-      const { isPlanned, isEditing, onUpdate } = getEditState(row, table);
+    cell: ({ row, table }: { row: TransactionRow; table: TransactionTable }) => {
+      const { isPlanned, isEditing, onFieldChange } = getEditState(row, table);
+
       if (isPlanned && isEditing) {
         return (
           <EditableProjectCell
             value={row.original.projectId}
-            onSave={(value) => onUpdate("projectId", value)}
+            onSave={(value) => onFieldChange("projectId", value)}
           />
         );
       }
       return (
-        <div className="p-1 max-w-40 truncate">
+        <div className="p-1 min-w-40 max-w-64 truncate">
           {row.original.projectName || ""}
         </div>
       );
@@ -185,20 +202,20 @@ const baseColumns = [
   {
     accessorKey: "description",
     header: "Beschreibung",
-    cell: ({ row, table }: any) => {
-      const { isEditing, onUpdate } = getEditState(row, table);
-      const description =
-        row.getValue("description") || row.original.reference || "";
+    cell: ({ row, table }: { row: TransactionRow; table: TransactionTable }) => {
+      const { isEditing, onFieldChange } = getEditState(row, table);
+      const description = row.original.description || "";
+
       if (isEditing) {
         return (
           <EditableTextareaCell
             value={description}
-            onSave={(value) => onUpdate("description", value)}
+            onSave={(value) => onFieldChange("description", value)}
           />
         );
       }
       return (
-        <div className="max-w-64 text-muted-foreground text-sm truncate">
+        <div className="min-w-48 max-w-96 text-muted-foreground text-sm truncate">
           {description}
         </div>
       );
@@ -207,18 +224,19 @@ const baseColumns = [
   {
     accessorKey: "categoryName",
     header: "Kategorie",
-    cell: ({ row, table }: any) => {
-      const { isEditing, onUpdate } = getEditState(row, table);
+    cell: ({ row, table }: { row: TransactionRow; table: TransactionTable }) => {
+      const { isEditing, onFieldChange } = getEditState(row, table);
+
       if (isEditing) {
         return (
           <EditableCategoryCell
             value={row.original.categoryId}
-            onSave={(value) => onUpdate("categoryId", value)}
+            onSave={(value) => onFieldChange("categoryId", value)}
           />
         );
       }
       return (
-        <div className="p-1 max-w-32 truncate">
+        <div className="p-1 min-w-32 max-w-48 truncate">
           {row.original.categoryName || ""}
         </div>
       );
@@ -226,26 +244,27 @@ const baseColumns = [
   },
   {
     accessorKey: "amount",
-    header: ({ column }: any) => (
+    header: ({ column }: { column: Column<EnrichedTransaction> }) => (
       <div className="flex justify-end">
         <SortableHeader column={column} label="Betrag" />
       </div>
     ),
-    cell: ({ row, table }: any) => {
-      const { isPlanned, isEditing, onUpdate } = getEditState(row, table);
-      const amount = row.getValue("amount");
+    cell: ({ row, table }: { row: TransactionRow; table: TransactionTable }) => {
+      const { isPlanned, isEditing, onFieldChange } = getEditState(row, table);
+      const amount = row.original.amount;
+
       if (isPlanned && isEditing) {
         return (
           <div className="flex justify-end pr-2">
             <EditableAmountCell
               value={amount}
-              onSave={(value) => onUpdate("amount", value)}
+              onSave={(value) => onFieldChange("amount", value)}
             />
           </div>
         );
       }
       return (
-        <div className="text-right font-medium pr-2">
+        <div className="text-right font-medium pr-2 whitespace-nowrap">
           {formatCurrency(amount)}
         </div>
       );
@@ -253,22 +272,12 @@ const baseColumns = [
   },
   {
     accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: any) => {
-      const status = row.getValue("status");
-      const isTransfer = !!row.original.transferId;
-      const label = isTransfer
-        ? "Budget"
-        : status === "expected"
-          ? "Geplant"
-          : "Abgerechnet";
-      const variant = isTransfer
-        ? "outline"
-        : status === "processed"
-          ? "default"
-          : "secondary";
-      return <Badge variant={variant}>{label}</Badge>;
-    },
+    header: () => <div className="text-right">Status</div>,
+    cell: ({ row }: { row: TransactionRow }) => (
+      <div className="flex justify-end">
+        <StatusCell row={row} />
+      </div>
+    ),
   },
   {
     id: "actions",
@@ -279,5 +288,5 @@ const baseColumns = [
 export const editableColumns = baseColumns;
 
 export const editableColumnsWithoutProject = baseColumns.filter(
-  (column) => column.accessorKey !== "projectName",
+  (column) => column.accessorKey !== "projectName"
 );
