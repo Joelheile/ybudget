@@ -53,7 +53,9 @@ export function CreateProjectDialog({
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      toast.error("Fehler beim Erstellen");
+      toast.error(
+        "Fehler beim Erstellen. Du kannst nur Projekte zu einem Department hinzufügen."
+      );
     }
   };
 
