@@ -314,6 +314,7 @@ export function ProjectNav({ id }: { id?: string }) {
             <button
               onClick={handleAddClick}
               className="p-1 hover:bg-accent rounded"
+              aria-label="Projekt hinzufügen"
             >
               <Plus className="h-4 w-4 text-muted-foreground" />
             </button>
