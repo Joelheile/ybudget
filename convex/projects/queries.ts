@@ -61,7 +61,20 @@ export const getDepartments = query({
         q.eq("organizationId", user.organizationId),
       )
       .collect();
-    return projects.filter((project) => !project.parentId);
+    return projects.filter((project) => !project.parentId && !project.isArchived);
+  },
+});
+
+export const getArchivedProjects = query({
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", user.organizationId),
+      )
+      .collect();
+    return projects.filter((project) => project.isArchived);
   },
 });
 

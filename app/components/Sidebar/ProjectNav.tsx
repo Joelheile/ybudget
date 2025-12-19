@@ -1,5 +1,6 @@
 "use client";
 
+import { ArchivedProjectsDialog } from "@/components/Dialogs/ArchivedProjectsDialog";
 import { CreateProjectDialog } from "@/components/Dialogs/CreateProjectDialog";
 import { Paywall } from "@/components/Payment/Paywall";
 import {
@@ -19,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
@@ -46,6 +46,7 @@ type Project = NonNullable<
 export function ProjectNav({ id }: { id?: string }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<Id<"projects"> | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -292,22 +293,31 @@ export function ProjectNav({ id }: { id?: string }) {
 
   return (
     <SidebarGroup id={id}>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pr-1">
         <SidebarGroupLabel className="font-bold text-sm text-foreground">
-          Departments / Projekte
+          Projekte & Departments
         </SidebarGroupLabel>
-        {canEdit && countText && (
-          <span className="text-xs pr-5 text-muted-foreground">
-            {countText}
-          </span>
+        {canEdit && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setArchiveDialogOpen(true)}
+              className="p-1 hover:bg-accent rounded"
+            >
+              <Archive className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={handleAddClick}
+              className="p-1 hover:bg-accent rounded"
+            >
+              <Plus className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
         )}
       </div>
-
-      {canEdit && (
-        <SidebarGroupAction onClick={handleAddClick}>
-          <Plus />
-          <span className="sr-only">Projekt hinzufügen</span>
-        </SidebarGroupAction>
+      {canEdit && countText && (
+        <span className="text-xs text-muted-foreground px-2 -mt-1">
+          {countText}
+        </span>
       )}
 
       <SidebarMenu className="gap-0">
@@ -325,6 +335,10 @@ export function ProjectNav({ id }: { id?: string }) {
         <>
           <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />
           <Paywall open={paywallOpen} onOpenChange={setPaywallOpen} />
+          <ArchivedProjectsDialog
+            open={archiveDialogOpen}
+            onOpenChange={setArchiveDialogOpen}
+          />
         </>
       )}
     </SidebarGroup>

@@ -88,6 +88,21 @@ export const archiveProject = mutation({
   },
 });
 
+export const unarchiveProject = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
+    const user = await getCurrentUser(ctx);
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project) throw new Error("Project not found");
+    if (project.organizationId !== user.organizationId) throw new Error("Access denied");
+
+    await ctx.db.patch(args.projectId, { isArchived: false });
+    await addLog(ctx, user.organizationId, user._id, "project.unarchive", args.projectId, project.name);
+  },
+});
+
 export const moveProject = mutation({
   args: {
     projectId: v.id("projects"),
