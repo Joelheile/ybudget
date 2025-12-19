@@ -161,8 +161,11 @@ export function ProjectNav({ id }: { id?: string }) {
     project: Project,
     availableDepartments: Project[]
   ) => {
-    if (availableDepartments.length === 0) return null;
     if (getChildren(project._id).length > 0) return null;
+
+    const canMoveToRoot = Boolean(project.parentId);
+    const hasDestinations = availableDepartments.length > 0 || canMoveToRoot;
+    if (!hasDestinations) return null;
 
     return (
       <ContextMenuSub>
@@ -171,7 +174,7 @@ export function ProjectNav({ id }: { id?: string }) {
           Verschieben nach
         </ContextMenuSubTrigger>
         <ContextMenuSubContent>
-          {project.parentId && (
+          {canMoveToRoot && (
             <ContextMenuItem onClick={() => handleMove(project._id, null)}>
               Kein Department
             </ContextMenuItem>
@@ -232,7 +235,10 @@ export function ProjectNav({ id }: { id?: string }) {
   const renderContextMenu = (project: Project, isSubItem: boolean) => {
     const isReserves = project.name === "Rücklagen" && !project.parentId;
     const availableDepartments = parentProjects.filter(
-      (dept) => dept._id !== project.parentId && dept.name !== "Rücklagen"
+      (dept) =>
+        dept._id !== project._id &&
+        dept._id !== project.parentId &&
+        dept.name !== "Rücklagen"
     );
 
     if (isReserves) return renderProjectLink(project, isSubItem);
