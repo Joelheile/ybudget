@@ -12,14 +12,14 @@ interface Props {
   value: string | undefined;
   onValueChange: (value: string) => void;
   autoFocus?: boolean;
-  isExpense?: boolean;
+  showRuecklagen?: boolean;
 }
 
 export function SelectProject({
   value,
   onValueChange,
   autoFocus,
-  isExpense,
+  showRuecklagen,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -29,7 +29,7 @@ export function SelectProject({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const projects = useQuery(api.projects.queries.getBookableProjects, {
-    isExpense,
+    showRuecklagen,
   });
   const selected = projects?.find((project) => project._id === value);
   const filtered =

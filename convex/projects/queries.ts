@@ -66,7 +66,7 @@ export const getDepartments = query({
 });
 
 export const getBookableProjects = query({
-  args: { isExpense: v.optional(v.boolean()) },
+  args: { showRuecklagen: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -98,7 +98,7 @@ export const getBookableProjects = query({
 
     return active.filter((project) => {
       if (!project.parentId && parentIds.has(project._id)) return false;
-      if (args.isExpense && project.name === "Rücklagen" && !project.parentId)
+      if (!args.showRuecklagen && project.name === "Rücklagen" && !project.parentId)
         return false;
       return true;
     });

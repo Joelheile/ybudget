@@ -76,6 +76,7 @@ export function TransferDialog({ open, onOpenChange, fromProjectId }: Props) {
             <SelectProject
               value={senderId ?? ""}
               onValueChange={(value) => setSenderId(value as Id<"projects">)}
+              showRuecklagen
             />
           </div>
           <div className="space-y-2">
@@ -84,6 +85,7 @@ export function TransferDialog({ open, onOpenChange, fromProjectId }: Props) {
               value={receiverId ?? ""}
               onValueChange={(value) => setReceiverId(value as Id<"projects">)}
               autoFocus={open && !!fromProjectId}
+              showRuecklagen
             />
           </div>
           <div className="space-y-2">

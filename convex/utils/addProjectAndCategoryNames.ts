@@ -5,21 +5,28 @@ export async function addProjectAndCategoryNames<
   Transaction extends {
     projectId?: Id<"projects">;
     categoryId?: Id<"categories">;
+    donorId?: Id<"donors">;
   },
 >(
   ctx: QueryCtx,
   items: Transaction[],
-): Promise<(Transaction & { projectName?: string; categoryName?: string })[]> {
+): Promise<
+  (Transaction & { projectName?: string; categoryName?: string; donorName?: string })[]
+> {
   const projectIds = [
     ...new Set(items.map((item) => item.projectId).filter(Boolean)),
   ];
   const categoryIds = [
     ...new Set(items.map((item) => item.categoryId).filter(Boolean)),
   ];
+  const donorIds = [
+    ...new Set(items.map((item) => item.donorId).filter(Boolean)),
+  ];
 
-  const [projects, categories] = await Promise.all([
+  const [projects, categories, donors] = await Promise.all([
     Promise.all(projectIds.map((id) => ctx.db.get(id!))),
     Promise.all(categoryIds.map((id) => ctx.db.get(id!))),
+    Promise.all(donorIds.map((id) => ctx.db.get(id!))),
   ]);
 
   const projectMap = new Map(
@@ -30,6 +37,9 @@ export async function addProjectAndCategoryNames<
       .filter(Boolean)
       .map((category) => [category!._id, category!.name]),
   );
+  const donorMap = new Map(
+    donors.filter(Boolean).map((donor) => [donor!._id, donor!.name]),
+  );
 
   return items.map((item) => ({
     ...item,
@@ -37,5 +47,6 @@ export async function addProjectAndCategoryNames<
     categoryName: item.categoryId
       ? categoryMap.get(item.categoryId)
       : undefined,
+    donorName: item.donorId ? donorMap.get(item.donorId) : undefined,
   }));
 }
