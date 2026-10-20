@@ -116,9 +116,9 @@ export default function DatenschutzPage() {
         Wir setzen folgende(n) Hoster ein:
         <br />
         <br />
-        Vercel Inc.
+        Cloudflare, Inc.
         <br />
-        340 S Lemon Ave #4133, Walnut, CA 91789, USA
+        101 Townsend St, San Francisco, CA 94107, USA
       </p>
 
       <h2 className="text-2xl font-semibold mt-8 mb-4">

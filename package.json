@@ -9,7 +9,11 @@
     "format": "prettier --write .",
     "lint": "biome lint --write",
     "test": "vitest run && pnpm exec playwright test",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.86",
@@ -45,12 +49,12 @@
     "convex": "^1.30.0",
     "convex-helpers": "^0.1.106",
     "date-fns": "^4.1.0",
-    "eslint-config-next": "^16.0.7",
+    "eslint-config-next": "^16.4.2",
     "framer-motion": "^12.23.25",
     "geist": "^1.5.1",
     "heic2any": "^0.0.4",
     "lucide-react": "^0.546.0",
-    "next": "16.0.7",
+    "next": "16.4.2",
     "onborda": "^1.2.5",
     "papaparse": "^5.5.3",
     "pdf-lib": "^1.17.1",
@@ -76,6 +80,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.3",
     "@edge-runtime/vm": "^5.0.0",
+    "@opennextjs/cloudflare": "^1.20.12",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^20.19.25",
@@ -88,6 +93,7 @@
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "wrangler": "^4.151.2"
   }
 }
