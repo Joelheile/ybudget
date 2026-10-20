@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ybudget",
+  "main": ".open-next/worker.js",
+  "workers_dev": false,
+  "preview_urls": false,
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "routes": [{ "pattern": "ybudget.joels.tech", "custom_domain": true }],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "ybudget",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+  },
+}
